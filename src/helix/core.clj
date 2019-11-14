@@ -1,6 +1,43 @@
 (ns helix.core
-  (:require [clojure.walk]
-            [clojure.string :as str]))
+  (:require [helix.analyzer :as hana]
+            [clojure.string :as string]))
+
+(defn- camel-case
+  "Returns camel case version of the string, e.g. \"http-equiv\" becomes \"httpEquiv\"."
+  [s]
+  (if (or (keyword? s)
+          (string? s)
+          (symbol? s))
+    (let [[first-word & words] (string/split s #"-")]
+      (if (or (empty? words)
+              (= "aria" first-word)
+              (= "data" first-word))
+        s
+        (-> (map string/capitalize words)
+            (conj first-word)
+            string/join)))
+    s))
+
+(defn style
+  [x]
+  (if (map? x)
+    (hana/clj->js-obj x :kv->prop (fn [k v]
+                                    [(-> k name camel-case)
+                                     (style v)]))
+    x))
+
+(defn key->prop
+  [k v]
+  (case k
+    :class ["className" v]
+    :for ["htmlFor" v]
+    :style ["style"
+            (if (map? v)
+              (style v)
+              `(clj->js ~v))]
+
+    [(camel-case (name k)) v]))
+
 
 (defmacro $
   "Create a new React element from a valid React type.
@@ -24,7 +61,7 @@
     (if (map? (first args))
       `(create-element
         ~type
-        (clj->props ~(first args) ~native?)
+        ~(hana/clj->js-obj (first args) :kv->prop key->prop)
         ~@(rest args))
       ;; bail to runtime detection of props
       `($$ ~type
@@ -45,43 +82,6 @@
        [props# maybe-ref#]
        (let [~props-bindings [(extract-cljs-props props#) maybe-ref#]]
          (do ~@body)))))
-
-
-;;
-;; React Fast Refresh
-;;
-
-
-(defn- find-all
-  "Recursively walks a tree structure and finds all elements
-  that match `pred`. Returns a vector of results."
-  [pred tree]
-  (let [results (atom [])]
-    (clojure.walk/postwalk
-     (fn walker [x]
-       (when (pred x)
-         (swap! results conj x))
-       x)
-     tree)
-    @results))
-
-
-(defn hook?
-  [x]
-  (when (list? x)
-    (let [fst (first x)]
-      (and (symbol? fst) (str/starts-with? (name fst)
-                                           "use")))))
-
-(defn find-hooks [body]
-  (find-all hook? body))
-
-;; TODO:
-;; - Detect custom hooks
-;; - Handle re-ordering
-;;   - Detect hooks used in let-bindings and add left-hand side to signature
-;;   - ???
-
 
 
 (defmacro defnc
@@ -122,7 +122,7 @@
         opts (if opts-map?
                (first body)
                {})
-        hooks (find-hooks body)
+        hooks (hana/find-hooks body)
         sig-sym (gensym "sig")
         fully-qualified-name (str *ns* "/" display-name)]
     `(do (def ~sig-sym (signature!))

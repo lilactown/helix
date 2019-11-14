@@ -1,6 +1,6 @@
 (ns helix.dom
   (:refer-clojure :exclude [map meta time])
-  (:require [helix.core :as react])
+  (:require [helix.core :as hx])
   #?(:cljs (:require-macros [helix.dom])))
 
 
@@ -140,7 +140,7 @@
 #?(:clj (defn gen-tag
           [tag]
           `(defmacro ~tag [& args#]
-             `(react/$ ~(keyword '~tag) ~@args#))))
+             `(hx/$ ~(keyword '~tag) ~@args#))))
 
 #?(:clj (defmacro gen-tags
           []
