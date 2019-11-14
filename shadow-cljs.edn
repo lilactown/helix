@@ -1,0 +1,48 @@
+;; shadow-cljs configuration
+{:source-paths
+ ["src" "test" "dev" "benchmark"]
+
+ :nrepl {:port 8777}
+
+ :dependencies
+ [[binaryage/devtools "0.9.7"]
+  [devcards "0.2.5"]
+  [cljs-bean "1.5.0"]]
+
+ :builds
+ {:dev {:target :browser
+        :output-dir "public/dev/js"
+        :asset-path "/js"
+        :modules {:shared {}
+                  :main {:entries [workshop]
+                         :depends-on #{:shared}}
+                  :refresh {:entries [refresh-example]
+                            :depends-on #{:shared}}}
+        :compiler-options {:devcards true}
+        :devtools {:http-root    "public/dev"
+                   :http-port    8700
+                   :preloads     [devtools.preload]}}
+
+  ;; :test     {:target    :browser-test
+  ;;            :test-dir  "public/test/js"
+  ;;            :ns-regexp "-test$"
+  ;;            :devtools  {:http-port 8021
+  ;;                        :http-root "public/test/js"}}
+
+  ;; :ci       {:target :karma
+  ;;            :output-to  "target/ci.js"
+  ;;            :ns-regexp  "-test$"}
+
+  ;; :benchmark {:target :node-script
+  ;;             :main hx.benchmark/main
+  ;;             :output-to "target/benchmark/index.js"
+  ;;             :devtools {;; :enabled false
+  ;;                        :after-load hx.benchmark/main
+  ;;                        }}
+  ;; :benchmark-browser {:target :browser
+  ;;                     :output-dir "public/benchmark/js"
+  ;;                     :asset-path "/js"
+  ;;                     :modules {:main {:entries [hx.benchmark]}}
+  ;;                     :devtools {:http-root "public/benchmark"
+  ;;                                :http-port    8800}}
+  }}}

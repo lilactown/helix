@@ -1,0 +1,6 @@
+/public/dev/js
+/public/benchmark/js
+/public/test/js
+node_modules
+/.shadow-cljs
+/package-lock.json
