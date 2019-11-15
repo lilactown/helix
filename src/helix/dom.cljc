@@ -136,7 +136,6 @@
     stop
     tspan])
 
-
 #?(:clj (defn gen-tag
           [tag]
           `(defmacro ~tag [& args#]

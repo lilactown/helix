@@ -39,6 +39,12 @@
     [(camel-case (name k)) v]))
 
 
+(defn primitive?
+  [x]
+  (or (string? x)
+      (number? x)))
+
+
 (defmacro $
   "Create a new React element from a valid React type.
 
@@ -58,14 +64,19 @@
         type (if native?
                (name type)
                type)]
-    (if (map? (first args))
-      `(create-element
-        ~type
-        ~(hana/clj->js-obj (first args) :kv->prop key->prop)
-        ~@(rest args))
+    (cond
+      (map? (first args)) `(create-element
+                            ~type
+                            ~(hana/clj->js-obj (first args) :kv->prop key->prop)
+                            ~@(rest args))
+      (primitive? (first args)) `(create-element
+                                ~type
+                                nil
+                                ~@args)
+      (nil? (first args)) `(create-element ~type nil ~@(rest args))
       ;; bail to runtime detection of props
-      `($$ ~type
-           ~@args))))
+      :else `($$ ~type
+                 ~@args))))
 
 
 (defmacro <>
@@ -141,10 +152,10 @@
          (def ~display-name
            ~@(when-not (nil? docstring)
                (list docstring))
-           (factory ~wrapped-name))
+           (cljs-factory ~wrapped-name))
 
          (when goog/DEBUG
-           (~sig-sym ~wrapped-name ~(str/join hooks)
+           (~sig-sym ~wrapped-name ~(string/join hooks)
             nil ;; forceReset
             nil) ;; getCustomHooks
            (register! ~wrapped-name ~fully-qualified-name))

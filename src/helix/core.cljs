@@ -76,11 +76,37 @@
         (-type [_] type))))
 
 
+(defn- cljs-factory
+  [type]
+  (-> (fn factory [& args]
+        (if (map? (first args))
+          (let [props (first args)
+                {:keys [key ref]} props]
+            (apply create-element
+                   type
+                   #js {:cljs-props (dissoc props :key :ref)
+                        :key key
+                        :ref ref}
+                   (rest args)))
+          (apply create-element type nil args)))
+      (specify! IExtractType
+        (-type [_] type))))
+
+
 (defn- wrap-cljs-component
   [type]
   ;; convert js props to clj props
   (let [wrapper (fn wrap-type-props [p r]
-                  (type #js {:cljs-props (utils/props->clj p)} r))]
+                  (let [cljs-props (gobj/get p "cljs-props" {})
+                        props (reduce (fn [cljs-props' k]
+                                        (if (= k "cljs-props")
+                                          cljs-props'
+                                          (assoc cljs-props'
+                                                 (keyword k)
+                                                 (gobj/get p k))))
+                                      cljs-props
+                                      (gobj/getKeys p))]
+                  (type #js {:cljs-props props} r)))]
     (when js/goog.DEBUG
       (set! (.-displayName wrapper) (str "cljsProps(" (.-displayName type) ")")))
     wrapper))
