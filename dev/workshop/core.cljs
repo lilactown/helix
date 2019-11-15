@@ -100,7 +100,7 @@
 
 
 (defnc children-test
-  [{:keys [children]}]
+  [{:keys [children] :as props}]
   (d/div {:style {:display "flex"
                   :justify-content "space-between"}}
    children))

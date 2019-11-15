@@ -98,15 +98,16 @@
   ;; convert js props to clj props
   (let [wrapper (fn wrap-type-props [p r]
                   (let [cljs-props (gobj/get p "cljs-props" {})
-                        props (reduce (fn [cljs-props' k]
-                                        (if (= k "cljs-props")
-                                          cljs-props'
-                                          (assoc cljs-props'
-                                                 (keyword k)
-                                                 (gobj/get p k))))
-                                      cljs-props
-                                      (gobj/getKeys p))]
-                  (type #js {:cljs-props props} r)))]
+                        gather-keys (fn [cljs-props' k]
+                                      (if (= k "cljs-props")
+                                        cljs-props'
+                                        (assoc cljs-props'
+                                               (keyword k)
+                                               (gobj/get p k))))]
+                    (type #js {:cljs-props (.reduce (gobj/getKeys p)
+                                                    gather-keys
+                                                    cljs-props)}
+                          r)))]
     (when js/goog.DEBUG
       (set! (.-displayName wrapper) (str "cljsProps(" (.-displayName type) ")")))
     wrapper))
