@@ -27,6 +27,25 @@
 ;;
 
 
+(defn resolve-local-vars
+  "Returns a set of symbols found in `body` that also exist in `env`."
+  [env body]
+  (let [sym-list (atom #{})]
+    (clojure.walk/postwalk
+     (fn w [x]
+       (if (symbol? x)
+         (do (swap! sym-list conj x)
+             x)
+         x))
+     body)
+
+    (->> @sym-list
+         (map (:locals env))
+         (filter (comp not nil?))
+         (map :name)
+         vec)))
+
+
 ;; TODO:
 ;; - Detect custom hooks
 ;; - Handle re-ordering

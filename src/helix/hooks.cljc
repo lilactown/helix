@@ -1,5 +1,5 @@
 (ns helix.hooks
-  #?(:clj (:require [cljs.analyzer.api])
+  #?(:clj (:require [helix.analyzer :as hana])
      :cljs (:require
             ["react" :as react]))
   #?(:cljs (:require-macros [helix.hooks])))
@@ -77,25 +77,6 @@
            js/undefined)))))
 
 
-#?(:clj
-   (defn resolve-vars
-     "Returns a set of symbols found in `body` that also exist in `env`."
-     [env body]
-     (let [sym-list (atom #{})]
-       (clojure.walk/postwalk
-        (fn w [x]
-          (if (symbol? x)
-            (do (swap! sym-list conj x)
-                x)
-            x))
-        body)
-       (->> @sym-list
-            (map (partial cljs.analyzer.api/resolve env))
-            (filter (comp not nil?))
-            (map :name)
-            vec))))
-
-
 (defn simple-body? [body]
   (and (= (count body) 1) (symbol? (first body))))
 
@@ -109,7 +90,7 @@
 
        ;; auto deps is passed in
        (= (first body) :auto-deps) (deps->hook-body
-                                    `(cljs.core/array ~@(resolve-vars env (rest body)))
+                                    `(cljs.core/array ~@(hana/resolve-local-vars env (rest body)))
                                     (rest body))
 
        ;; no deps passed in
@@ -164,8 +145,9 @@
    &env body
    (fn
      ([fn-body] `(raw-use-memo (fn [] ~@fn-body)))
-     ([deps fn-body] `(raw-use-memo (fn [] ~@fn-body)
-                                    ~deps)))))
+     ([deps fn-body]
+      `(raw-use-memo (fn [] ~@fn-body)
+                     ~deps)))))
 
 
 #?(:cljs
