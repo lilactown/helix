@@ -2,6 +2,8 @@
   (:require [helix.core :as hx :refer [$ <> defnc]]
             [helix.dom :as d]
             [helix.hooks :as hooks]
+            ["react" :as r]
+            ["react-dom/server" :as rds]
             [devcards.core :as dc :include-macros true]))
 
 
@@ -105,3 +107,66 @@
 
 (dc/defcard children
   (children-test (d/div "foo") (d/div "bar")))
+
+
+(defnc use-memo-component
+  [{:keys [qworp]}]
+  (let [bar "bar"
+        foobar (macroexpand '(hooks/use-memo :auto-deps (fn [] (str qworp bar))))]
+    (pr-str foobar)))
+
+
+(dc/defcard use-memo
+  (use-memo-component {:qworp "foo"}))
+
+
+(defnc simple-benchmark-component []
+  (let [[re-render set-state] (hooks/use-state 0)
+        force-render #(set-state inc)
+        [iterations set-iterations] (hooks/use-state 10000)
+        helix-time (hooks/use-memo [re-render]
+                                   (with-out-str
+                                     (simple-benchmark
+                                      []
+                                      (rds/renderToString
+                                       (children-test
+                                        {:foo "bar"}
+                                        (d/div {:style {:background-color "green"}} "foo")
+                                        (d/div "bar")))
+                                      iterations)))
+        react-time (hooks/use-memo [re-render]
+                                   (with-out-str
+                                     (simple-benchmark
+                                      [react-children-test
+                                       (fn [props]
+                                         (r/createElement "div"
+                                                          nil
+                                                          (.-children ^js props)))]
+                                      (rds/renderToString
+                                       (r/createElement
+                                        react-children-test
+                                        #js {:foo "bar"}
+                                        (r/createElement "div" #js {:style #js {:backgroundColor "green"}} "foo")
+                                        (r/createElement "div" nil "bar")))
+                                      iterations)))]
+    (<>
+     (d/div
+      (d/input {:value iterations
+                :on-change #(set-iterations
+                             (-> %
+                                 .-target
+                                 .-value
+                                 (js/parseInt 10)))
+                :type "number"})
+      (d/button {:on-click force-render} "Re-run"))
+     (d/div
+      {:style {:padding "5px"}}
+      (d/code
+       helix-time))
+     (d/div
+      {:style {:padding "5px"}}
+      (d/code
+       react-time)))))
+
+(dc/defcard simple-benchmark
+  (simple-benchmark-component))
