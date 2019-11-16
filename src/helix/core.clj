@@ -140,7 +140,8 @@
          (def ~wrapped-name
            (-> ~(fnc* wrapped-name props-bindings
                                    (cons `(when goog/DEBUG
-                                            (~sig-sym))
+                                            (when ~sig-sym
+                                              (~sig-sym)))
                                          (if opts-map?
                                            (rest body)
                                            body)))
@@ -155,8 +156,9 @@
            (cljs-factory ~wrapped-name))
 
          (when goog/DEBUG
-           (~sig-sym ~wrapped-name ~(string/join hooks)
-            nil ;; forceReset
-            nil) ;; getCustomHooks
+           (when ~sig-sym
+             (~sig-sym ~wrapped-name ~(string/join hooks)
+              nil ;; forceReset
+              nil)) ;; getCustomHooks
            (register! ~wrapped-name ~fully-qualified-name))
          ~display-name)))

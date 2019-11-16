@@ -2,8 +2,7 @@
   (:refer-clojure :exclude [type])
   (:require [goog.object :as gobj]
             [helix.utils :as utils]
-            ["react" :as react]
-            ["react-refresh/runtime" :as react-refresh])
+            ["react" :as react])
   (:require-macros [helix.core]))
 
 
@@ -128,8 +127,11 @@
   `type` is the component function, and `id` is the unique ID assigned to it
   (e.g. component name) for cache invalidation."
   [type id]
-  (react-refresh/register type id))
+  (when (exists? (.-$$Register$$ js/window))
+    (.$$Register$$ js/window type id)))
 
 
-(def signature!
-  react-refresh/createSignatureFunctionForTransform)
+(defn signature! []
+  ;; grrr `maybe` bug strikes again
+  (and (exists? (.-$$Signature$$ js/window))
+      (.$$Signature$$ js/window)))

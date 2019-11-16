@@ -2,7 +2,6 @@
   (:require [helix.core :as hx :refer [<> defnc]]
             [helix.dom :as d]
             [helix.hooks :as hooks]
-            [helix.refresh :as refresh]
             [refresh-example.depended :refer [greet]]
             ["react-dom" :as rdom]))
 
