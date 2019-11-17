@@ -14,20 +14,16 @@
     (name k)))
 
 
-(def unwrappable-key (unkeywordize ::unwrap))
-
-
 (defn unwrappable?
   [p]
-  (or (satisfies? IUnwrappable p)
-      (some? (gobj/get p unwrappable-key))))
+  (satisfies? IUnwrappable p))
 
 
 (defn unwrap
   [p]
   (if (satisfies? IUnwrappable p)
     (-unwrap p)
-    ((gobj/get p unwrappable-key))))
+    (throw (js/Error. "Does not implement IUnwrappable"))))
 
 
 
@@ -74,12 +70,16 @@
 
 (defn own-keys
   [o]
-  (to-array (map unkeywordize (keys o))))
+  (this-as handler
+    (let [{:keys [key->prop]} (.-opts ^js handler)]
+      (to-array (map key->prop (keys o))))))
 
 
 (defn enumerate
   [o]
-  (map unkeywordize (keys o)))
+  (this-as handler
+    (let [{:keys [key->prop]} (.-opts ^js handler)]
+      (map key->prop (keys o)))))
 
 
 (defn get-own-property-descriptor
@@ -108,9 +108,10 @@
 
 (defn ^js ueaq
   ([o] (ueaq o {}))
-  ([o {:keys [recursive? prop->key mutable?] :as opts
+  ([o {:keys [recursive? prop->key key->prop] :as opts
        :or {recursive? false
-            prop->key keyword}}]
+            prop->key keyword
+            key->prop unkeywordize}}]
    (let [;; this is an object to hold implementations of various protocols for
          ;; CLJS usage
          context (specify! #js {}
@@ -131,7 +132,8 @@
                    )
 
          handler #js {:opts (assoc opts
-                                   :prop->key prop->key)
+                                   :prop->key prop->key
+                                   :key->prop key->prop)
                       :context context
                       :get getter
                       :has has

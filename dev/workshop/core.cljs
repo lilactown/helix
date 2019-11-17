@@ -7,12 +7,29 @@
             [devcards.core :as dc :include-macros true]))
 
 
-(defnc subcomponent [{:keys [name] :as props}]
+(defnc props-test
+  [props]
+  (d/div
+   (d/div "props test")
+   (for [[k v] props]
+     (d/div
+      {:key k}
+      (d/div
+       {:style {:color "red"}}
+       "key: " (str k))
+      (d/div "val: " (pr-str v))))))
+
+
+(dc/defcard props ($ props-test {:class :class
+                                 :style :style
+                                 :for :for
+                                 :kebab-case :kebab-case
+                                 :camelCase :camelCase}))
+
+
+(defnc subcomponent
+  [{:keys [name] :as props}]
   (d/div name))
-
-
-(dc/defcard $
-  ($ (hx/type subcomponent) {:name "$ works"}))
 
 
 (defnc state-test
@@ -25,14 +42,16 @@
 
 
 (dc/defcard use-state
-  (state-test))
+  ($ state-test))
 
 
-(defnc display-range [{:keys [end color]}]
+(defnc display-range
+  [{:keys [end color] :as props}]
   (for [n (range end)]
     (d/div {:key n
             :style {:width "10px" :height "10px" :display "inline-block"
                     :background (or color "green") :margin "auto 2px"}})))
+
 
 (defnc effect-test
   []
@@ -63,19 +82,20 @@
      (d/button {:on-click #(set-count inc)} "inc")
      (d/div
       (d/div "renders:")
-      (display-range {:end (.-current renders) :color "red"}))
+      ($ display-range {:end (.-current renders) :color "red"}))
      (for [[k v] fx-state]
        (d/div {:key (str k)}
         (d/div (str k))
-        (display-range {:end v}))))))
+        ($ display-range {:end v}))))))
 
 
 (dc/defcard use-effect
-  (effect-test))
+  ($ effect-test))
 
 
 (defnc lazy-test
-  [{:keys [begin end]}]
+  [{:keys [begin end]
+    :or {begin 0}}]
   (<>
    (d/div (str "numbers " (or begin 0) "-" (dec end) ":"))
    (d/ul
@@ -84,8 +104,8 @@
    (d/div "ur welcome")))
 
 
-#_(dc/defcard lazy
-  (lazy-test {:end 6}))
+(dc/defcard lazy
+  ($ lazy-test {:end 6}))
 
 
 (defnc dynamic-test
@@ -96,7 +116,7 @@
     ($ div props children "baz")))
 
 (dc/defcard dynamic
-  (dynamic-test))
+  ($ dynamic-test))
 
 
 (defnc children-test
@@ -106,18 +126,18 @@
    children))
 
 (dc/defcard children
-  (children-test (d/div "foo") (d/div "bar")))
+  ($ children-test (d/div "foo") (d/div "bar")))
 
 
 (defnc use-memo-component
   [{:keys [qworp]}]
   (let [bar "bar"
-        foobar (macroexpand '(hooks/use-memo :auto-deps (fn [] (str qworp bar))))]
+        foobar (macroexpand '(hooks/use-memo :auto-deps (fn [] (str qworp bar goog/DEBUG))))]
     (pr-str foobar)))
 
 
 (dc/defcard use-memo
-  (use-memo-component {:qworp "foo"}))
+  ($ use-memo-component {:qworp "foo"}))
 
 
 ;;
@@ -157,7 +177,7 @@
                                      (simple-benchmark
                                       []
                                       (rds/renderToString
-                                       (helix-children-benchmark
+                                       ($ helix-children-benchmark
                                         {:foo "bar"}
                                         (d/div {:style {:background-color "green"}} "foo")
                                         (d/div "bar")))
@@ -168,7 +188,7 @@
                                                      (simple-benchmark
                                                       []
                                                       (rds/renderToString
-                                                       (helix-children-interpret-props-benchmark
+                                                       ($ helix-children-interpret-props-benchmark
                                                         {:foo "bar"}
                                                         (d/div {:style {:background-color "green"}} "foo")
                                                         (d/div "bar")))
@@ -209,4 +229,4 @@
        react-time)))))
 
 #_(dc/defcard simple-benchmark
-  (simple-benchmark-component))
+  ($ simple-benchmark-component))

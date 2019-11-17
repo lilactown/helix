@@ -88,6 +88,11 @@
               (fn [_ c] c)
               root))
 
+
+(defn inferred-type [env x]
+  (cljs.analyzer/infer-tag env (ana/analyze env x)))
+
+
 (comment
   (def example '[foo (fn foo [x] "foo")
                  bar {:a 1}

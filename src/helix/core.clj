@@ -26,7 +26,7 @@
                                      (style v)]))
     x))
 
-(defn key->prop
+(defn key->native-prop
   [k v]
   (case k
     :class ["className" v]
@@ -34,7 +34,7 @@
     :style ["style"
             (if (map? v)
               (style v)
-              `(clj->js ~v))]
+              `(cljs.core/clj->js ~v))]
 
     [(camel-case (name k)) v]))
 
@@ -42,7 +42,8 @@
 (defn primitive?
   [x]
   (or (string? x)
-      (number? x)))
+      (number? x)
+      (boolean? x)))
 
 
 (defmacro $
@@ -63,17 +64,30 @@
   (let [native? (keyword? type)
         type (if native?
                (name type)
-               type)]
+               type)
+        first-arg-type (hana/inferred-type &env (first args))]
     (cond
+      (and native? (map? (first args))) `(create-element
+                                          ~type
+                                          ~(hana/clj->js-obj (first args) :kv->prop key->native-prop)
+                                          ~@(rest args))
+
       (map? (first args)) `(create-element
                             ~type
-                            ~(hana/clj->js-obj (first args) :kv->prop key->prop)
+                            ~(hana/clj->js-obj (first args))
                             ~@(rest args))
+
       (primitive? (first args)) `(create-element
                                 ~type
                                 nil
                                 ~@args)
+
       (nil? (first args)) `(create-element ~type nil ~@(rest args))
+
+      ;; inferred primitive type
+      (#{'string 'number 'clj-nil
+         'cljs.core/LazySeq} first-arg-type) `(create-element ~type nil ~@args)
+
       ;; bail to runtime detection of props
       :else `($$ ~type
                  ~@args))))
@@ -147,13 +161,13 @@
                                            body)))
                (cond-> goog/DEBUG
                  (doto (goog.object/set "displayName" ~fully-qualified-name)))
-               (wrap-cljs-component)
+               #_(wrap-cljs-component)
                ~@(-> opts :wrap)))
 
          (def ~display-name
            ~@(when-not (nil? docstring)
                (list docstring))
-           (cljs-factory ~wrapped-name))
+           ~wrapped-name)
 
          (when goog/DEBUG
            (when ~sig-sym

@@ -20,13 +20,21 @@
 (def Fragment react/Fragment)
 
 
-(def props->clj utils/props->clj)
+;; (def props->clj utils/props->clj)
 
 
 (defn clj->props
+  "Shallowly converts CLJS map to a props object. `native?` will add special
+  handling of `:style` key to recursively convert it."
   [x native?]
-  (ueaq/ueaq x)
-  #_(utils/clj->props x native?))
+  (utils/clj->props x native?))
+
+
+(defn clj-key->react-prop [k]
+  (case k
+    :class "className"
+    :for "htmlFor"))
+
 
 
 (def create-element react/createElement)
@@ -74,50 +82,10 @@
   [type]
   (-> (fn factory [& args]
         (if (map? (first args))
-          (apply create-element type (clj->props (first args) false) (rest args))
+          (apply create-element type (ueaq/ueaq (first args)) (rest args))
           (apply create-element type nil args)))
       (specify! IExtractType
         (-type [_] type))))
-
-
-(defn- cljs-factory
-  [type]
-  (-> (fn factory [& args]
-        (if (map? (first args))
-          (let [props (first args)
-                {:keys [key ref]} props]
-            (apply create-element
-                   type
-                   ;; #js {:cljs-props (dissoc props :key :ref)
-                   ;;      :key key
-                   ;;      :ref ref}
-                   (ueaq/ueaq props)
-                   (rest args)))
-          (apply create-element type nil args)))
-      (specify! IExtractType
-        (-type [_] type))))
-
-
-(defn- wrap-cljs-component
-  [type]
-  ;; convert js props to clj props
-  (let [wrapper (fn wrap-type-props [p r]
-                  ;; (js/console.log p)
-                  ;; (let [cljs-props (gobj/get p "cljs-props" {})
-                  ;;       gather-keys (fn [cljs-props' k]
-                  ;;                     (if (= k "cljs-props")
-                  ;;                       cljs-props'
-                  ;;                       (assoc cljs-props'
-                  ;;                              (keyword k)
-                  ;;                              (gobj/get p k))))]
-                  ;;   (type #js {:cljs-props (.reduce (gobj/getKeys p)
-                  ;;                                   gather-keys
-                  ;;                                   cljs-props)}
-                  ;;         r))
-                  (type p r))]
-    (when js/goog.DEBUG
-      (set! (.-displayName wrapper) (str "cljsProps(" (.-displayName type) ")")))
-    wrapper))
 
 
 (defn- extract-cljs-props
