@@ -84,7 +84,7 @@
    (d/div "ur welcome")))
 
 
-(dc/defcard lazy
+#_(dc/defcard lazy
   (lazy-test {:end 6}))
 
 
@@ -120,6 +120,34 @@
   (use-memo-component {:qworp "foo"}))
 
 
+;;
+;; -- Benchmarking
+;;
+
+(defnc helix-children-benchmark
+  [{:keys [children] :as props}]
+  (d/div {:style {:display "flex"
+                   :justify-content "space-between"}}
+          children))
+
+(defnc helix-children-interpret-props-benchmark
+  [{:keys [children] :as props}]
+  (let [props {:style {:display "flex"
+                       :justify-content "space-between"}}]
+  (d/div props
+         children)))
+
+
+(defn react-children-benchmark
+  [props]
+  (r/createElement
+   "div"
+   #js {:style
+        #js {:display "flex"
+             :justifyContent "space-between"}}
+   (.-children ^js props)))
+
+
 (defnc simple-benchmark-component []
   (let [[re-render set-state] (hooks/use-state 0)
         force-render #(set-state inc)
@@ -129,22 +157,30 @@
                                      (simple-benchmark
                                       []
                                       (rds/renderToString
-                                       (children-test
+                                       (helix-children-benchmark
                                         {:foo "bar"}
                                         (d/div {:style {:background-color "green"}} "foo")
                                         (d/div "bar")))
                                       iterations)))
+
+        helix-interpret-props-time (hooks/use-memo [re-render]
+                                                   (with-out-str
+                                                     (simple-benchmark
+                                                      []
+                                                      (rds/renderToString
+                                                       (helix-children-interpret-props-benchmark
+                                                        {:foo "bar"}
+                                                        (d/div {:style {:background-color "green"}} "foo")
+                                                        (d/div "bar")))
+                                                      iterations)))
+
         react-time (hooks/use-memo [re-render]
                                    (with-out-str
                                      (simple-benchmark
-                                      [react-children-test
-                                       (fn [props]
-                                         (r/createElement "div"
-                                                          nil
-                                                          (.-children ^js props)))]
+                                      []
                                       (rds/renderToString
                                        (r/createElement
-                                        react-children-test
+                                        react-children-benchmark
                                         #js {:foo "bar"}
                                         (r/createElement "div" #js {:style #js {:backgroundColor "green"}} "foo")
                                         (r/createElement "div" nil "bar")))
@@ -166,7 +202,11 @@
      (d/div
       {:style {:padding "5px"}}
       (d/code
+       helix-interpret-props-time))
+     (d/div
+      {:style {:padding "5px"}}
+      (d/code
        react-time)))))
 
-(dc/defcard simple-benchmark
+#_(dc/defcard simple-benchmark
   (simple-benchmark-component))
