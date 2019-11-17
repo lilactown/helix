@@ -2,7 +2,11 @@
   (:refer-clojure :exclude [type])
   (:require [goog.object :as gobj]
             [helix.utils :as utils]
-            ["react" :as react])
+            ["./class.js" :as helix.class]
+            [cljs-bean.core :as bean]
+            [ueaq.core :as ueaq]
+            ["react" :as react]
+            ["react-dom/server" :as rds])
   (:require-macros [helix.core]))
 
 
@@ -21,7 +25,8 @@
 
 (defn clj->props
   [x native?]
-  (utils/clj->props x native?))
+  (ueaq/ueaq x)
+  #_(utils/clj->props x native?))
 
 
 (def create-element react/createElement)
@@ -83,9 +88,10 @@
                 {:keys [key ref]} props]
             (apply create-element
                    type
-                   #js {:cljs-props (dissoc props :key :ref)
-                        :key key
-                        :ref ref}
+                   ;; #js {:cljs-props (dissoc props :key :ref)
+                   ;;      :key key
+                   ;;      :ref ref}
+                   (ueaq/ueaq props)
                    (rest args)))
           (apply create-element type nil args)))
       (specify! IExtractType
@@ -96,17 +102,19 @@
   [type]
   ;; convert js props to clj props
   (let [wrapper (fn wrap-type-props [p r]
-                  (let [cljs-props (gobj/get p "cljs-props" {})
-                        gather-keys (fn [cljs-props' k]
-                                      (if (= k "cljs-props")
-                                        cljs-props'
-                                        (assoc cljs-props'
-                                               (keyword k)
-                                               (gobj/get p k))))]
-                    (type #js {:cljs-props (.reduce (gobj/getKeys p)
-                                                    gather-keys
-                                                    cljs-props)}
-                          r)))]
+                  ;; (js/console.log p)
+                  ;; (let [cljs-props (gobj/get p "cljs-props" {})
+                  ;;       gather-keys (fn [cljs-props' k]
+                  ;;                     (if (= k "cljs-props")
+                  ;;                       cljs-props'
+                  ;;                       (assoc cljs-props'
+                  ;;                              (keyword k)
+                  ;;                              (gobj/get p k))))]
+                  ;;   (type #js {:cljs-props (.reduce (gobj/getKeys p)
+                  ;;                                   gather-keys
+                  ;;                                   cljs-props)}
+                  ;;         r))
+                  (type p r))]
     (when js/goog.DEBUG
       (set! (.-displayName wrapper) (str "cljsProps(" (.-displayName type) ")")))
     wrapper))
@@ -114,7 +122,34 @@
 
 (defn- extract-cljs-props
   [o]
-  (gobj/get o "cljs-props"))
+  (bean/bean o))
+
+
+
+;;
+;; -- class components
+;;
+
+
+
+(defn create-component [spec statics]
+  (helix.class/createComponent spec statics))
+
+(comment
+  (def MyComponent
+    (create-component #js {:displayName "Foo"
+                           :constructor
+                           (fn [this]
+                             (set! (.-state this) #js {:count 3}))
+                           :render
+                           (fn [this props state]
+                             (prn props state)
+                             ($$ "div" (.-count (.-state this))))}
+                      nil))
+
+  (js/console.log MyComponent)
+
+  (rds/renderToString ($$ MyComponent {:foo "baz"})))
 
 
 ;;
