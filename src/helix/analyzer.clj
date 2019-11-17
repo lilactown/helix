@@ -2,7 +2,9 @@
   (:require [clojure.walk]
             [clojure.zip :as zip]
             [clojure.string :as string]
-            [cljs.analyzer.api :as ana]))
+            [cljs.env]
+            [cljs.analyzer.api :as ana]
+            [ilk.core :as ilk]))
 
 
 ;;
@@ -91,6 +93,8 @@
                  bar {:a 1}
                  baz "baz"])
 
+  (ilk/inferred-type {:a 1})
+
   (def z (seqable-zip example))
 
   (defn prn-all-nodes [loc]
@@ -112,4 +116,19 @@
       #_(zip/node)
       (->> (into [])))
 
-  (ana/analyze (ana/empty-env) example))
+
+  (let [forms  '[^:meta (fn [x] 1)
+                 (fn [x] 1)]
+        env cljs.env/*compiler*]
+    (for [f forms]
+      (cljs.analyzer/infer-tag env (ana/analyze env f))))
+
+  (let [env (ana/empty-env)]
+    (for [f example]
+      [(meta f)
+       (cljs.analyzer/infer-tag env (ana/analyze env f))
+       f]))
+  )
+
+
+;; => (nil cljs.core/IMap)
