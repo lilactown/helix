@@ -132,7 +132,7 @@
 (defnc use-memo-component
   [{:keys [qworp]}]
   (let [bar "bar"
-        foobar (macroexpand '(hooks/use-memo :auto-deps (fn [] (str qworp bar goog/DEBUG))))]
+        foobar (macroexpand '(hooks/use-memo :auto-deps (str qworp bar goog/DEBUG)))]
     (pr-str foobar)))
 
 
@@ -172,39 +172,42 @@
   (let [[re-render set-state] (hooks/use-state 0)
         force-render #(set-state inc)
         [iterations set-iterations] (hooks/use-state 10000)
-        helix-time (hooks/use-memo [re-render]
-                                   (with-out-str
-                                     (simple-benchmark
-                                      []
-                                      (rds/renderToString
-                                       ($ helix-children-benchmark
-                                        {:foo "bar"}
-                                        (d/div {:style {:background-color "green"}} "foo")
-                                        (d/div "bar")))
-                                      iterations)))
+        helix-time (hooks/use-memo
+                    [re-render]
+                    (with-out-str
+                      (simple-benchmark
+                       []
+                       (rds/renderToString
+                        ($ helix-children-benchmark
+                           {:foo "bar"}
+                           (d/div {:style {:background-color "green"}} "foo")
+                           (d/div "bar")))
+                       iterations)))
 
-        helix-interpret-props-time (hooks/use-memo [re-render]
-                                                   (with-out-str
-                                                     (simple-benchmark
-                                                      []
-                                                      (rds/renderToString
-                                                       ($ helix-children-interpret-props-benchmark
-                                                        {:foo "bar"}
-                                                        (d/div {:style {:background-color "green"}} "foo")
-                                                        (d/div "bar")))
-                                                      iterations)))
+        helix-interpret-props-time (hooks/use-memo
+                                    [re-render]
+                                    (with-out-str
+                                      (simple-benchmark
+                                       []
+                                       (rds/renderToString
+                                        ($ helix-children-interpret-props-benchmark
+                                           {:foo "bar"}
+                                           (d/div {:style {:background-color "green"}} "foo")
+                                           (d/div "bar")))
+                                       iterations)))
 
-        react-time (hooks/use-memo [re-render]
-                                   (with-out-str
-                                     (simple-benchmark
-                                      []
-                                      (rds/renderToString
-                                       (r/createElement
-                                        react-children-benchmark
-                                        #js {:foo "bar"}
-                                        (r/createElement "div" #js {:style #js {:backgroundColor "green"}} "foo")
-                                        (r/createElement "div" nil "bar")))
-                                      iterations)))]
+        react-time (hooks/use-memo
+                    [re-render]
+                    (with-out-str
+                      (simple-benchmark
+                       []
+                       (rds/renderToString
+                        (r/createElement
+                         react-children-benchmark
+                         #js {:foo "bar"}
+                         (r/createElement "div" #js {:style #js {:backgroundColor "green"}} "foo")
+                         (r/createElement "div" nil "bar")))
+                       iterations)))]
     (<>
      (d/div
       (d/input {:value iterations

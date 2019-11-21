@@ -102,9 +102,9 @@
   (deps-macro-body
    &env body
    (fn
-     ([fn-body] `(raw-use-effect (wrap-fx (fn [] ~@fn-body))))
+     ([fn-body] `^clj-nil (raw-use-effect (wrap-fx (fn [] ~@fn-body))))
      ([deps fn-body]
-      `(raw-use-effect (wrap-fx (fn [] ~@fn-body)) ~deps)))))
+      `^clj-nil (raw-use-effect (wrap-fx (fn [] ~@fn-body)) ~deps)))))
 
 
 #?(:cljs
@@ -124,9 +124,9 @@
   (deps-macro-body
    &env body
    (fn
-     ([fn-body] `(raw-use-layout-effect (wrap-fx (fn [] ~@fn-body))))
+     ([fn-body] `^clj-nil (raw-use-layout-effect (wrap-fx (fn [] ~@fn-body))))
      ([deps fn-body]
-      `(raw-use-layout-effect (wrap-fx (fn [] ~@fn-body)) ~deps)))))
+      `^clj-nil (raw-use-layout-effect (wrap-fx (fn [] ~@fn-body)) ~deps)))))
 
 
 #?(:cljs
@@ -144,10 +144,17 @@
   (deps-macro-body
    &env body
    (fn
-     ([fn-body] `(raw-use-memo (fn [] ~@fn-body)))
+     ([fn-body]
+      (vary-meta
+        `(raw-use-memo (fn [] ~@fn-body))
+        merge
+        {:tag (hana/inferred-type &env fn-body)}))
      ([deps fn-body]
-      `(raw-use-memo (fn [] ~@fn-body)
-                     ~deps)))))
+      (vary-meta
+        `(raw-use-memo (fn [] ~@fn-body)
+                       ~deps)
+        merge
+        {:tag (hana/inferred-type &env (last fn-body))})))))
 
 
 #?(:cljs
@@ -165,9 +172,9 @@
   (deps-macro-body
    &env body
    (fn
-     ([fn-body] `(raw-use-callback (fn [] ~@fn-body)))
-     ([deps fn-body] `(raw-use-callback (fn [] ~@fn-body)
-                                        ~deps)))))
+     ([fn-body] `^function (raw-use-callback (fn [] ~@fn-body)))
+     ([deps fn-body] `^function (raw-use-callback (fn [] ~@fn-body)
+                                                  ~deps)))))
 
 #?(:cljs
    (defn use-callback*

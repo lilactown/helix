@@ -61,42 +61,53 @@
      \"child2\" ))
   ```"
   [type & args]
-  (let [native? (keyword? type)
+  (let [native? (or (keyword? type) (string? type))
         type (if native?
                (name type)
                type)
         first-arg-type (hana/inferred-type &env (first args))]
     (cond
-      (and native? (map? (first args))) `(create-element
-                                          ~type
-                                          ~(hana/clj->js-obj (first args) :kv->prop key->native-prop)
-                                          ~@(rest args))
+      (and native? (map? (first args)))
+      `^js/React.Element (create-element
+                          ~type
+                          ~(hana/clj->js-obj (first args) :kv->prop key->native-prop)
+                          ~@(rest args))
 
-      (map? (first args)) `(create-element
-                            ~type
-                            ~(hana/clj->js-obj (first args))
-                            ~@(rest args))
+      (map? (first args)) `^js/React.Element (create-element
+                                              ~type
+                                              ~(hana/clj->js-obj (first args))
+                                              ~@(rest args))
 
-      (primitive? (first args)) `(create-element
-                                ~type
-                                nil
-                                ~@args)
+      (primitive? (first args)) `^js/React.Element (create-element
+                                                    ~type
+                                                    nil
+                                                    ~@args)
 
-      (nil? (first args)) `(create-element ~type nil ~@(rest args))
+      (nil? (first args)) `^js/React.Element (create-element ~type nil ~@(rest args))
 
       ;; inferred primitive type
-      (#{'string 'number 'clj-nil
-         'cljs.core/LazySeq} first-arg-type) `(create-element ~type nil ~@args)
+      (or (#{'string 'number 'clj-nil
+             'cljs.core/LazySeq 'js/React.Element} first-arg-type)
+          ;; special case macros in `helix.dom`
+          (when (seqable? (first args))
+            (= 'helix.dom (:ns (cljs.analyzer.api/resolve &env (ffirst args))))))
+      `^js/React.Element (create-element ~type nil ~@args)
 
       ;; bail to runtime detection of props
-      :else `($$ ~type
-                 ~@args))))
+      :else (do (when-not (= first-arg-type 'cljs.core/IMap)
+                  (let [ns-with-line (str (-> &env :ns :name) "" (:line &env) " ")
+                        form (reverse (cons '... (into '() (take 3 &form))))]
+                    (println (str ns-with-line "WARNING: Unable to determine props statically: "
+                                  "Inferred type of arg was " first-arg-type))
+                    (println (str form "\n"))))
+                `^js/React.Element ($$ ~type
+                                       ~@args)))))
 
 
 (defmacro <>
   "Creates a new React Fragment Element"
   [& children]
-  `($ Fragment ~@children))
+  `^js/React.Element ($ Fragment ~@children))
 
 
 (defn- fnc*
