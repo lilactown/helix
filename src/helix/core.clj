@@ -110,13 +110,17 @@
       ;; inferred primitive type
       (or (#{'string 'number 'clj-nil
              'cljs.core/LazySeq 'js/React.Element} first-arg-type)
-          ;; special case macros in `helix.dom`
+          ;; special case macros in `helix.dom` and `helix.core`
           (when (seqable? (first args))
-            (= 'helix.dom (:ns (cljs.analyzer.api/resolve &env (ffirst args))))))
+            (let [form-resolve (cljs.analyzer.api/resolve &env (ffirst args))
+                  ns (:ns form-resolve)
+                  fully-qualified-name (:name form-resolve)]
+              (or (= 'helix.dom ns)
+                  (= 'helix.core/$ fully-qualified-name)))))
       `^js/React.Element (create-element ~type nil ~@args)
 
       ;; bail to runtime detection of props
-      :else (do #_(when-not (= first-arg-type 'cljs.core/IMap)
+      :else (do (when-not (= first-arg-type 'cljs.core/IMap)
                   (let [ns-with-line (str (-> &env :ns :name) "" (:line &env) " ")
                         form (reverse (cons '... (into '() (take 3 &form))))]
                     (println (str ns-with-line "WARNING: Unable to determine props statically: "
