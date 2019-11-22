@@ -113,7 +113,7 @@
   (let [div "div"
         props {:style {:color "blue"}}
         children '("foo" "bar")]
-    ($ div props children "baz")))
+    ($ div {& props} children "baz")))
 
 (dc/defcard dynamic
   ($ dynamic-test))
@@ -154,7 +154,7 @@
   [{:keys [children] :as props}]
   (let [props {:style {:display "flex"
                        :justify-content "space-between"}}]
-  (d/div props
+  (d/div {& props}
          children)))
 
 
@@ -172,6 +172,20 @@
   (let [[re-render set-state] (hooks/use-state 0)
         force-render #(set-state inc)
         [iterations set-iterations] (hooks/use-state 10000)
+
+        react-time (hooks/use-memo
+                    [re-render]
+                    (with-out-str
+                      (simple-benchmark
+                       []
+                       (rds/renderToString
+                        (r/createElement
+                         react-children-benchmark
+                         #js {:foo "bar"}
+                         (r/createElement "div" #js {:style #js {:backgroundColor "green"}} "foo")
+                         (r/createElement "div" nil "bar")))
+                       iterations)))
+
         helix-time (hooks/use-memo
                     [re-render]
                     (with-out-str
@@ -194,20 +208,7 @@
                                            {:foo "bar"}
                                            (d/div {:style {:background-color "green"}} "foo")
                                            (d/div "bar")))
-                                       iterations)))
-
-        react-time (hooks/use-memo
-                    [re-render]
-                    (with-out-str
-                      (simple-benchmark
-                       []
-                       (rds/renderToString
-                        (r/createElement
-                         react-children-benchmark
-                         #js {:foo "bar"}
-                         (r/createElement "div" #js {:style #js {:backgroundColor "green"}} "foo")
-                         (r/createElement "div" nil "bar")))
-                       iterations)))]
+                                       iterations)))]
     (<>
      (d/div
       (d/input {:value iterations
@@ -221,15 +222,15 @@
      (d/div
       {:style {:padding "5px"}}
       (d/code
+       react-time))
+     (d/div
+      {:style {:padding "5px"}}
+      (d/code
        helix-time))
      (d/div
       {:style {:padding "5px"}}
       (d/code
-       helix-interpret-props-time))
-     (d/div
-      {:style {:padding "5px"}}
-      (d/code
-       react-time)))))
+       helix-interpret-props-time)))))
 
 #_(dc/defcard simple-benchmark
   ($ simple-benchmark-component))
