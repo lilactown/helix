@@ -173,8 +173,8 @@
   (deps-macro-body
    &env deps body
    (fn
-     ([fn-body] `^function (raw-use-callback (fn [] ~@fn-body)))
-     ([deps fn-body] `^function (raw-use-callback (fn [] ~@fn-body)
+     ([fn-body] `^function (raw-use-callback ~@fn-body))
+     ([deps fn-body] `^function (raw-use-callback ~@fn-body
                                                   ~deps)))))
 
 #?(:cljs
