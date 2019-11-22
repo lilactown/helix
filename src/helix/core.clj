@@ -100,34 +100,7 @@
                                               ~(props (first args) {})
                                               ~@(rest args))
 
-      (primitive? (first args)) `^js/React.Element (create-element
-                                                    ~type
-                                                    nil
-                                                    ~@args)
-
-      (nil? (first args)) `^js/React.Element (create-element ~type nil ~@(rest args))
-
-      ;; inferred primitive type
-      (or (#{'string 'number 'clj-nil
-             'cljs.core/LazySeq 'js/React.Element} first-arg-type)
-          ;; special case macros in `helix.dom` and `helix.core`
-          (when (seqable? (first args))
-            (let [form-resolve (cljs.analyzer.api/resolve &env (ffirst args))
-                  ns (:ns form-resolve)
-                  fully-qualified-name (:name form-resolve)]
-              (or (= 'helix.dom ns)
-                  (= 'helix.core/$ fully-qualified-name)))))
-      `^js/React.Element (create-element ~type nil ~@args)
-
-      ;; bail to runtime detection of props
-      :else (do (when-not (= first-arg-type 'cljs.core/IMap)
-                  (let [ns-with-line (str (-> &env :ns :name) "" (:line &env) " ")
-                        form (reverse (cons '... (into '() (take 3 &form))))]
-                    (println (str ns-with-line "WARNING: Unable to determine props statically: "
-                                  "Inferred type of arg " (first args) " was " first-arg-type))
-                    (println (str form "\n"))))
-                `^js/React.Element ($$ ~type
-                                       ~@args)))))
+      :else `^js/React.Element (create-element ~type nil ~@args))))
 
 
 (defmacro <>
