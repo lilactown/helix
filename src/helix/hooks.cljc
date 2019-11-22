@@ -33,7 +33,8 @@
                                         ([f & xs]
                                          (updater (fn spread-updater [x]
                                                     (apply f x xs)))))
-                                      #js [u])]
+                                      ;; `u` is guaranteed to be stable so we elide it
+                                      #js [])]
        [v updater])))
 
 
@@ -82,25 +83,25 @@
 
 
 #?(:clj
-   (defn deps-macro-body [env body deps->hook-body]
+   (defn deps-macro-body [env deps body deps->hook-body]
      (cond
        ;; deps are passed in as a vector
-       (vector? (first body)) (deps->hook-body `(cljs.core/array ~@(first body))
-                                               (rest body))
+       (vector? deps) (deps->hook-body `(cljs.core/array ~@deps)
+                                       body)
 
        ;; auto deps is passed in
-       (= (first body) :auto-deps) (deps->hook-body
-                                    `(cljs.core/array ~@(hana/resolve-local-vars env (rest body)))
-                                    (rest body))
+       (= deps :auto-deps) (deps->hook-body
+                            `(cljs.core/array ~@(hana/resolve-local-vars env body))
+                            body)
 
-       ;; no deps passed in
-       true (deps->hook-body body))))
+       ;; always fire it (don't pass any deps in to hook)
+       (= deps :always) (deps->hook-body body))))
 
 
 (defmacro use-effect
-  [& body]
+  [deps & body]
   (deps-macro-body
-   &env body
+   &env deps body
    (fn
      ([fn-body] `^clj-nil (raw-use-effect (wrap-fx (fn [] ~@fn-body))))
      ([deps fn-body]
@@ -120,9 +121,9 @@
       (react/useEffect (wrap-fx f) (to-array deps)))))
 
 
-(defmacro use-layout-effect [& body]
+(defmacro use-layout-effect [deps & body]
   (deps-macro-body
-   &env body
+   &env deps body
    (fn
      ([fn-body] `^clj-nil (raw-use-layout-effect (wrap-fx (fn [] ~@fn-body))))
      ([deps fn-body]
@@ -140,9 +141,9 @@
 
 
 (defmacro use-memo
-  [& body]
+  [deps & body]
   (deps-macro-body
-   &env body
+   &env deps body
    (fn
      ([fn-body]
       (vary-meta
@@ -168,9 +169,9 @@
 
 
 (defmacro use-callback
-  [& body]
+  [deps & body]
   (deps-macro-body
-   &env body
+   &env deps body
    (fn
      ([fn-body] `^function (raw-use-callback (fn [] ~@fn-body)))
      ([deps fn-body] `^function (raw-use-callback (fn [] ~@fn-body)
@@ -187,9 +188,9 @@
 
 
 (defmacro use-imperative-handle
-  [ref & body]
+  [ref deps & body]
   (deps-macro-body
-   &env body
+   &env deps body
    (fn
      ([fn-body] `(raw-use-imperative-handle ref (fn [] ~@fn-body)))
      ([deps fn-body] `(raw-use-imperative-handle

@@ -63,6 +63,7 @@
                                                   :every-third/auto 0})
         threes (quot count 3)]
     (hooks/use-effect
+     :always
      (set! (.-current renders) (inc (.-current renders))))
     (hooks/use-effect
      [count]
