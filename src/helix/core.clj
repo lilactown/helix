@@ -36,9 +36,9 @@
 (defn style
   [x]
   (if (map? x)
-    (clj->js-obj x :kv->prop (fn [k v]
+    (clj->js-obj x {:kv->prop (fn [k v]
                                     [(-> k name camel-case)
-                                     (style v)]))
+                                     (style v)])})
     x))
 
 (defn key->native-prop
@@ -61,11 +61,13 @@
       (boolean? x)))
 
 
-(defn props [clj-map opts]
-  (if (contains? clj-map '&)
-    `(merge-map+obj ~(clj->js-obj (dissoc clj-map '&) opts)
-                    ~(get clj-map '&))
-    (clj->js-obj clj-map opts)))
+(defn props [clj-map native?]
+  (let [opts (if native? {:kv->prop key->native-prop} {})]
+    (if (contains? clj-map '&)
+      `(merge-map+obj ~native?
+                      ~(clj->js-obj (dissoc clj-map '&) opts)
+                      ~(get clj-map '&))
+      (clj->js-obj clj-map opts))))
 
 
 (defmacro $
@@ -86,18 +88,11 @@
   (let [native? (or (keyword? type) (string? type))
         type (if native?
                (name type)
-               type)
-        first-arg-type (hana/inferred-type &env (first args))]
+               type)]
     (cond
-      (and native? (map? (first args)))
-      `^js/React.Element (create-element
-                          ~type
-                          ~(props (first args) {:kv->prop key->native-prop})
-                          ~@(rest args))
-
       (map? (first args)) `^js/React.Element (create-element
                                               ~type
-                                              ~(props (first args) {})
+                                              ~(props (first args) native?)
                                               ~@(rest args))
 
       :else `^js/React.Element (create-element ~type nil ~@args))))
@@ -113,7 +108,7 @@
   [display-name props-bindings body]
   (let [ret (gensym "return_value")]
     ;; maybe-ref for react/forwardRef support
-    `(fn ~display-name
+    `(fn ^js/React.Element ~display-name
        [props# maybe-ref#]
        (let [~props-bindings [(extract-cljs-props props#) maybe-ref#]]
          (do ~@body)))))

@@ -20,9 +20,6 @@
 (def Fragment react/Fragment)
 
 
-;; (def props->clj utils/props->clj)
-
-
 (defn clj->props
   "Shallowly converts CLJS map to a props object. `native?` will add special
   handling of `:style` key to recursively convert it."
@@ -30,15 +27,8 @@
   (utils/clj->props x native?))
 
 
-(defn clj-key->react-prop [k]
-  (case k
-    :class "className"
-    :for "htmlFor"))
-
-
-(defn merge-map+obj [js-obj map]
-  (js/Object.assign #js {} js-obj (ueaq/ueaq map)))
-
+(defn merge-map+obj [native? js-obj map]
+  (js/Object.assign #js {} js-obj (clj->props map native?)))
 
 
 (def create-element react/createElement)
@@ -82,7 +72,7 @@
 
 
 (defn factory
-  "Creates a factory function for an external React component"
+  "Creates a factory function for a React component"
   [type]
   (-> (fn factory [& args]
         (if (map? (first args))
