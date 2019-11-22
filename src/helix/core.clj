@@ -2,6 +2,21 @@
   (:require [helix.analyzer :as hana]
             [clojure.string :as string]))
 
+
+;;
+;; -- Props
+;;
+
+(defn clj->js-obj
+  [m {:keys [kv->prop]
+      :or {kv->prop (fn [k v] [(name k) v])}}]
+  {:pre [(map? m)]}
+  (list* (reduce-kv (fn [form k v]
+                      `(~@form ~@(kv->prop k v)))
+                    '[cljs.core/js-obj]
+                    m)))
+
+
 (defn- camel-case
   "Returns camel case version of the string, e.g. \"http-equiv\" becomes \"httpEquiv\"."
   [s]
@@ -21,7 +36,7 @@
 (defn style
   [x]
   (if (map? x)
-    (hana/clj->js-obj x :kv->prop (fn [k v]
+    (clj->js-obj x :kv->prop (fn [k v]
                                     [(-> k name camel-case)
                                      (style v)]))
     x))
@@ -44,6 +59,13 @@
   (or (string? x)
       (number? x)
       (boolean? x)))
+
+
+(defn props [clj-map opts]
+  (if (contains? clj-map '&)
+    `(merge-map+obj ~(clj->js-obj (dissoc clj-map '&) opts)
+                    ~(get clj-map '&))
+    (clj->js-obj clj-map opts)))
 
 
 (defmacro $
@@ -70,12 +92,12 @@
       (and native? (map? (first args)))
       `^js/React.Element (create-element
                           ~type
-                          ~(hana/clj->js-obj (first args) :kv->prop key->native-prop)
+                          ~(props (first args) {:kv->prop key->native-prop})
                           ~@(rest args))
 
       (map? (first args)) `^js/React.Element (create-element
                                               ~type
-                                              ~(hana/clj->js-obj (first args))
+                                              ~(props (first args) {})
                                               ~@(rest args))
 
       (primitive? (first args)) `^js/React.Element (create-element
@@ -94,11 +116,11 @@
       `^js/React.Element (create-element ~type nil ~@args)
 
       ;; bail to runtime detection of props
-      :else (do (when-not (= first-arg-type 'cljs.core/IMap)
+      :else (do #_(when-not (= first-arg-type 'cljs.core/IMap)
                   (let [ns-with-line (str (-> &env :ns :name) "" (:line &env) " ")
                         form (reverse (cons '... (into '() (take 3 &form))))]
                     (println (str ns-with-line "WARNING: Unable to determine props statically: "
-                                  "Inferred type of arg was " first-arg-type))
+                                  "Inferred type of arg " (first args) " was " first-arg-type))
                     (println (str form "\n"))))
                 `^js/React.Element ($$ ~type
                                        ~@args)))))

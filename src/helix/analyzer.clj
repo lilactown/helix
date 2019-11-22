@@ -7,19 +7,6 @@
             [ilk.core :as ilk]))
 
 
-;;
-;; -- Props
-;;
-
-(defn clj->js-obj
-  [m & {:keys [kv->prop]
-        :or {kv->prop (fn [k v] [(name k) v])}}]
-  {:pre [(map? m)]}
-  (list* (reduce-kv (fn [form k v]
-                      `(~@form ~@(kv->prop k v)))
-                    '[cljs.core/js-obj]
-                    m)))
-
 #_(clj->props '{:a 1 :b {:foo bar}
                 :on-click (fn [e] (js/alert "hi"))})
 
@@ -90,7 +77,7 @@
 
 
 (defn inferred-type [env x]
-  (cljs.analyzer/infer-tag env (ana/analyze env x)))
+  (cljs.analyzer/infer-tag env (ana/no-warn (ana/analyze env x))))
 
 
 (comment

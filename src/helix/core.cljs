@@ -36,6 +36,10 @@
     :for "htmlFor"))
 
 
+(defn merge-map+obj [js-obj map]
+  (js/Object.assign #js {} js-obj (ueaq/ueaq map)))
+
+
 
 (def create-element react/createElement)
 
