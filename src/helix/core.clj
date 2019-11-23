@@ -123,7 +123,7 @@
     {,,,opts-map}
     ,,,body)
 
-  \"component-name\" will now be a React factory function that returns a React
+  \"component-name\" will now be a React function component that returns a React
   Element.
 
 
