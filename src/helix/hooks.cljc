@@ -1,5 +1,5 @@
 (ns helix.hooks
-  #?(:clj (:require [helix.analyzer :as hana])
+  #?(:clj (:require [helix.impl.analyzer :as hana])
      :cljs (:require
             ["react" :as react]))
   #?(:cljs (:require-macros [helix.hooks])))

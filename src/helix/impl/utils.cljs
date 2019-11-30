@@ -1,4 +1,4 @@
-(ns helix.utils
+(ns helix.impl.utils
   (:require [clojure.string :as str]
             [goog.object :as gobj]))
 

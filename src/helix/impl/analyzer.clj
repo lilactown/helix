@@ -1,4 +1,4 @@
-(ns helix.analyzer
+(ns helix.impl.analyzer
   (:require [clojure.walk]
             [clojure.zip :as zip]
             [clojure.string :as string]

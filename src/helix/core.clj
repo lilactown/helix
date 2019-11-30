@@ -1,5 +1,5 @@
 (ns helix.core
-  (:require [helix.analyzer :as hana]
+  (:require [helix.impl.analyzer :as hana]
             [clojure.string :as string]))
 
 
@@ -155,7 +155,8 @@
         hooks (hana/find-hooks body)
         sig-sym (gensym "sig")
         fully-qualified-name (str *ns* "/" display-name)]
-    `(do (def ~sig-sym (signature!))
+    `(do (when goog/DEBUG
+           (def ~sig-sym (signature!)))
          (def ~wrapped-name
            (-> ~(fnc* wrapped-name props-bindings
                                    (cons `(when goog/DEBUG

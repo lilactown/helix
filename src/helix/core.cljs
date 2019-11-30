@@ -1,8 +1,8 @@
 (ns helix.core
   (:refer-clojure :exclude [type])
   (:require [goog.object :as gobj]
-            [helix.utils :as utils]
-            ["./class.js" :as helix.class]
+            [helix.impl.utils :as utils]
+            ["./impl/class.js" :as helix.class]
             [cljs-bean.core :as bean]
             [ueaq.core :as ueaq]
             ["react" :as react]
