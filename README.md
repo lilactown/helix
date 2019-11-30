@@ -11,8 +11,8 @@ ClojureScript optimized for modern React development.
             ["react-dom" :as rdom]))
 
 (defnc Greeting
- "A component which greets a user. The user can double click on their name to edit it."
- [{:keys [name on-name-change]}]
+  "A component which greets a user. The user can double click on their name to edit it."
+  [{:keys [name on-name-change]}]
   (let [[editing? set-editing?] (hooks/use-state false)
         input-ref (hooks/use-ref nil)
         focus-input #(when-let [current (.-current input-ref)]
