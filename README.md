@@ -39,7 +39,9 @@ ClojureScript optimized for modern React development.
 (rdom/render ($ App) (js/document.getElementById "app"))
 ```
 
-## Dependencies
+## Installation
+
+[![Clojars Project](https://img.shields.io/clojars/v/lilactown/helix.svg)](https://clojars.org/lilactown/helix)
 
 You'll want to make sure you have the latest version of `react`, and whatever
 renderer you are targeting (e.g. `react-dom`).
