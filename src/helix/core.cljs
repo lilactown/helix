@@ -95,7 +95,14 @@
 
 
 (defn create-component [spec statics]
-  (helix.class/createComponent spec statics))
+  (let [render (.-render ^js spec)
+        render' (fn [this]
+                  (render
+                   this
+                   (extract-cljs-props (.-props ^js this))
+                   (.-state ^js this)))]
+    (gobj/set spec "render" render')
+    (helix.class/createComponent spec statics)))
 
 (comment
   (def MyComponent

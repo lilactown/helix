@@ -212,14 +212,14 @@
         {statics true spec false} (group-by static? spec)
         js-spec `(cljs.core/js-obj ~@(->> spec
                                 (map ->method)
-                                (apply concat)))
+                                (apply concat (list "displayName" (str display-name)))))
         js-statics `(cljs.core/js-obj ~@(->> statics
                                    (map #(if (method? %)
                                            (->method %)
                                            (->value %)))
                                    (apply concat)))]
     ;; TODO handle render specially
-    `(create-component ~js-spec ~js-statics)))
+    `(def ~display-name (create-component ~js-spec ~js-statics))))
 
 (comment
   (macroexpand

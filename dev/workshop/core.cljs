@@ -152,8 +152,14 @@
                                  (d/div (.-count (.-state this))))}
                           nil))
 
+(helix/defcomponent ClassComponent
+  (render [this props state]
+    (prn props state)
+    (d/div "hi")))
+
 (dc/defcard class-component
-  ($ class-component))
+  (<> ($ class-component {:foo "bar"})
+      ($ ClassComponent {:foo "baz"})))
 
 
 ;;
