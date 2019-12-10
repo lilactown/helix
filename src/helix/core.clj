@@ -204,7 +204,8 @@
 
 (defmacro defcomponent
   [display-name & spec]
-  {:assert [(simple-symbol? display-name)]}
+  {:assert [(simple-symbol? display-name)
+            (seq (filter #(= 'render (first %)) spec))]}
   (let [[docstring spec] (if (string? (first spec))
                            [(first spec) (rest spec)]
                            [nil spec])
@@ -217,6 +218,7 @@
                                            (->method %)
                                            (->value %)))
                                    (apply concat)))]
+    ;; TODO handle render specially
     `(create-component ~js-spec ~js-statics)))
 
 (comment
