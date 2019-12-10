@@ -203,6 +203,8 @@
   (list (str sym-name) value))
 
 (defmacro defcomponent
+  "Defines a React class component."
+  {:style/indent [1 :form [1]]}
   [display-name & spec]
   {:assert [(simple-symbol? display-name)
             (seq (filter #(= 'render (first %)) spec))]}
