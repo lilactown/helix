@@ -1,6 +1,8 @@
-import * as React from "react";
+let React = require("react");
 
-export function createComponent(spec, statics) {
+// import * as React from "react";
+
+/*export*/ function createComponent(spec, statics) {
   let component = class HelixComponent extends React.Component {
     constructor(props) {
       super(props);
@@ -32,3 +34,5 @@ export function createComponent(spec, statics) {
 
   return component;
 }
+
+module.exports = { createComponent };

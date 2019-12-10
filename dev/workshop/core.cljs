@@ -1,5 +1,5 @@
 (ns workshop.core
-  (:require [helix.core :as hx :refer [$ <> defnc]]
+  (:require [helix.core :as helix :refer [$ <> defnc]]
             [helix.dom :as d]
             [helix.hooks :as hooks]
             ["react" :as r]
@@ -139,6 +139,21 @@
 
 (dc/defcard use-memo
   ($ use-memo-component {:qworp "foo"}))
+
+
+(def class-component
+  (helix/create-component #js {:displayName "Foo"
+                               :constructor
+                               (fn [this]
+                                 (set! (.-state this) #js {:count 3}))
+                               :render
+                               (fn [this props state]
+                                 (prn props state)
+                                 (d/div (.-count (.-state this))))}
+                          nil))
+
+(dc/defcard class-component
+  ($ class-component))
 
 
 ;;
