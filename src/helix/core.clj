@@ -49,6 +49,7 @@
     :style ["style"
             (if (map? v)
               (style v)
+              ;; TODO this needs to camelCase keys
               `(cljs.core/clj->js ~v))]
 
     [(camel-case (name k)) v]))
