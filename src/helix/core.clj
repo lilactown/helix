@@ -182,3 +182,56 @@
               nil)) ;; getCustomHooks
            (register! ~wrapped-name ~fully-qualified-name))
          ~display-name)))
+
+
+(defn static? [form]
+  (boolean (:static (meta form))))
+
+(defn method? [form]
+  (and (list? form)
+       (simple-symbol? (first form))
+       (vector? (second form))))
+
+(defn ->method [[sym-name bindings & form]]
+  {:assert [(simple-symbol? sym-name)]}
+  (list (str sym-name)
+        `(fn ~sym-name ~bindings
+           ~@form)))
+
+(defn ->value [[sym-name value]]
+  {:assert [(simple-symbol? sym-name)]}
+  (list (str sym-name) value))
+
+(defmacro defcomponent
+  [display-name & spec]
+  {:assert [(simple-symbol? display-name)]}
+  (let [[docstring spec] (if (string? (first spec))
+                           [(first spec) (rest spec)]
+                           [nil spec])
+        {statics true spec false} (group-by static? spec)
+        js-spec `(cljs.core/js-obj ~@(->> spec
+                                (map ->method)
+                                (apply concat)))
+        js-statics `(cljs.core/js-obj ~@(->> statics
+                                   (map #(if (method? %)
+                                           (->method %)
+                                           (->value %)))
+                                   (apply concat)))]
+    `(create-component ~js-spec ~js-statics)))
+
+(comment
+  (macroexpand
+   '(defcomponent asdf
+      (foo [] "bar")
+      ^:static (greeting "asdf")
+      (bar [this] asdf)
+      ^:static (baz [] 123)))
+
+  ;; => (helix.core/create-component
+  ;;     (cljs.core/js-obj
+  ;;      "foo"
+  ;;      (clojure.core/fn foo [] "bar")
+  ;;      "bar"
+  ;;      (clojure.core/fn bar [this] asdf))
+  ;;     (cljs.core/js-obj "greeting" "asdf" "baz" (clojure.core/fn baz [] 123)))
+  )
