@@ -14,13 +14,11 @@ ClojureScript optimized for modern React development.
   "A component which greets a user. The user can double click on their name to edit it."
   [{:keys [name on-name-change]}]
   (let [[editing? set-editing?] (hooks/use-state false)
-        input-ref (hooks/use-ref nil)
-        focus-input #(when-let [current (.-current input-ref)]
-                       (.focus current))]
+        input-ref (hooks/use-ref nil)]
     (hooks/use-layout-effect
       :auto-deps ;; automatically infer deps array from body; stand in for `[editing?]`
       (when editing?
-        (focus-input)))
+        (.focus (.-current input-ref)))
     (d/div
      "Hello, " (if editing?
                  (d/input {:ref input-ref
