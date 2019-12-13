@@ -42,6 +42,18 @@
   `^js/React.Element ($ Fragment ~@children))
 
 
+(defmacro provider
+  "Creates a Provider for a React Context value.
+
+  Example:
+
+    (def my-context (react/createContext))
+
+    (provider {:context my-context} child1 child2 ...childN)"
+  [{:keys [context]} & children]
+  `^js/React.Element ($ (.-Provider ~context) ~@children))
+
+
 (defn- fnc*
   [display-name props-bindings body]
   (let [ret (gensym "return_value")]
