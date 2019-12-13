@@ -102,7 +102,7 @@
                    (extract-cljs-props (.-props ^js this))
                    (.-state ^js this)))]
     (gobj/set spec "render" render')
-    (helix.class/createComponent spec statics)))
+    (helix.class/createComponent react/Component spec statics)))
 
 (comment
   (def MyComponent
