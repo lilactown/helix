@@ -1,7 +1,7 @@
 (ns helix.core
   (:refer-clojure :exclude [type])
   (:require [goog.object :as gobj]
-            [helix.impl.utils :as utils]
+            [helix.impl.props :as impl.props]
             ["./impl/class.js" :as helix.class]
             [cljs-bean.core :as bean]
             [ueaq.core :as ueaq]
@@ -18,17 +18,6 @@
 
 
 (def Fragment react/Fragment)
-
-
-(defn clj->props
-  "Shallowly converts CLJS map to a props object. `native?` will add special
-  handling of `:style` key to recursively convert it."
-  [x native?]
-  (utils/clj->props x native?))
-
-
-(defn merge-map+obj [native? js-obj map]
-  (js/Object.assign #js {} js-obj (clj->props map native?)))
 
 
 (def create-element react/createElement)
@@ -50,11 +39,14 @@
   ```"
   [type & args]
   (let [?p (first args)
-        ?c (rest args)]
+        ?c (rest args)
+        native? (string? type)]
     (if (map? ?p)
       (apply create-element
              type
-             (clj->props ?p (string? type))
+             (if native?
+               (impl.props/-native-props ?p)
+               (impl.props/-props ?p))
              ?c)
       (apply create-element
              type

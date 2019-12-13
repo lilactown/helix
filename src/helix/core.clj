@@ -1,67 +1,7 @@
 (ns helix.core
   (:require [helix.impl.analyzer :as hana]
+            [helix.impl.props :as impl.props]
             [clojure.string :as string]))
-
-
-;;
-;; -- Props
-;;
-
-(defn clj->js-obj
-  [m {:keys [kv->prop]
-      :or {kv->prop (fn [k v] [(name k) v])}}]
-  {:pre [(map? m)]}
-  (list* (reduce-kv (fn [form k v]
-                      `(~@form ~@(kv->prop k v)))
-                    '[cljs.core/js-obj]
-                    m)))
-
-
-(defn- camel-case
-  "Returns camel case version of the string, e.g. \"http-equiv\" becomes \"httpEquiv\"."
-  [s]
-  (if (or (keyword? s)
-          (string? s)
-          (symbol? s))
-    (let [[first-word & words] (string/split s #"-")]
-      (if (or (empty? words)
-              (= "aria" first-word)
-              (= "data" first-word))
-        s
-        (-> (map string/capitalize words)
-            (conj first-word)
-            string/join)))
-    s))
-
-(defn style
-  [x]
-  (if (map? x)
-    (clj->js-obj x {:kv->prop (fn [k v]
-                                    [(-> k name camel-case)
-                                     (style v)])})
-    x))
-
-(defn key->native-prop
-  [k v]
-  (case k
-    :class ["className" v]
-    :for ["htmlFor" v]
-    :style ["style"
-            (if (map? v)
-              (style v)
-              ;; TODO this needs to camelCase keys
-              `(cljs.core/clj->js ~v))]
-
-    [(camel-case (name k)) v]))
-
-
-(defn props [clj-map native?]
-  (let [opts (if native? {:kv->prop key->native-prop} {})]
-    (if (contains? clj-map '&)
-      `(merge-map+obj ~native?
-                      ~(clj->js-obj (dissoc clj-map '&) opts)
-                      ~(get clj-map '&))
-      (clj->js-obj clj-map opts))))
 
 
 (defmacro $
@@ -79,14 +19,18 @@
      \"child2\" ))
   ```"
   [type & args]
-  (let [native? (or (keyword? type) (string? type))
+  (let [inferred (hana/inferred-type &env type)
+        native? (or (keyword? type) (string? type)
+                    (= inferred 'string) (= inferred 'cljs.core/Keyword))
         type (if native?
                (name type)
                type)]
     (cond
       (map? (first args)) `^js/React.Element (create-element
                                               ~type
-                                              ~(props (first args) native?)
+                                              ~(if native?
+                                                 `(impl.props/native-props ~(first args))
+                                                 `(impl.props/props ~(first args)))
                                               ~@(rest args))
 
       :else `^js/React.Element (create-element ~type nil ~@args))))
