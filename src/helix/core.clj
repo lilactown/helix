@@ -55,13 +55,6 @@
     [(camel-case (name k)) v]))
 
 
-(defn primitive?
-  [x]
-  (or (string? x)
-      (number? x)
-      (boolean? x)))
-
-
 (defn props [clj-map native?]
   (let [opts (if native? {:kv->prop key->native-prop} {})]
     (if (contains? clj-map '&)
