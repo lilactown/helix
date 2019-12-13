@@ -49,9 +49,12 @@
 
     (def my-context (react/createContext))
 
-    (provider {:context my-context} child1 child2 ...childN)"
-  [{:keys [context]} & children]
-  `^js/React.Element ($ (.-Provider ~context) ~@children))
+    (provider {:context my-context :value my-value} child1 child2 ...childN)"
+  [{:keys [context value] :as props} & children]
+  `^js/React.Element ($ (.-Provider ~context)
+                        ~@(when (contains? props :value)
+                            `({:value ~value}))
+                        ~@children))
 
 
 (defn- fnc*
