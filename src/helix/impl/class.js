@@ -1,9 +1,5 @@
-let React = require("react");
-
-// import * as React from "react";
-
-/*export*/ function createComponent(spec, statics) {
-  let component = class HelixComponent extends React.Component {
+export function createComponent(superclass, spec, statics) {
+  let component = class HelixComponent extends superclass {
     constructor(props) {
       super(props);
       if (spec.constructor) {
@@ -34,5 +30,3 @@ let React = require("react");
 
   return component;
 }
-
-module.exports = { createComponent };
