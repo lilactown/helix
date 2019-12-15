@@ -32,7 +32,7 @@ object to it:
 ```
 
 The `defnc` macro takes care of efficiently converting this JS object to a type
-that works with CLJS data structures.
+that works with destructuring and core functions like `assoc`/etc.
 
 ## Interop
 
@@ -40,7 +40,7 @@ One thing to note is that this conversion of JS objects to CLJS data types is
 _shallow_; this means if you pass in data like a JS object, array, etc. to a
 prop, it will be left alone.
 
-```
+```clojure
 (defnc MyComponent [{:keys [person]}]
   ;; using JS interop to access the "lastName" property
   (let [last-name (.-lastName ^js person)
@@ -54,7 +54,7 @@ prop, it will be left alone.
 ;; => "Hello, Miguel R."
 ```
 
-This is an intentional design decision. IT is a tradeoff - on the one hand, it
+This is an intentional design decision. It is a tradeoff - on the one hand, it
 is more efficient to opt not to deeply convert JS data structures to CLJS data,
 and it means that you do not need to learn some Helix-specific rules when
 interoping with external React libraries that use higher-order components or
