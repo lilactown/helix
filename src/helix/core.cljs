@@ -20,6 +20,9 @@
 (def Fragment react/Fragment)
 
 
+(def Suspense react/Suspense)
+
+
 (def create-element react/createElement)
 
 

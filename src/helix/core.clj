@@ -52,8 +52,18 @@
     (provider {:context my-context :value my-value} child1 child2 ...childN)"
   [{:keys [context value] :as props} & children]
   `^js/React.Element ($ (.-Provider ~context)
+                        ;; use contains to guard against `nil`
                         ~@(when (contains? props :value)
                             `({:value ~value}))
+                        ~@children))
+
+
+(defmacro suspense
+  "Creates a React Suspense boundary."
+  [{:keys [fallback]} & children]
+  `^js/React.Element ($ Suspense
+                        ~@(when fallback
+                            `({:fallback ~fallback}))
                         ~@children))
 
 
@@ -120,7 +130,6 @@
                                            body)))
                (cond-> goog/DEBUG
                  (doto (goog.object/set "displayName" ~fully-qualified-name)))
-               #_(wrap-cljs-component)
                ~@(-> opts :wrap)))
 
          (def ~display-name
