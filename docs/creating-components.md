@@ -22,7 +22,7 @@ CLJS data structure.
 React components always expect a single argument: a _JavaScript object_ that
 holds all of the props passed to it.
 
-If we were to call our component like a normal function (which you should not do!
+If we were to call our component like a normal function (which you should **not do**!
 See [Creating Elements](./creating-elements.md)), we would need to pass in a JS
 object to it:
 
