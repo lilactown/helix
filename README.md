@@ -58,6 +58,17 @@ react yourself using webpack, ensuring it is provided as the name `"react"`.
 
 ## Documentation
 
+- [Creating Components](./docs/creating-components.md)
+  - [Props](./docs/creating-components.md#props)
+  - [Interop](./docs/creating-components.md#interop)
+  - [Higher-order Components](./docs/creating-components.md#higher-order-components)
+  - [Class Components](./docs/creating-components.md#class-components) (WIP)
+- [Creating elements](./docs/creating-elements.md) (WIP)
+
+
+Other resources:
+
+- [#helix Slack channel](https://clojurians.slack.com/archives/CRRJBCX7S) ([Sign up for Slack here](http://clojurians.net))
 - [Example TodoMVC](https://github.com/Lokeh/helix-todo-mvc)
 - [Future looking example and discussion](https://gist.github.com/Lokeh/e93a1a0ab25d40df006d77f405c1e535)
 
