@@ -38,7 +38,12 @@
 (defn primitive-obj
   ([] #?(:clj '[cljs.core/js-obj]
          :cljs #js {}))
-  ([m] (primitive-obj m (primitive-obj)))
+  ([m]
+   #?(:clj (if (map? m)
+             (primitive-obj m (primitive-obj))
+             ;; fall back to runtime
+             `(primitive-obj m))
+      :cljs (primitive-obj m (primitive-obj))))
   ([m o]
    (if (seq m)
      (recur (rest m)
@@ -82,6 +87,11 @@
      #?(:clj (list* o)
         :cljs o))))
 
+
+(comment
+  (-native-props {:asdf "jkl" :style 'foo})
+  )
+
 (defmacro native-props [m]
   (-native-props m))
 
@@ -99,7 +109,9 @@
      #?(:clj (list* o)
         :cljs o))))
 
-(-props {:foo-bar "baz"})
+(comment
+  (-props {:foo-bar "baz"})
+  )
 
 (defmacro props [m]
   (-props m))
