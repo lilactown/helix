@@ -42,7 +42,7 @@
    #?(:clj (if (map? m)
              (primitive-obj m (primitive-obj))
              ;; fall back to runtime
-             `(primitive-obj m))
+             `(primitive-obj ~m))
       :cljs (primitive-obj m (primitive-obj))))
   ([m o]
    (if (seq m)
