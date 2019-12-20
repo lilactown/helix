@@ -82,7 +82,10 @@
      (t/is (eq (let [extra-props {:foo-bar :extra-foo-bar
                                   :b :extra-b}]
                  (impl/native-props {:foo-bar :a :b :b :c :c :d :d & extra-props}))
-               #js {:fooBar :extra-foo-bar :b :extra-b :c :c :d :d}))))
+               #js {:fooBar :extra-foo-bar :b :extra-b :c :c :d :d}))
+     (t/is (eq (let [dynamic-style {:color "blue"}]
+                 (impl/native-props {:style dynamic-style}))
+               #js {:style #js {:color "blue"}}))))
 
 
 #?(:cljs
