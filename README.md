@@ -13,12 +13,16 @@ ClojureScript optimized for modern React development.
 (defnc Greeting
   "A component which greets a user. The user can double click on their name to edit it."
   [{:keys [name on-name-change]}]
+  ;; keep track of state
   (let [[editing? set-editing?] (hooks/use-state false)
         input-ref (hooks/use-ref nil)]
+
+    ;; do side effects
     (hooks/use-layout-effect
-      :auto-deps ;; automatically infer deps array from body; stand in for `[editing?]`
+      [editing?]
       (when editing?
-        (.focus (.-current input-ref)))
+        (.focus @input-ref))
+
     (d/div
      "Hello, " (if editing?
                  (d/input {:ref input-ref
@@ -31,9 +35,12 @@ ClojureScript optimized for modern React development.
 (defnc App []
   (let [[state set-state] (hooks/use-state {:name "Helix User"})]
     (<> (d/h1 "Welcome!")
+
+        ;; create elements out of components
         ($ Greeting {:name (:name state)
                      :on-name-change #(set-name assoc :name %)}))))
 
+;; start your app with your favorite React renderer
 (rdom/render ($ App) (js/document.getElementById "app"))
 ```
 
