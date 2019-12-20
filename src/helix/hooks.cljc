@@ -1,7 +1,8 @@
 (ns helix.hooks
   #?(:clj (:require [helix.impl.analyzer :as hana])
      :cljs (:require
-            ["react" :as react]))
+             ["react" :as react]
+             [goog.object :as gobj]))
   #?(:cljs (:require-macros [helix.hooks])))
 
 #?(:cljs
@@ -38,10 +39,41 @@
        [v updater])))
 
 
+(defn use-as-iref!
+  "Takes a React ref and adds protocol implementations for IDeref, IReset and
+  ISwap."
+  [ref]
+  (react/useMemo
+   (fn []
+     (specify! ref
+       IDeref
+       (-deref [this]
+         (.-current ^js this))
+
+       IReset
+       (-reset! [this v]
+         (gobj/set this "current" v))
+
+       ISwap
+       (-swap!
+         ([this f]
+          (gobj/set this "current" (f (.-current ^js this))))
+         ([this f a]
+          (gobj/set this "current" (f (.-current ^js this) a)))
+         ([this f a b]
+          (gobj/set this "current" (f (.-current ^js this) a b)))
+         ([this f a b xs]
+          (gobj/set this "current" (apply f (.-current ^js this) a b xs))))))
+   ;; refs are guaranteed to be stable
+   #js []))
+
+
 #?(:cljs
-   (def use-ref
-     "Just react/useRef"
-     react/useRef))
+   (defn use-ref
+     "Just like react/useRef. Supports accessing the \"current\" property via
+  dereference (@) and updating the \"current\" property via `reset!` and `swap!`"
+     [x]
+     (use-as-iref! (react/useRef x))))
 
 
 #?(:cljs
