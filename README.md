@@ -23,6 +23,7 @@ ClojureScript optimized for modern React development.
       (when editing?
         (.focus @input-ref))
 
+    ;; render elements
     (d/div
      "Hello, " (if editing?
                  (d/input {:ref input-ref
