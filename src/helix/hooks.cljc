@@ -127,7 +127,9 @@
                             body)
 
        ;; always fire it (don't pass any deps in to hook)
-       (= deps :always) (deps->hook-body body))))
+       (= deps :always) (deps->hook-body body)
+
+       (= deps :once) (deps->hook-body nil body))))
 
 
 (defmacro use-effect
@@ -149,7 +151,7 @@
      ([f deps]
       (when js/goog.DEBUG
         (when (= deps :auto-deps)
-          (throw (js/Error. "Can't use `:auto-deps` with `use-effect`; use `use-fx` macro for that"))))
+          (throw (js/Error. "Can't use `:auto-deps` with `use-effect*`; use `use-effect` macro for that"))))
       (react/useEffect (wrap-fx f) (to-array deps)))))
 
 
@@ -168,7 +170,7 @@
      ([f deps]
       (when js/goog.DEBUG
         (when (= deps :auto-deps)
-          (throw (js/Error. "Can't use `:auto-deps` with `use-layout-effect`; use `use-layout-fx` macro for that"))))
+          (throw (js/Error. "Can't use `:auto-deps` with `use-layout-effect*`; use `use-layout-effect` macro for that"))))
       (react/useLayoutEffect (wrap-fx f) (to-array deps)))))
 
 
@@ -196,7 +198,7 @@
      ([f deps]
       (when js/goog.DEBUG
         (when (= deps :auto-deps)
-          (throw (js/Error. "Can't use `:auto-deps` with `use-memoize`; use `use-memo` macro for that"))))
+          (throw (js/Error. "Can't use `:auto-deps` with `use-memo*`; use `use-memo` macro for that"))))
       (react/useMemo f (to-array deps)))))
 
 
@@ -215,7 +217,7 @@
      ([f deps]
       (when js/goog.DEBUG
         (when (= deps :auto-deps)
-          (throw (js/Error. "Can't use `:auto-deps` with `use-callback`; use `use-cb` macro for that"))))
+          (throw (js/Error. "Can't use `:auto-deps` with `use-callback*`; use `use-callback` macro for that"))))
       (react/useCallback f (to-array deps)))))
 
 
@@ -236,7 +238,7 @@
      ([ref f deps]
       (when js/goog.DEBUG
         (when (= deps :auto-deps)
-          (throw (js/Error. "Can't use `:auto-deps` with `use-imperative-handle`; use `use-imp-handle` macro for that"))))
+          (throw (js/Error. "Can't use `:auto-deps` with `use-imperative-handle*`; use `use-imperative-handle` macro for that"))))
       (react/useImperativeHandle ref f (to-array deps)))))
 
 
