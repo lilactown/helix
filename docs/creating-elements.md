@@ -114,3 +114,69 @@ All macros use the same props syntax and rules as `$` for native elements.
 ;; spread props
 (d/input {:type "text" & other-props})
 ```
+
+## Other helpful tools
+
+### Fragments
+
+`helix.core/<>` is a helper macro to create [React Fragments](https://reactjs.org/docs/react-api.html#reactfragment)
+
+```clojure
+(<> ($ "div") ($ "span"))
+;; => #js {:type react/Fragment :props #js {:children #js [ ... ]}}
+```
+
+### Context providers
+
+`helix.core/provider` is a helper macro to create a Provider element based on
+a [React Context](https://reactjs.org/docs/context.html) value.
+
+```clojure
+(def my-context (react/createContext "default"))
+
+(helix.core/provider
+  {:context my-context
+   :value "overrides default value"}
+  ($ SomeComponent)
+  ($ OtherComponent))
+;; => #js {:type (.-Provider my-context)
+;;         :props #js {:value "overrides default value"
+;;                     :children #js [ ... ]}}
+```
+
+
+### Suspense boundaries
+
+`helix.core/suspense` is a helper macro to create a [React Suspense boundary](https://reactjs.org/docs/react-api.html#reactsuspense).
+
+```clojure
+(helix.core/suspense
+  {:fallback ($ Spinner)}
+  ($ "div"
+     ($ OtherComponent)))
+;; => #js {:type react/Suspense
+;;         :props #js {:fallback #js {:type Spinner}}
+;;                     :children #js [ ... ]}
+```
+
+### Creating elements dynamically
+
+Sometimes you need more dynamism than the `$` macro can give you. In 99% of the
+cases, `$` should be fine, but there is also the `$$` function which will do
+all interpretation of type and props at runtime. This is slower, but more
+dynamic and gives you all of the other semantics for native elements and props.
+
+### Factory functions
+
+Factory functions can be used instead of calls to `$`. Factory functions will
+parse their props at runtime from a CLJS map to a JS object, thus being slightly
+slower.
+
+```clojure
+(ns my-app.feature
+  (:require [helix.core :refer [defnc]]
+            [helix.dom :as d]))
+
+(defnc MyComponent [{:keys [name on-click]}]
+  (d/a {:on-click #(js/alert (str "hello," name))}))
+```
