@@ -42,8 +42,16 @@ about props which are documented below.
 ### Native props
 
 For "native" components (in React DOM this is any string like "div", "span",
-etc.), a map literal passed to the `:style` prop will also be converted to a JS
-object at compile time.
+etc.), all prop keys will be converted from kebab-case to camelCase and several
+props will be specially transformed.
+
+An element is determined to be "native" and be subject to these transformations
+if:
+
+- It is a string e.g. "div"
+- OR it is a keyword e.g. :div
+- OR it is _inferred_ to be a string or keyword
+- OR it has metadata key `:native` set to true
 
 ```clojure
 ($ "div" {:style {:color "red"
@@ -52,13 +60,15 @@ object at compile time.
 ;;         :props #js {:style #js {:color "red"
 ;;                                 :background "green"}}
 ;;         ...}
+
+
+($ ^:native SomeComponent {:on-click do-thing})
+;; => #js {:type SomeComponent :props #js {:onClick do-thing}}
 ```
 
 Other special props:
 - The `:class` prop is renamed to `:className`
 - The `:for` prop is renamed to `:htmlFor`
-
-All prop keys will be converted from kebab-case to camelCase.
 
 ### Dynamic props
 
