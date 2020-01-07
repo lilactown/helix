@@ -71,7 +71,17 @@ react yourself using webpack, ensuring it is provided as the name `"react"`.
   - [Interop](./docs/creating-components.md#interop)
   - [Higher-order Components](./docs/creating-components.md#higher-order-components)
   - [Class Components](./docs/creating-components.md#class-components) (WIP)
-- [Creating elements](./docs/creating-elements.md) (WIP)
+- [Creating elements](./docs/creating-elements.md)
+  - [$ macro](https://github.com/Lokeh/helix/blob/master/docs/creating-elements.md#-macro)
+    - [Native elements and props](https://github.com/Lokeh/helix/blob/master/docs/creating-elements.md#native-elements-and-props)
+    - [Dynamic props](https://github.com/Lokeh/helix/blob/master/docs/creating-elements.md#dynamic-props)
+  - [`helix.dom`](https://github.com/Lokeh/helix/blob/master/docs/creating-elements.md#helixdom)
+  - [Other helpful tools](https://github.com/Lokeh/helix/blob/master/docs/creating-elements.md#other-helpful-tools)
+    - [Fragments](https://github.com/Lokeh/helix/blob/master/docs/creating-elements.md#fragments)
+    - [Context providers](https://github.com/Lokeh/helix/blob/master/docs/creating-elements.md#context-providers)
+    - [Suspense boundaries](https://github.com/Lokeh/helix/blob/master/docs/creating-elements.md#suspense-boundaries)
+    - [Creating elements dynamically](https://github.com/Lokeh/helix/blob/master/docs/creating-elements.md#creating-elements-dynamically)
+    - [Factory functions](https://github.com/Lokeh/helix/blob/master/docs/creating-elements.md#factory-functions)
 
 
 Other resources:
