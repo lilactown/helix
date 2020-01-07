@@ -85,6 +85,15 @@ syntax is meant to mirror dynamic arity in function definitions.
 ;; => #js {:type MyComponent :props #js {:prop1 "foo" :prop2 "bar" :prop3 "baz"}}
 ```
 
+Props in the dynamic map will override props that are defined statically.
+
+```clojure
+(def extra-props {:b 3})
+
+($ MyComponent {:a 1 :b 2 & extra-props})
+;; => #js {:type MyComponent :props #js {:a 1 :b 3}}
+```
+
 ## helix.dom
 
 The `helix.dom` namespace contains helper macros for creating React DOM
