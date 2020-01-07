@@ -15,13 +15,13 @@ with that same information, like [React.createElement](https://reactjs.org/docs/
 ($ "div" "hello")
 ;; => #js {:type "div" :props #js {:children "hello"}}
 
-($ "div" {:style {:color "red"}} "red text in a div")
-;; => #js {:type "div" :props #js {:style #js {:color "red"}}}
+($ MyComponent {:data {:foo "bar"}} "red text in a div")
+;; => #js {:type MyComponent :props #js {:data {:foo "bar"}}}
 
-($ "div" ($ "div" "first")
-         ($ "div" "second"
-                  ($ "span" "last")))
-;; => #js {:type "div"
+($ MyComponent ($ "div" "first")
+               ($ "div" "second"
+                        ($ "span" "last")))
+;; => #js {:type MyComponent
 ;;         :props #js {:children #js [#js {:type "div"
 ;;                                         :props #js {:children "first"}}
 ;;                                    #js {:type "div"
@@ -36,12 +36,13 @@ This is to avoid converting the map to a JS object at runtime, as well as
 seamlessly using helix and 3rd party React components together.
 
 This conversion is shallow. If you pass in any CLJS type into a prop, it will be
-passed in as-is, with one exception. There are some additional things to know
-about props which are documented below.
+passed in as-is. All keys are converted to strings without any munging.
 
-### Native props
+A few exceptions are documented below.
 
-For "native" components (in React DOM this is any string like "div", "span",
+### Native elements and props
+
+For "native" elements (in React DOM this is any string like "div", "span",
 etc.), all prop keys will be converted from kebab-case to camelCase and several
 props will be specially transformed.
 
