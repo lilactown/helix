@@ -20,8 +20,11 @@
   ```"
   [type & args]
   (let [inferred (hana/inferred-type &env type)
-        native? (or (keyword? type) (string? type)
-                    (= inferred 'string) (= inferred 'cljs.core/Keyword))
+        native? (or (keyword? type)
+                    (string? type)
+                    (= inferred 'string)
+                    (= inferred 'cljs.core/Keyword)
+                    (:native (meta type)))
         type (if native?
                (name type)
                type)]
