@@ -5,7 +5,7 @@ ClojureScript optimized for modern React development.
 
 ```clojure
 (ns my-app.core
-  (:require [helix.core :refer [defnc $ <>]]
+  (:require [helix.core :refer [defnc $]]
             [helix.hooks :as hooks]
             [helix.dom :as d]
             ["react-dom" :as rdom]))
