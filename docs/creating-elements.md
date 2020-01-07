@@ -50,7 +50,7 @@ if:
 
 - It is a string e.g. "div"
 - OR it is a keyword e.g. :div
-- OR it is _inferred_ to be a string or keyword
+- OR it is _inferred_ to be a string or keyword (experimental)
 - OR it has metadata key `:native` set to true
 
 ```clojure
