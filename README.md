@@ -10,36 +10,21 @@ ClojureScript optimized for modern React development.
             [helix.dom :as d]
             ["react-dom" :as rdom]))
 
+;; define components using the `defnc` macro
 (defnc Greeting
-  "A component which greets a user. The user can double click on their name to edit it."
-  [{:keys [name on-name-change]}]
-  ;; keep track of state
-  (let [[editing? set-editing?] (hooks/use-state false)
-        input-ref (hooks/use-ref nil)]
-
-    ;; do side effects
-    (hooks/use-layout-effect
-      [editing?]
-      (when editing?
-        (.focus @input-ref))
-
-    ;; render elements
-    (d/div
-     "Hello, " (if editing?
-                 (d/input {:ref input-ref
-                           :on-change #(on-name-change (.. % -target -value))
-                           :value name
-                           :on-blur #(set-editing? false)})
-                 (d/strong {:on-double-click #(set-editing? true)} name)
-                "!")))
+  "A component which greets a user."
+  [{:keys [name]}] ;; takes a props map as an argument
+  (d/div ;; Create DOM elements using `helix.dom`
+    "Hello, " (d/strong name) "!"))
 
 (defnc App []
+  ;; use local state
   (let [[state set-state] (hooks/use-state {:name "Helix User"})]
-    (<> (d/h1 "Welcome!")
+    (d/div (d/h1 "Welcome!")
 
-        ;; create elements out of components
-        ($ Greeting {:name (:name state)
-                     :on-name-change #(set-name assoc :name %)}))))
+           ;; create elements out of components
+           ($ Greeting {:name (:name state)
+                        :on-name-change #(set-name assoc :name %)}))))
 
 ;; start your app with your favorite React renderer
 (rdom/render ($ App) (js/document.getElementById "app"))
