@@ -178,5 +178,13 @@ slower.
             [helix.dom :as d]))
 
 (defnc MyComponent [{:keys [name on-click]}]
-  (d/a {:on-click #(js/alert (str "hello," name))}))
+  (d/a {:on-click #(on-click name)}
+       "Greetings " name "!"))
+
+(def my-component (factory MyComponent))
+
+
+(my-component {:name "Uma" :on-click #(js/alert (str "hello," %))})
+;; => {:type MyComponent
+;;     :props #js {:name "Uma" :on-click #function[...]}}
 ```
