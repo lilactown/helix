@@ -13,18 +13,17 @@ ClojureScript optimized for modern React development.
 ;; define components using the `defnc` macro
 (defnc Greeting
   "A component which greets a user."
-  [{:keys [name]}] ;; takes a props map as an argument
-  (d/div ;; Create DOM elements using `helix.dom`
-    "Hello, " (d/strong name) "!"))
+  [{:keys [name]}]
+  ;; use helix.dom to create DOM elements
+  (d/div "Hello, " (d/strong name) "!"))
 
 (defnc App []
-  ;; use local state
   (let [[state set-state] (hooks/use-state {:name "Helix User"})]
     (d/div (d/h1 "Welcome!")
-
            ;; create elements out of components
-           ($ Greeting {:name (:name state)
-                        :on-name-change #(set-name assoc :name %)}))))
+           ($ Greeting {:name (:name state)})
+           (d/input {:value name 
+                     :on-change #(set-state assoc :name (.. % -target -value))}))))
 
 ;; start your app with your favorite React renderer
 (rdom/render ($ App) (js/document.getElementById "app"))
