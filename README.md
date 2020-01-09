@@ -87,6 +87,6 @@ Everything in the forward-looking example and discussion has been implemented ex
 
 ## License
 
-Copyright © 2019 Will Acton
+Copyright © 2020 Will Acton
 
 Distributed under the EPL 2.0
