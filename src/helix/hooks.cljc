@@ -129,7 +129,8 @@
        ;; always fire it (don't pass any deps in to hook)
        (= deps :always) (deps->hook-body body)
 
-       (= deps :once) (deps->hook-body #js [] body))))
+       ;; pass an empty array for things that should only run once
+       (= deps :once) (deps->hook-body '(cljs.core/array) body))))
 
 
 (defmacro use-effect
