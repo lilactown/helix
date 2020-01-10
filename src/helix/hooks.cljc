@@ -43,29 +43,7 @@
            "Takes a React ref and adds protocol implementations for IDeref, IReset and
   ISwap."
            [ref]
-           (react/useMemo
-            (fn []
-              (specify! ref
-                IDeref
-                (-deref [this]
-                  (.-current ^js this))
-
-                IReset
-                (-reset! [this v]
-                  (gobj/set this "current" v))
-
-                ISwap
-                (-swap!
-                  ([this f]
-                   (gobj/set this "current" (f (.-current ^js this))))
-                  ([this f a]
-                   (gobj/set this "current" (f (.-current ^js this) a)))
-                  ([this f a b]
-                   (gobj/set this "current" (f (.-current ^js this) a b)))
-                  ([this f a b xs]
-                   (gobj/set this "current" (apply f (.-current ^js this) a b xs))))))
-            ;; refs are guaranteed to be stable
-            #js [])))
+           ))
 
 
 #?(:cljs
@@ -73,7 +51,29 @@
      "Just like react/useRef. Supports accessing the \"current\" property via
   dereference (@) and updating the \"current\" property via `reset!` and `swap!`"
      [x]
-     (use-as-iref! (react/useRef x))))
+     (let [ref (react/useRef nil)]
+       (when (nil? (.-current ^js ref))
+         (set! (.-current ^js ref)
+               (specify! #js {:current x}
+                 IDeref
+                 (-deref [this]
+                   (.-current ^js this))
+
+                 IReset
+                 (-reset! [this v]
+                   (gobj/set this "current" v))
+
+                 ISwap
+                 (-swap!
+                   ([this f]
+                    (gobj/set this "current" (f (.-current ^js this))))
+                   ([this f a]
+                    (gobj/set this "current" (f (.-current ^js this) a)))
+                   ([this f a b]
+                    (gobj/set this "current" (f (.-current ^js this) a b)))
+                   ([this f a b xs]
+                    (gobj/set this "current" (apply f (.-current ^js this) a b xs)))))))
+       (.-current ^js ref))))
 
 
 #?(:cljs

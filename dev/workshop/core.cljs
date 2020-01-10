@@ -64,7 +64,7 @@
         threes (quot count 3)]
     (hooks/use-effect
      :always
-     (set! (.-current renders) (inc (.-current renders))))
+     (swap! renders inc))
     (hooks/use-effect
      [count]
      (set-fx-state assoc :every count))
@@ -83,15 +83,30 @@
      (d/button {:on-click #(set-count inc)} "inc")
      (d/div
       (d/div "renders:")
-      ($ display-range {:end (.-current renders) :color "red"}))
+      ($ display-range {:end @renders :color "red"}))
      (for [[k v] fx-state]
        (d/div {:key (str k)}
         (d/div (str k))
         ($ display-range {:end v}))))))
 
 
+(helix/defcomponent error-boundary
+  (constructor [this]
+    (set! (.-state this) #js {:error nil}))
+
+  ^:static
+  (getDerivedStateFromError [this error]
+    #js {:error error})
+
+  (render [this]
+    (if-not (.. this -state -error)
+      (.. this -props -children)
+      (d/pre (d/code (pr-str (.. this -state -error)))))))
+
+
 (dc/defcard use-effect
-  ($ effect-test))
+  ($ error-boundary
+     ($ effect-test)))
 
 
 (defnc lazy-test
@@ -148,13 +163,11 @@
                                  (set! (.-state this) #js {:count 3}))
                                :render
                                (fn [this props state]
-                                 (prn props state)
                                  (d/div (.-count (.-state this))))}
                           nil))
 
 (helix/defcomponent ClassComponent
   (render [this props state]
-    (prn props state)
     (d/div "hi")))
 
 (dc/defcard class-component
