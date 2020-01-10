@@ -25,7 +25,7 @@
                     (= inferred 'string)
                     (= inferred 'cljs.core/Keyword)
                     (:native (meta type)))
-        type (if native?
+        type (if (keyword? type)
                (name type)
                type)]
     (cond
