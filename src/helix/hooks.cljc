@@ -39,13 +39,6 @@
        [v updater])))
 
 
-#?(:cljs (defn use-as-iref!
-           "Takes a React ref and adds protocol implementations for IDeref, IReset and
-  ISwap."
-           [ref]
-           ))
-
-
 #?(:cljs
    (defn use-ref
      "Just like react/useRef. Supports accessing the \"current\" property via
