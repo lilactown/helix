@@ -6,5 +6,4 @@
   :source-paths ["src"]
   :dependencies [[ilk "1.0.0"]
                  [cljs-bean "1.5.0"]]
-  :deploy-repositories [["releases"  {:sign-releases false :url "https://clojars.org"}]
-                        ["snapshots" {:sign-releases false :url "https://clojars.org"}]])
+  :deploy-repositories [["snapshots" {:sign-releases false :url "https://clojars.org"}]])

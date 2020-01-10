@@ -129,7 +129,7 @@
        ;; always fire it (don't pass any deps in to hook)
        (= deps :always) (deps->hook-body body)
 
-       (= deps :once) (deps->hook-body nil body))))
+       (= deps :once) (deps->hook-body #js [] body))))
 
 
 (defmacro use-effect
