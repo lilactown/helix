@@ -1,4 +1,4 @@
-(defproject lilactown/helix "0.0.3"
+(defproject lilactown/helix "0.0.4"
   :description "ClojureScript optimized for modern React development."
   :url "https://github.com/Lokeh/helix"
   :license {:name "Eclipse Public License"
