@@ -121,6 +121,12 @@
         hooks (hana/find-hooks body)
         sig-sym (gensym "sig")
         fully-qualified-name (str *ns* "/" display-name)]
+    (when-some [invalid-hooks (->> (map hana/invalid-hooks-usage body)
+                                   (flatten)
+                                   (filter (comp not nil?))
+                                   (seq))]
+      (throw (ex-info "Invalid hooks usage"
+                      {:invalid-hooks invalid-hooks})))
     `(do (when goog/DEBUG
            (def ~sig-sym (signature!)))
          (def ~wrapped-name
