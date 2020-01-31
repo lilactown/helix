@@ -3,13 +3,14 @@
             [clojure.zip :as zip]
             [clojure.string :as string]
             [cljs.env]
-            [cljs.analyzer.api :as ana]
+            [cljs.analyzer.api :as ana-api]
+            [cljs.analyzer :as ana]
             [ilk.core :as ilk]))
+
 
 
 #_(clj->props '{:a 1 :b {:foo bar}
                 :on-click (fn [e] (js/alert "hi"))})
-
 
 ;;
 ;; -- Hooks
@@ -77,7 +78,7 @@
 
 
 (defn inferred-type [env x]
-  (cljs.analyzer/infer-tag env (ana/no-warn (ana/analyze env x))))
+  (cljs.analyzer/infer-tag env (ana-api/no-warn (ana-api/analyze env x))))
 
 
 (defn invalid-hooks-usage
@@ -89,6 +90,43 @@
      nil
      (let [hd (first form)]
        (->> (cond
+              ;;
+              ;; -- Loops
+              ;;
+
+              ;; loops that have some initial binding expression that is run
+              ;; once, then a loop body
+              ('#{for loop doseq dotimes} hd)
+              (let [[bindings-expr & body] (rest form)]
+                (->> body
+                     ;; check body
+                     (map #(invalid-hooks-usage
+                            (assoc ctx :state :loop)
+                            %))
+                     ;; handle bindings-expr
+                     (concat (map #(invalid-hooks-usage ctx %) bindings-expr))))
+
+              ;; seq operations and other fns that take f as first param
+              ('#{reduce reduce-kv map mapv filter filterv trampoline
+                  reductions partition-by group-by map-indexed keep mapcat
+                  run! keep-indexed remove some iterate} hd)
+              ()
+
+              ;; ;; lazy seq macros
+              ('#{lazy-seq} hd)
+              ()
+
+              ;; weird ones
+              ;; tree-seq
+              ;; ('#{juxt})
+              ;; ('#{sort-by})
+              ;; ('#{repeatedly})
+              ;; ('#{amap areduce})
+
+              ;;
+              ;; -- Conditionals
+              ;;
+
               ;; conditionals which have a predicate or expression that is
               ;; always run in the first arg
               ('#{if if-not when when-not case and or
@@ -196,12 +234,12 @@
                  (fn [x] 1)]
         env cljs.env/*compiler*]
     (for [f forms]
-      (cljs.analyzer/infer-tag env (ana/analyze env f))))
+      (cljs.analyzer/infer-tag env (ana-api/analyze env f))))
 
-  (let [env (ana/empty-env)]
+  (let [env (ana-api/empty-env)]
     (for [f example]
       [(meta f)
-       (cljs.analyzer/infer-tag env (ana/analyze env f))
+       (cljs.analyzer/infer-tag env (ana-api/analyze env f))
        f]))
   )
 

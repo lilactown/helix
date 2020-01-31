@@ -92,3 +92,6 @@
            (use-foo) (baz))
         '(condp #(use-foo %) asdf
             123 (baz))))))
+
+(hana/invalid-hooks-usage '(loop [foo (use-foo)]
+                             (bar (use-bar))))
