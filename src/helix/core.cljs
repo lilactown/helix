@@ -38,16 +38,21 @@
   [type & args]
   (let [?p (first args)
         ?c (rest args)
-        native? (string? type)]
+        native? (or (keyword? type)
+                    (string? type)
+                    (:native (meta type)))
+        type' (if (keyword? type)
+                (name type)
+                type)]
     (if (map? ?p)
       (apply create-element
-             type
+             type'
              (if native?
                (impl.props/-native-props ?p)
                (impl.props/-props ?p))
              ?c)
       (apply create-element
-             type
+             type'
              nil
              args))))
 

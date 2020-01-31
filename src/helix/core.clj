@@ -133,17 +133,17 @@
         (throw (ex-info "Invalid hooks usage"
                         {:invalid-hooks invalid-hooks}))))
     `(do ~(when (:fast-refresh feature-flags)
-            `(when goog/DEBUG
+            `(if ^boolean goog/DEBUG
                (def ~sig-sym (signature!))))
          (def ~wrapped-name
            (-> ~(fnc* wrapped-name props-bindings
                       (cons (when (:fast-refresh feature-flags)
-                              `(when goog/DEBUG
+                              `(if ^boolean goog/DEBUG
                                  (when ~sig-sym
                                    (~sig-sym))))
                                          body))
-               (cond-> goog/DEBUG
-                 (doto (goog.object/set "displayName" ~fully-qualified-name)))
+               (cond->
+                 (true? ^boolean goog/DEBUG) (goog.object/set "displayName" ~fully-qualified-name))
                ~@(-> opts :wrap)))
 
          (def ~display-name
@@ -152,7 +152,7 @@
            ~wrapped-name)
 
          ~(when (:fast-refresh feature-flags)
-            `(when goog/DEBUG
+            `(if ^boolean goog/DEBUG
                (when ~sig-sym
                  (~sig-sym ~wrapped-name ~(string/join hooks)
                   nil ;; forceReset

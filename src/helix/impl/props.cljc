@@ -4,21 +4,25 @@
                        [goog.object :as gobj]]))
   #?(:cljs (:require-macros [helix.impl.props])))
 
+(def aria-data-special-case-re #"^(aria-|data-).*")
+
 (defn camel-case
   "Returns camel case version of the string, e.g. \"http-equiv\" becomes \"httpEquiv\"."
   [s]
   (if (or (keyword? s)
           (string? s)
           (symbol? s))
-    (let [[first-word & words] (string/split s #"-")]
-      (if (or (empty? words)
-              (= "aria" first-word)
-              (= "data" first-word))
-        s
-        (-> (map string/capitalize words)
-            (conj first-word)
-            string/join)))
-    s))
+    (let [name-str (name s)]
+      ; this is hot path so we want to use low-level interop
+      #?(:clj  (cond
+                 (some? (re-matches aria-data-special-case-re name-str)) name-str
+                 (= (subs name-str 0 1) "'") (subs name-str 1)
+                 :else (string/replace name-str #"-(\w)" #(string/upper-case (second %))))
+         :cljs (cond
+                 (some? (.match name-str aria-data-special-case-re)) name-str
+                 (= (.substring name-str 0 1) "'") (.substring name-str 1)
+                 :else (.replace name-str #"-(\w)" #(.toUpperCase %2)))))
+      s))
 
 (defn kw->str [kw]
   (let [kw-ns (namespace kw)
