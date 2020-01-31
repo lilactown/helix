@@ -1,6 +1,18 @@
 (ns helix.children
-  (:require ["react" :as react])
+  (:require ["react" :as react]
+            [cljs-bean.core :as b]
+            [goog.object :as gobj])
   (:refer-clojure :exclude [map count vec]))
+
+(defn children
+  "Given a props object, returns children contained in it (if any).
+
+  Handles cases where props could be either a JS object or a CLJS structure."
+  [props]
+  (if (or (b/bean? props) (map? props))
+    (:children props)
+    ;; assume it's a raw props object
+    (gobj/get props "children")))
 
 (defn map
   "Map children that are typically specified as `props.children`.
