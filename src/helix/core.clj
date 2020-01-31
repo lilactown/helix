@@ -143,7 +143,8 @@
                                    (~sig-sym))))
                                          body))
                (cond->
-                 (true? ^boolean goog/DEBUG) (goog.object/set "displayName" ~fully-qualified-name))
+                 (true? ^boolean goog/DEBUG)
+                 (doto (goog.object/set "displayName" ~fully-qualified-name)))
                ~@(-> opts :wrap)))
 
          (def ~display-name
