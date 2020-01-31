@@ -4,9 +4,7 @@
             [helix.impl.props :as impl.props]
             ["./impl/class.js" :as helix.class]
             [cljs-bean.core :as bean]
-            [ueaq.core :as ueaq]
-            ["react" :as react]
-            ["react-dom/server" :as rds])
+            ["react" :as react])
   (:require-macros [helix.core]))
 
 
@@ -26,17 +24,14 @@
 (def create-element react/createElement)
 
 
-(defn $$
-  "Dynamically create a new React element from a valid React type.
-
-  `$` can typically be faster, because it will statically process the arguments
-  at macro-time if possible.
+(defn $
+  "Create a new React element from a valid React type.
 
   Example:
   ```
-  ($$ MyComponent
+  ($ MyComponent
    \"child1\"
-   ($$ \"span\"
+   ($ \"span\"
      {:style {:color \"green\"}}
      \"child2\" ))
   ```"
@@ -57,6 +52,23 @@
              args))))
 
 
+(def $$
+  "Dynamically create a new React element from a valid React type.
+
+  `$` can typically be faster, because it will statically process the arguments
+  at macro-time if possible.
+
+  Example:
+  ```
+  ($$ MyComponent
+   \"child1\"
+   ($$ \"span\"
+     {:style {:color \"green\"}}
+     \"child2\" ))
+  ```"
+ $)
+
+
 (defprotocol IExtractType
   (-type [factory] "Extracts the underlying type from the factory function."))
 
@@ -70,9 +82,7 @@
   "Creates a factory function for a React component"
   [type]
   (-> (fn factory [& args]
-        (if (map? (first args))
-          (apply create-element type (ueaq/ueaq (first args)) (rest args))
-          (apply create-element type nil args)))
+        (apply $ type args))
       (specify! IExtractType
         (-type [_] type))))
 
