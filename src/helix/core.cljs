@@ -57,7 +57,7 @@
              args))))
 
 
-(def $$
+(def ^:deprecated $$
   "Dynamically create a new React element from a valid React type.
 
   `$` can typically be faster, because it will statically process the arguments
