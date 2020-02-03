@@ -116,7 +116,7 @@
 
        ;; a single symbol
        (and (= (count body) 1) (symbol? (first body)))
-       (do (hana/warn :helix.impl.analyzer/simple-body env {:form body})
+       (do (hana/warn hana/simple-body-warning env {:form body})
            nil)
 
 

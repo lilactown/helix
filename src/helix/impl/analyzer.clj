@@ -4,14 +4,15 @@
             [clojure.string :as string]
             [cljs.env]
             [cljs.analyzer.api :as ana-api]
-            [cljs.analyzer :as ana]
-            [ilk.core :as ilk]))
+            [cljs.analyzer :as ana]))
 
+
+(def simple-body-warning ::simple-body)
 
 (defn warn [warning-type env extras]
   (ana/warning warning-type env extras))
 
-(defmethod ana/error-message ::simple-body
+(defmethod ana/error-message simple-body-warning
   [warning-type {:keys [form] :as info}]
   (format "Got a single symbol %s as a body, expected an expression. Maybe you meant (%s)?"
           (first form) (first form)))
@@ -42,12 +43,10 @@
 
 
 ;; TODO:
-;; - Detect custom hooks
 ;; - Handle re-ordering
 ;;   - Detect hooks used in let-bindings and add left-hand side to signature
-;;   - ???
 
-(defn- find-all
+(defn find-all
   "Recursively walks a tree structure and finds all elements
   that match `pred`. Returns a vector of results."
   [pred tree]
@@ -72,17 +71,6 @@
 (defn find-hooks
   [body]
   (find-all hook-expr? body))
-
-
-(defn seqable-zip [root]
-  (zip/zipper (every-pred (comp not string?)
-                          (comp not #(and (sequential? %) (string/starts-with?
-                                                           (name (first %))
-                                                           "use")))
-                          sequential?)
-              seq
-              (fn [_ c] c)
-              root))
 
 
 (defn inferred-type [env x]
@@ -233,7 +221,15 @@
                  bar {:a 1}
                  baz "baz"])
 
-  (ilk/inferred-type {:a 1})
+  (defn seqable-zip [root]
+    (zip/zipper (every-pred (comp not string?)
+                            (comp not #(and (sequential? %) (string/starts-with?
+                                                             (name (first %))
+                                                             "use")))
+                            sequential?)
+                seq
+                (fn [_ c] c)
+                root))
 
   (def z (seqable-zip example))
 
