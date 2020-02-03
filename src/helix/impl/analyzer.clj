@@ -7,15 +7,25 @@
             [cljs.analyzer :as ana]))
 
 
-(def simple-body-warning ::simple-body)
+(def warning-simple-body ::simple-body)
+
+(def warning-inferred-map-props ::inferred-map-props)
 
 (defn warn [warning-type env extras]
   (ana/warning warning-type env extras))
 
-(defmethod ana/error-message simple-body-warning
+(defmethod ana/error-message warning-simple-body
   [warning-type {:keys [form] :as info}]
   (format "Got a single symbol %s as a body, expected an expression. Maybe you meant (%s)?"
           (first form) (first form)))
+
+(defmethod ana/error-message warning-inferred-map-props
+  [warning-type {:keys [form props-form] :as info}]
+  (format "The inferred type of %s is a map. Did you mean to pass it in as props?
+Example: ($ %s %s ...)"
+          props-form
+          (first form)
+          '{& props-form}))
 
 
 ;;
@@ -220,6 +230,8 @@
   (def example '[foo (fn foo [x] "foo")
                  bar {:a 1}
                  baz "baz"])
+
+  (inferred-type (ana/empty-env) '{})
 
   (defn seqable-zip [root]
     (zip/zipper (every-pred (comp not string?)

@@ -19,6 +19,13 @@
      \"child2\" ))
   ```"
   [type & args]
+  (when (and (symbol? (first args))
+             (= (hana/inferred-type &env (first args))
+                'cljs.core/IMap))
+    (hana/warn hana/warning-inferred-map-props
+               &env
+               {:form (cons type args)
+                :props-form (first args)}))
   (let [inferred (hana/inferred-type &env type)
         native? (or (keyword? type)
                     (string? type)
