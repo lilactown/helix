@@ -60,15 +60,18 @@
      tree)
     @results))
 
-(defn hook?
+
+(defn hook? [x]
+  (and (symbol? x) (string/starts-with? (name x) "use")))
+
+(defn hook-expr?
   [x]
   (when (list? x)
-    (let [fst (first x)]
-      (and (symbol? fst) (string/starts-with? (name fst) "use")))))
+    (hook? (first x))))
 
 (defn find-hooks
   [body]
-  (find-all hook? body))
+  (find-all hook-expr? body))
 
 
 (defn seqable-zip [root]
@@ -86,13 +89,26 @@
   (cljs.analyzer/infer-tag env (ana-api/no-warn (ana-api/analyze env x))))
 
 
+(defn ensure-seq [x]
+  (if (seqable? x) x (list x)))
+
+
 (defn invalid-hooks-usage
   ([form] (invalid-hooks-usage
            {:state nil}
            form))
   ([ctx form]
-   (if-not (and (seq? form) (seq form))
+   (cond
+     ;; hook symbol passed in as a value
+     (and (not (nil? (:state ctx)))
+          (hook? form))
+     (assoc ctx :form form)
+
+     ;; otherwise, not a hook or not in a bad state, bail early
+     (not (and (seq? form) (seq form)))
      nil
+
+     :else
      (let [hd (first form)]
        (->> (cond
               ;;
@@ -116,19 +132,33 @@
                   reductions partition-by group-by map-indexed keep mapcat
                   run! keep-indexed remove some iterate} hd)
               ;; TODO make sure we handle `->>`
-              (let [[f-form seq-form] (rest form)]
-                (->> (if (seqable? f-form)
-                       f-form
-                       (list f-form))
+              (let [[f-form seq-form] (rest form)
+                    ;; forms could be either a symbol or an expression
+                    f-form (ensure-seq f-form)
+                    seq-form (ensure-seq seq-form)]
+                (->> f-form
+                     ;; f-form
                      (map #(invalid-hooks-usage (assoc ctx :state :loop) %))
+                     ;; seq-form
                      (concat (map #(invalid-hooks-usage ctx %) seq-form))))
 
               ;; ;; lazy seq macros
               ('#{lazy-seq} hd)
-              ()
+              (->> (rest form)
+                   (map #(invalid-hooks-usage (assoc ctx :state :loop) %)))
 
               ;; weird ones
               ;; tree-seq
+              ('#{tree-seq} hd)
+              (let [[branch?-form children-form root-form] (rest form)
+                    branch?-form (ensure-seq branch?-form)
+                    children-form (ensure-seq children-form)
+                    root-form (ensure-seq root-form)]
+                (doto (concat
+                       (map #(invalid-hooks-usage (assoc ctx :state :loop) %) branch?-form)
+                       (map #(invalid-hooks-usage (assoc ctx :state :loop) %) children-form)
+                       (map #(invalid-hooks-usage ctx %) root-form))
+                  (prn form)))
               ;; ('#{juxt})
               ;; ('#{sort-by})
               ;; ('#{repeatedly})
@@ -178,7 +208,7 @@
                      (cons (invalid-hooks-usage ctx first-pred))))
 
               (and (not (nil? (:state ctx)))
-                   (hook? form))
+                   (hook-expr? form))
               ;; wrap in a seq since it's expected
               [(assoc ctx :form form)]
 
