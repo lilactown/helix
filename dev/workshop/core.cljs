@@ -175,6 +175,25 @@
       ($ ClassComponent {:foo "baz"})))
 
 
+(defn use-custom-effect [deps f]
+  (hooks/use-effect deps (f)))
+
+(defnc custom-effect-test [{:keys [deps]}]
+  (let [[state set-state] (hooks/use-state nil)
+        mounted? (hooks/use-ref false)]
+    (use-custom-effect
+     deps
+     #(do (when-not @mounted? ;; avoid infinite render in `:always`
+            (set-state deps))
+          (reset! mounted? true)))
+    (prn :render)
+    (d/div "deps: " (when state
+                     (pr-str state)))))
+
+(dc/defcard custom-effect-test-card
+  (<> ($ custom-effect-test {:deps :always})))
+
+
 ;;
 ;; -- Benchmarking
 ;;

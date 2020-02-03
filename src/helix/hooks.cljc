@@ -123,7 +123,16 @@
        (= deps :always) (deps->hook-body body)
 
        ;; pass an empty array for things that should only run once
-       (= deps :once) (deps->hook-body '(cljs.core/array) body))))
+       (= deps :once) (deps->hook-body '(cljs.core/array) body)
+
+       :else (deps->hook-body `(determine-deps ~deps) body)))
+
+   :cljs (defn determine-deps [deps]
+           (case deps
+             :once (array)
+             :always js/undefined
+             :auto-deps (throw (js/Error. "Cannot use :auto-deps outside of macro."))
+             (to-array deps))))
 
 
 (defmacro use-effect
