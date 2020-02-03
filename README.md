@@ -73,6 +73,9 @@ react yourself using webpack, ensuring it is provided as the name `"react"`.
   - [Doing side effects](./docs/hooks.md#doing-side-effects)
   - [Optimizations](./docs/hooks.md#optimizations)
   - [Other miscellaneous](./docs/hooks.md#other-miscellaneous)
+- [Experiments](./docs/experiments.md)
+  - [Detect invalid hooks usage](./docs/experiments.md#detect-invalid-hooks-usage)
+  - [Fast Refresh](./docs/experiments.md#fast-refresh)
 
 
 Other resources:
