@@ -48,6 +48,9 @@
            (use-foo)
            (bar))
         '(if (foo)
+           use-foo
+           bar)
+        '(if (foo)
            (bar)
            (use-foo))
         '(if (foo)
