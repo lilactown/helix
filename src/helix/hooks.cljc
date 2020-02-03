@@ -110,6 +110,20 @@
 #?(:clj
    (defn deps-macro-body [env deps body deps->hook-body]
      (cond
+       ;;
+       ;; Warn on typical errors writing body
+       ;;
+
+       ;; a single symbol
+       (and (= (count body) 1) (symbol? (first body)))
+       (do (hana/warn :helix.impl.analyzer/simple-body env {:form body})
+           nil)
+
+
+       ;;
+       ;; Different variations of deps
+       ;;
+
        ;; deps are passed in as a vector
        (vector? deps) (deps->hook-body `(cljs.core/array ~@deps)
                                        body)

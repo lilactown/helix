@@ -8,9 +8,14 @@
             [ilk.core :as ilk]))
 
 
+(defn warn [warning-type env extras]
+  (ana/warning warning-type env extras))
 
-#_(clj->props '{:a 1 :b {:foo bar}
-                :on-click (fn [e] (js/alert "hi"))})
+(defmethod ana/error-message ::simple-body
+  [warning-type {:keys [form] :as info}]
+  (format "Got a single symbol %s as a body, expected an expression. Maybe you meant (%s)?"
+          (first form) (first form)))
+
 
 ;;
 ;; -- Hooks
