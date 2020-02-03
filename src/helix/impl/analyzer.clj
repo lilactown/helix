@@ -115,7 +115,13 @@
               ('#{reduce reduce-kv map mapv filter filterv trampoline
                   reductions partition-by group-by map-indexed keep mapcat
                   run! keep-indexed remove some iterate} hd)
-              ()
+              ;; TODO make sure we handle `->>`
+              (let [[f-form seq-form] (rest form)]
+                (->> (if (seqable? f-form)
+                       f-form
+                       (list f-form))
+                     (map #(invalid-hooks-usage (assoc ctx :state :loop) %))
+                     (concat (map #(invalid-hooks-usage ctx %) seq-form))))
 
               ;; ;; lazy seq macros
               ('#{lazy-seq} hd)
