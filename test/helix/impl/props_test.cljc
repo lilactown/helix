@@ -66,9 +66,13 @@
 
 #?(:cljs
    (t/deftest native-props
-     (t/is (eq (impl/native-props {:foo-bar "baz"})
-               #js {:fooBar "baz"}))
-     (t/is (eq (impl/native-props {:foo-bar "baz" :style {:color "blue" :background-color "red" :display :flex}})
+     (t/is (eq (impl/native-props {:foo-bar "baz"
+                                   :foo-bar-baz "asdf"})
+               #js {:fooBar "baz" :fooBarBaz "asdf"}))
+     (t/is (eq (impl/native-props {:foo-bar "baz"
+                                   :style {:color "blue"
+                                           :background-color "red"
+                                           :display :flex}})
                #js {:fooBar "baz" :style #js {:color "blue" :backgroundColor "red" :display "flex"}})
            "literal styles")
      (t/is (eq (impl/native-props {:foo-bar "baz"

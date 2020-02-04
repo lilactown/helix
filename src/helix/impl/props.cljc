@@ -6,6 +6,8 @@
 
 (def aria-data-special-case-re #"^(aria-|data-).*")
 
+#?(:cljs (def camel-regexp (js/RegExp "-(\\w)", "g")))
+
 (defn camel-case
   "Returns camel case version of the string, e.g. \"http-equiv\" becomes \"httpEquiv\"."
   [s]
@@ -21,8 +23,11 @@
          :cljs (cond
                  (some? (.match name-str aria-data-special-case-re)) name-str
                  (= (.substring name-str 0 1) "'") (.substring name-str 1)
-                 :else (.replace name-str #"-(\w)" #(.toUpperCase %2)))))
+                 :else (.replace name-str camel-regexp #(.toUpperCase %2)))))
       s))
+
+(comment
+  (camel-case "get-asdf-aw9e8f"))
 
 (defn kw->str [kw]
   (let [kw-ns (namespace kw)
