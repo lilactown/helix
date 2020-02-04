@@ -103,7 +103,7 @@ Example: ($ %s %s ...)"
      (assoc ctx :form form)
 
      ;; otherwise, not a hook or not in a bad state, bail early
-     (not (and (seq? form) (seq form)))
+     (not (and (seqable? form) (seq form)))
      nil
 
      :else
