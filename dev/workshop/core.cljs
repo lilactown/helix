@@ -1,10 +1,11 @@
 (ns workshop.core
-  (:require [helix.core :as helix :refer [$ <> defnc]]
-            [helix.dom :as d]
-            [helix.hooks :as hooks]
-            ["react" :as r]
-            ["react-dom/server" :as rds]
-            [devcards.core :as dc :include-macros true]))
+  (:require
+    [helix.core :as helix :refer [$ <> defnc]]
+    [helix.dom :as d]
+    [helix.hooks :as hooks]
+    ["react" :as r]
+    ["react-dom/server" :as rds]
+    [devcards.core :as dc :include-macros true]))
 
 
 (defnc props-test
@@ -84,6 +85,28 @@
 
 (dc/defcard use-state
   ($ state-test))
+
+
+(comment
+  ((->> (helix.repl/as-tree-seq)
+       ;; (take 10)
+       #_(filter (comp fn? :type))
+       (filter #(helix.repl/type? state-test %))
+       (first)
+       (helix.repl/info)
+       :state
+       first
+       :dispatch
+       #_(js/console.log)) {:name "jkl"})
+
+  (->> (helix.repl/as-tree-seq)
+       ;; (take 10)
+       #_(filter (comp fn? :type))
+       (filter #(helix.repl/type? state-test %))
+       (first)
+       (helix.repl/info)
+       (cljs.pprint/pprint))
+  )
 
 
 (defnc display-range
