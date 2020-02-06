@@ -2,7 +2,7 @@
   (:require [goog.object :as gobj]
             [cljs-bean.core :as b]))
 
-(def id->root (atom {}))
+(defonce id->root (atom {}))
 
 (defn on-commit-fiber-root [id root maybe-priority-level did-error?]
   (swap! id->root assoc id root))
@@ -53,14 +53,13 @@
       childs)))
 
 
-(defn type? [type node]
-  (= type (gobj/get node "type")))
-
-
 (defn as-tree-seq
-  []
-  (->> (current)
-       (tree-seq child? children)))
+  ([]
+   (->> (current)
+        (tree-seq child? children)))
+  ([root]
+   (tree-seq child? children root)))
+
 
 
 ;;
@@ -95,12 +94,18 @@
 
 
 (defn info [node]
-  (let [props (gobj/get node "memoizedProps")]
-    {:props props
+  (if (nil? node)
+    node
+    {:props (b/bean (gobj/get node "memoizedProps"))
+     :type (gobj/get node "type")
+     :dom-el (gobj/get node "stateNode")
      :state (if (hooks? node)
               (->> node
                    (accumulate-hooks)
-                   (map #(hook-info (first %) (second %)))))}))
+                   (map #(hook-info (first %) (second %))))
+              (-> node
+                  (gobj/get "memoizedState")
+                  (b/bean)))}))
 
 
 #_(->  (tree)
@@ -112,3 +117,36 @@
      #_(dissoc :props :pendingProps :memoizedProps)
      #_(cljs.pprint/pprint)
      (js/console.log))
+
+
+;;
+;; Querying
+;;
+
+
+(defn q
+  ([query]
+   (let [type (if-let [t (:type query)]
+                (if (.-displayName ^js t)
+                  #(= t %)
+                  t)
+                identity)
+         props (:props query identity)
+         state (:state query identity)]
+     (fn [node]
+       (and (-> node (gobj/get "type") (type))
+            (-> node (gobj/get "memoizedProps") (b/bean) (props))
+            (if (hooks? node)
+              (->> node
+                   (accumulate-hooks)
+                   (map #(hook-info (first %) (second %)))
+                   (map :current)
+                   (some state))
+              ;; class components
+              (-> node
+                  (gobj/get "memoizedState")
+                  (or #js {})
+                  (b/bean)
+                  (state)))))))
+  ([query coll]
+   (first (filter (q query) coll))))
