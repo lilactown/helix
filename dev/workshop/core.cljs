@@ -88,22 +88,17 @@
 
 
 (comment
+  (require '[helix.experimental.repl :as helix.repl])
+
   ((->> (helix.repl/as-tree-seq)
-       ;; (take 10)
-       #_(filter (comp fn? :type))
-       (filter #(helix.repl/type? state-test %))
-       (first)
+       (helix.repl/q {:type state-test})
        (helix.repl/info)
        :state
        first
-       :dispatch
-       #_(js/console.log)) {:name "jkl"})
+       :dispatch) {:name "jkl"})
 
   (->> (helix.repl/as-tree-seq)
-       ;; (take 10)
-       #_(filter (comp fn? :type))
-       (filter #(helix.repl/type? state-test %))
-       (first)
+       (helix.repl/q {:type state-test})
        (helix.repl/info)
        (cljs.pprint/pprint))
   )
