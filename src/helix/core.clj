@@ -131,7 +131,10 @@
         hooks (hana/find-hooks body)
         sig-sym (gensym "sig")
         fully-qualified-name (str *ns* "/" display-name)
-        feature-flags (:helix/features opts)]
+        feature-flags (:helix/features opts)
+
+        ;; feature flags
+        flag-fast-refresh? (:fast-refresh feature-flags)]
     (when (:check-invalid-hooks-usage feature-flags)
       (when-some [invalid-hooks (->> (map hana/invalid-hooks-usage body)
                                      (flatten)
@@ -139,14 +142,14 @@
                                      (seq))]
         (throw (ex-info "Invalid hooks usage"
                         {:invalid-hooks invalid-hooks}))))
-    `(do ~(when (:fast-refresh feature-flags)
+    `(do ~(when flag-fast-refresh?
             `(if ^boolean goog/DEBUG
                (def ~sig-sym (signature!))))
          (def ~display-name
            ~@(when-not (nil? docstring)
                (list docstring))
            (-> ~(fnc* display-name props-bindings
-                      (cons (when (:fast-refresh feature-flags)
+                      (cons (when flag-fast-refresh?
                               `(if ^boolean goog/DEBUG
                                  (when ~sig-sym
                                    (~sig-sym))))
@@ -156,8 +159,8 @@
                  (doto (goog.object/set "displayName" ~fully-qualified-name)))
                ~@(-> opts :wrap)))
 
-         ~(when (:fast-refresh feature-flags)
-            `(if ^boolean goog/DEBUG
+         ~(when flag-fast-refresh?
+            `(when ^boolean goog/DEBUG
                (when ~sig-sym
                  (~sig-sym ~display-name ~(string/join hooks)
                   nil ;; forceReset

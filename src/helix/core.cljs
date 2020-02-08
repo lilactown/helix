@@ -148,4 +148,4 @@
 (defn signature! []
   ;; grrr `maybe` bug strikes again
   (and (exists? (.-$$Signature$$ js/window))
-      (.$$Signature$$ js/window)))
+       (.$$Signature$$ js/window)))
