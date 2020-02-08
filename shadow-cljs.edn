@@ -17,7 +17,9 @@
                   :main {:entries [workshop]
                          :depends-on #{:shared}}
                   :refresh {:entries [refresh-example]
-                            :depends-on #{:shared}}}
+                            :depends-on #{:shared}}
+                  :experimental {:entries [react-experimental]
+                                 :depends-on #{:shared}}}
         :compiler-options {:devcards true}
         :devtools {:http-root    "public/dev"
                    :http-port    8700
