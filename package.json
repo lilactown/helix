@@ -11,7 +11,7 @@
   "dependencies": {
     "react": "0.0.0-experimental-241c4467e",
     "react-dom": "0.0.0-experimental-241c4467e",
-    "react-refresh": "^0.6.0",
+    "react-refresh": "0.0.0-experimental-241c4467e",
     "shadow-cljs": "^2.8.83",
     "showdown": "^1.9.1"
   }
