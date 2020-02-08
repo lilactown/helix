@@ -9,8 +9,8 @@
   "author": "",
   "license": "EPL-2.0",
   "dependencies": {
-    "react": "^16.11.0",
-    "react-dom": "^16.11.0",
+    "react": "0.0.0-experimental-241c4467e",
+    "react-dom": "0.0.0-experimental-241c4467e",
     "react-refresh": "^0.6.0",
     "shadow-cljs": "^2.8.83",
     "showdown": "^1.9.1"

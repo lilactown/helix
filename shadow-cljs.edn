@@ -7,7 +7,6 @@
  :dependencies
  [[binaryage/devtools "0.9.7"]
   [devcards "0.2.5"]
-  [ilk "1.0.0"]
   [cljs-bean "1.5.0"]]
 
  :builds
