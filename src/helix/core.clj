@@ -142,8 +142,10 @@
     `(do ~(when (:fast-refresh feature-flags)
             `(if ^boolean goog/DEBUG
                (def ~sig-sym (signature!))))
-         (def ~wrapped-name
-           (-> ~(fnc* wrapped-name props-bindings
+         (def ~display-name
+           ~@(when-not (nil? docstring)
+               (list docstring))
+           (-> ~(fnc* display-name props-bindings
                       (cons (when (:fast-refresh feature-flags)
                               `(if ^boolean goog/DEBUG
                                  (when ~sig-sym
@@ -154,18 +156,13 @@
                  (doto (goog.object/set "displayName" ~fully-qualified-name)))
                ~@(-> opts :wrap)))
 
-         (def ~display-name
-           ~@(when-not (nil? docstring)
-               (list docstring))
-           ~wrapped-name)
-
          ~(when (:fast-refresh feature-flags)
             `(if ^boolean goog/DEBUG
                (when ~sig-sym
-                 (~sig-sym ~wrapped-name ~(string/join hooks)
+                 (~sig-sym ~display-name ~(string/join hooks)
                   nil ;; forceReset
                   nil)) ;; getCustomHooks
-               (register! ~wrapped-name ~fully-qualified-name)))
+               (register! ~display-name ~fully-qualified-name)))
          ~display-name)))
 
 
