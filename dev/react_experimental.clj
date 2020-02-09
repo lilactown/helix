@@ -4,5 +4,6 @@
 
 (defmacro defnc [type params & body]
   `(helix.core/defnc ~type ~params
-     {:helix/features {:fast-refresh true}}
+     {:helix/features {:fast-refresh true
+                       :create-factory true}}
      ~@body))
