@@ -134,8 +134,9 @@
         feature-flags (:helix/features opts)
 
         ;; feature flags
-        flag-fast-refresh? (:fast-refresh feature-flags)]
-    (when (:check-invalid-hooks-usage feature-flags)
+        flag-fast-refresh? (:fast-refresh feature-flags)
+        flag-check-invalid-hooks-usage? (:check-invalid-hooks-usage feature-flags)]
+    (when flag-check-invalid-hooks-usage?
       (when-some [invalid-hooks (->> (map hana/invalid-hooks-usage body)
                                      (flatten)
                                      (filter (comp not nil?))
