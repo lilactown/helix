@@ -4,7 +4,8 @@
    [helix.core :refer [$ suspense]]
    [helix.dom :as d]
    [helix.hooks :as hooks]
-   ["react-dom" :as rdom])
+   ["react-dom" :as rdom]
+   ["react" :as react :refer [useTransition]])
   (:require-macros
    [react-experimental :refer [defnc]]))
 
@@ -20,25 +21,32 @@
 ;;
 
 
-(def resource)
+(def default-resource)
 
 
 (defnc data-view
-  []
-  (let [data (read resource)]
-    (d/div
-     (pr-str data))))
+  [{:keys [default-resource]}]
+  (let [[resource set-resource] (hooks/use-state default-resource)
+        [start-transition pending?] (useTransition #js {:timeoutMs 3000})]
+    (d/div {:style {:padding "5px 0"}}
+     (pr-str (read resource))
+     " "
+     (d/button {:on-click (fn []
+                            (start-transition #(set-resource (fetch-data))))
+                :disabled pending?}
+               "Next"))))
 
 
 (defnc app
   []
+  (prn :app)
   (suspense
    {:fallback (d/h1 "Loading data...")}
-   ($ data-view)
-   ($ data-view)
-   ($ data-view)
-   ($ data-view)
-   ($ data-view)))
+   (->data-view {:default-resource default-resource})
+   (->data-view {:default-resource default-resource})
+   (->data-view {:default-resource default-resource})
+   (->data-view {:default-resource default-resource})
+   (->data-view {:default-resource default-resource})))
 
 
 (defn start
@@ -47,7 +55,7 @@
   (refresh/inject-hook!)
 
   ;; start "fetching" data
-  (set! resource (fetch-data))
+  (set! default-resource (fetch-data))
 
   ;; start the app in concurrent mode
   (-> (js/document.getElementById "app")
@@ -57,8 +65,6 @@
 
 (defn ^:dev/after-load reload
   []
-  ;; reset data each reload
-  (set! resource (fetch-data))
   ;; do hot reload of components
   (refresh/refresh!))
 
