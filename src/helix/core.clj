@@ -135,7 +135,8 @@
 
         ;; feature flags
         flag-fast-refresh? (:fast-refresh feature-flags)
-        flag-check-invalid-hooks-usage? (:check-invalid-hooks-usage feature-flags)]
+        flag-check-invalid-hooks-usage? (:check-invalid-hooks-usage feature-flags)
+        flag-create-factory? (:create-factory feature-flags)]
     (when flag-check-invalid-hooks-usage?
       (when-some [invalid-hooks (->> (map hana/invalid-hooks-usage body)
                                      (flatten)
@@ -159,6 +160,10 @@
                  (true? ^boolean goog/DEBUG)
                  (doto (goog.object/set "displayName" ~fully-qualified-name)))
                ~@(-> opts :wrap)))
+
+         ~(when flag-create-factory
+            `(def ~(symbol (str "->" display-name))
+               (factory ~display-name)))
 
          ~(when flag-fast-refresh?
             `(when ^boolean goog/DEBUG
