@@ -20,12 +20,12 @@
 ;;
 
 
-(def data (atom nil))
+(def resource)
 
 
 (defnc data-view
   []
-  (let [data (read @data)]
+  (let [data (read resource)]
     (d/div
      (pr-str data))))
 
@@ -43,7 +43,13 @@
 
 (defn start
   []
+  ;; for hot reloading at dev-time
   (refresh/inject-hook!)
+
+  ;; start "fetching" data
+  (set! resource (fetch-data))
+
+  ;; start the app in concurrent mode
   (-> (js/document.getElementById "app")
       (rdom/createRoot)
       (.render ($ app))))
@@ -51,7 +57,9 @@
 
 (defn ^:dev/after-load reload
   []
-  (reset! data (fetch-data))
+  ;; reset data each reload
+  (set! resource (fetch-data))
+  ;; do hot reload of components
   (refresh/refresh!))
 
 
