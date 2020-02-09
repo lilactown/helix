@@ -92,9 +92,27 @@
         (-type [_] type))))
 
 
+(defn- cljs-factory
+  [type]
+  (-> (fn factory [& args]
+        ;; put props detection here so it's easier to detect
+        ;; slow paths in render
+        (if (map? (first args))
+          (apply react/createElement
+                 type
+                 #js {"helix/props" (first args)}
+                 (rest args))
+          (apply react/createElement
+                 type
+                 #js {}
+                 args)))))
+
+
 (defn- extract-cljs-props
   [o]
-  (bean/bean o))
+  (if-let [props (gobj/get o "helix/props")]
+    (assoc props :children (gobj/get o "children"))
+    (bean/bean o)))
 
 
 
