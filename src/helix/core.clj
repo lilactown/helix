@@ -161,9 +161,9 @@
                  (doto (goog.object/set "displayName" ~fully-qualified-name)))
                ~@(-> opts :wrap)))
 
-         ~(when flag-create-factory
+         ~(when flag-create-factory?
             `(def ~(symbol (str "->" display-name))
-               (factory ~display-name)))
+               (cljs-factory ~display-name)))
 
          ~(when flag-fast-refresh?
             `(when ^boolean goog/DEBUG
