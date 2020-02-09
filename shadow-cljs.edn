@@ -7,7 +7,6 @@
  :dependencies
  [[binaryage/devtools "0.9.7"]
   [devcards "0.2.5"]
-  [ilk "1.0.0"]
   [cljs-bean "1.5.0"]]
 
  :builds
@@ -18,7 +17,9 @@
                   :main {:entries [workshop]
                          :depends-on #{:shared}}
                   :refresh {:entries [refresh-example]
-                            :depends-on #{:shared}}}
+                            :depends-on #{:shared}}
+                  :experimental {:entries [react-experimental]
+                                 :depends-on #{:shared}}}
         :compiler-options {:devcards true}
         :devtools {:http-root    "public/dev"
                    :http-port    8700
