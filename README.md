@@ -77,7 +77,7 @@ react yourself using webpack, ensuring it is provided as the name `"react"`.
   - [Detect invalid hooks usage](./docs/experiments.md#detect-invalid-hooks-usage)
   - [Fast Refresh](./docs/experiments.md#fast-refresh)
 - [Pro-tips](./docs/pro-tips.md)
-  - [Create your own macro](./docs/pro-tips.md#create-your-own-macro)
+  - [Create a custom macro](./docs/pro-tips.md#create-a-custom-macro)
 
 
 Other resources:
