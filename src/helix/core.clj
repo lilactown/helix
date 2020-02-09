@@ -36,14 +36,14 @@
                (name type)
                type)]
     (cond
-      (map? (first args)) `^js/React.Element (create-element
+      (map? (first args)) `^js/React.Element (.createElement (get-react)
                                               ~type
                                               ~(if native?
                                                  `(impl.props/native-props ~(first args))
                                                  `(impl.props/props ~(first args)))
                                               ~@(rest args))
 
-      :else `^js/React.Element (create-element ~type nil ~@args))))
+      :else `^js/React.Element (.createElement (get-react) ~type nil ~@args))))
 
 
 (defmacro <>

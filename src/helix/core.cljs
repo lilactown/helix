@@ -24,6 +24,11 @@
 (def create-element react/createElement)
 
 
+;; this is to enable calling `(.createElement (get-react))` without doing
+;; a dynamic arity dispatch. See https://github.com/Lokeh/helix/issues/20
+(defn get-react [] react)
+
+
 (defn $
   "Create a new React element from a valid React type.
 
