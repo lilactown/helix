@@ -142,8 +142,12 @@
                                      (flatten)
                                      (filter (comp not nil?))
                                      (seq))]
-        (throw (ex-info "Invalid hooks usage"
-                        {:invalid-hooks invalid-hooks}))))
+        #_(throw (ex-info "Invalid hooks usage"
+                          {:invalid-hooks invalid-hooks}))
+        (doseq [invalid-hook invalid-hooks]
+          (hana/warn hana/warning-invalid-hooks-usage
+                     &env
+                     invalid-hook))))
     `(do ~(when flag-fast-refresh?
             `(if ^boolean goog/DEBUG
                (def ~sig-sym (signature!))))

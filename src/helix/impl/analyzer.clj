@@ -11,6 +11,8 @@
 
 (def warning-inferred-map-props ::inferred-map-props)
 
+(def warning-invalid-hooks-usage ::invalid-hooks-usage)
+
 (defn warn [warning-type env extras]
   (ana/warning warning-type env extras))
 
@@ -26,6 +28,10 @@ Example: ($ %s %s ...)"
           props-form
           (first form)
           '{& props-form}))
+
+(defmethod ana/error-message warning-invalid-hooks-usage
+  [warning-type {:keys [form state] :as info}]
+  (format "Invalid hooks usage: %s used in %s" form (name state)))
 
 
 ;;
