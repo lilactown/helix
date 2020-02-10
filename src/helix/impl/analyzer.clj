@@ -77,7 +77,8 @@ Example: ($ %s %s ...)"
 
 
 (defn hook? [x]
-  (and (symbol? x) (string/starts-with? (name x) "use")))
+  (and (symbol? x)
+       (string/starts-with? (name x) "use-")))
 
 (defn hook-expr?
   [x]
