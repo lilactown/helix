@@ -45,5 +45,9 @@ to the React team should not be the default.
 This long train of thought about state management, rendering methods, and
 performance is why the (pretty rough, not optimized) hiccup interperter was
 removed when moving from the hx name to helix. It didn't fit with the overall
-goal of giving users a performant, ergonomic method for creating React
+goal of giving users a performant, ergonomic default method for creating React
 applications.
+
+If you want to use libraries like [sablono](https://github.com/r0man/sablono),
+[hicada](https://github.com/rauhs/hicada) or even [hx](https://github.com/Lokeh/hx/)
+hiccup parser, you can easily add that by [creating a custom macro](./docs/pro-tips.md#create-a-custom-macro).
