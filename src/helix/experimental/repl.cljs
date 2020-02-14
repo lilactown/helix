@@ -7,7 +7,7 @@
 (defn on-commit-fiber-root [id root maybe-priority-level did-error?]
   (swap! id->root assoc id root))
 
-(defn inject-hook []
+(defn inject-hook! []
   (let [hook (gobj/get js/window "__REACT_DEVTOOLS_GLOBAL_HOOK__")
         onCommitFiberRoot (gobj/get hook "onCommitFiberRoot")]
     (gobj/set hook "onCommitFiberRoot"
