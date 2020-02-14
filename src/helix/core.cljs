@@ -24,6 +24,9 @@
 (def create-element react/createElement)
 
 
+(def create-context react/createContext)
+
+
 ;; this is to enable calling `(.createElement (get-react))` without doing
 ;; a dynamic arity dispatch. See https://github.com/Lokeh/helix/issues/20
 (defn get-react [] react)
