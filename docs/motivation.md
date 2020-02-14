@@ -13,10 +13,10 @@ ClojureScript
 Helix accomplishes this by providing a collection of macros for creating
 components and elements.
 
-Years ago, the only way to build stateful React components was by defining a
-JavaScript class that extends React’s Component class and implements various
-lifecycle handlers. Most ClojureScript wrappers interop with this way of
-defining components. Since the release of [React Hooks](https://reactjs.org/docs/hooks-intro.html),
+Years ago, the only way to build stateful React components was to define a
+JavaScript class that extended React’s `Component` class and implement various
+lifecycle handlers. Most ClojureScript wrappers interop through this way of
+building components. Since the release of [React Hooks](https://reactjs.org/docs/hooks-intro.html),
 a modern component is a JavaScript function that takes in a props object, and
 returns React Element objects.
 
