@@ -159,13 +159,6 @@ a [React Context](https://reactjs.org/docs/context.html) value.
 ;;                     :children #js [ ... ]}
 ```
 
-### Creating elements dynamically
-
-Sometimes you need more dynamism than the `$` macro can give you. In 99% of the
-cases, `$` should be fine, but there is also the `$$` function which will do
-all interpretation of type and props at runtime. This is slower, but more
-dynamic and gives you all of the other semantics for native elements and props.
-
 ### Factory functions
 
 Factory functions can be used instead of calls to `$`. Factory functions will
@@ -174,7 +167,7 @@ slower.
 
 ```clojure
 (ns my-app.feature
-  (:require [helix.core :refer [defnc]]
+  (:require [helix.core :refer [defnc factory]]
             [helix.dom :as d]))
 
 (defnc MyComponent [{:keys [name on-click]}]
