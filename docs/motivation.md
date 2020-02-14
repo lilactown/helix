@@ -72,8 +72,8 @@ So an example of a component that determines whether it’s “on” or “off�
 ```
 
 This is mechanically tiresome, but consistent. Because of this, a wrapping
-library can still be warranted to handle easily converting to and from JS
-objects. Here’s how that component would look in helix:
+library can help us easily handle converting to and from JS objects. Here’s how
+that component would look in helix:
 
 ```clojure
 (defnc my-component
