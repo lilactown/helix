@@ -50,4 +50,4 @@ applications.
 
 If you want to use libraries like [sablono](https://github.com/r0man/sablono),
 [hicada](https://github.com/rauhs/hicada) or even [hx](https://github.com/Lokeh/hx/)
-hiccup parser, you can easily add that by [creating a custom macro](./docs/pro-tips.md#create-a-custom-macro).
+hiccup parser, you can easily add that by [creating a custom macro](./pro-tips.md#create-a-custom-macro).
