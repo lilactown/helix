@@ -42,13 +42,13 @@ This is simple enough to translate to CLJS:
 React Hooks are motivating because they vastly simplify both the code required
 to build components, and the mental model of how components work. Before,
 understanding React’s lifecycle methods and how they mapped to how and when your
-code would run was quite confusing. [React Hooks mental model](https://reactjs.org/docs/hooks-faq.html#how-do-lifecycle-methods-correspond-to-hooks),
+code would run was quite confusing. [React Hooks mental model](https://reactjs.org/docs/hooks-faq.html#how-do-lifecycle-methods-correspond-to-hooks) is smaller,
 and removes an amount of subtle bugs that hampered many React applications and
 libraries.
 
 They also provide a migration path to being “safe” in Concurrent mode (e.g. your
 app will have less bugs when trying to migrate to Concurrent mode).
-[Concurrene mode](https://reactjs.org/docs/concurrent-mode-intro.html) opens up
+[Concurrent mode](https://reactjs.org/docs/concurrent-mode-intro.html) opens up
 a whole slew of fantastic UX and DX improvements that should not be ignored. 
 
 However, two issues appear quickly when attempting to write CLJS applications
