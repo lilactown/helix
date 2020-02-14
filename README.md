@@ -19,11 +19,12 @@ ClojureScript optimized for modern React development.
 
 (defnc App []
   (let [[state set-state] (hooks/use-state {:name "Helix User"})]
-    (d/div (d/h1 "Welcome!")
-           ;; create elements out of components
-           ($ Greeting {:name (:name state)})
-           (d/input {:value name 
-                     :on-change #(set-state assoc :name (.. % -target -value))}))))
+    (d/div
+     (d/h1 "Welcome!")
+      ;; create elements out of components
+      ($ Greeting {:name (:name state)})
+      (d/input {:value name
+                :on-change #(set-state assoc :name (.. % -target -value))}))))
 
 ;; start your app with your favorite React renderer
 (rdom/render ($ App) (js/document.getElementById "app"))
