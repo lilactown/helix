@@ -86,8 +86,8 @@ that component would look in helix:
 ```
 
 The defnc macro does the work of coercing the props object into something that
-can be destructured easily. The div macro (d here is an alias of helix.dom)
-creates the “div” element and $ macro creates a new my-component element,
+can be destructured easily. The `div` macro (`d` here is an alias of `helix.dom`)
+creates the “div” element and `$` macro creates a new `my-component` element,
 handling coercion of the map literal we pass in into a JS object in the most
 performant way possible.
 
