@@ -50,6 +50,7 @@ react yourself using webpack, ensuring it is provided as the name `"react"`.
 
 ## Documentation
 
+- [Why Helix](./docs/motivation.md)
 - [Creating Components](./docs/creating-components.md)
   - [Props](./docs/creating-components.md#props)
   - [Interop](./docs/creating-components.md#interop)
