@@ -79,6 +79,9 @@ react yourself using webpack, ensuring it is provided as the name `"react"`.
   - [Fast Refresh](./docs/experiments.md#fast-refresh)
 - [Pro-tips](./docs/pro-tips.md)
   - [Create a custom macro](./docs/pro-tips.md#create-a-custom-macro)
+- [Frequently Asked Questions](./docs/faq.md)
+  - [What about hx?](./docs/faq.md#what-about-hx)
+  - [What about hiccup?](./docs/faq.md#what-about-hiccup)
 
 
 Other resources:
