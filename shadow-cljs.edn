@@ -15,7 +15,7 @@
         :output-dir "resources/public/dev/cljs-out"
         :asset-path "/cljs-out"
         :modules {:shared {}
-                  :dev-main {:entries [workshop]
+                  :dev-main {:entries [workshop.main]
                              :depends-on #{:shared}}
                   :refresh {:entries [refresh-example]
                             :depends-on #{:shared}}}
