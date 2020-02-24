@@ -6,11 +6,11 @@
   #?(:cljs (:require-macros [helix.hooks])))
 
 #?(:cljs
-   (do (def ^:private raw-use-effect react/useEffect)
-       (def ^:private raw-use-layout-effect react/useLayoutEffect)
-       (def ^:private raw-use-memo react/useMemo)
-       (def ^:private raw-use-callback react/useCallback)
-       (def ^:private raw-use-imperative-handle react/useImperativeHandle)))
+   (do (def raw-use-effect react/useEffect)
+       (def raw-use-layout-effect react/useLayoutEffect)
+       (def raw-use-memo react/useMemo)
+       (def raw-use-callback react/useCallback)
+       (def raw-use-imperative-handle react/useImperativeHandle)))
 
 
 
@@ -95,7 +95,7 @@
 
 ;; React `useEffect` expects either a function or undefined to be returned
 #?(:cljs
-   (defn- wrap-fx [f]
+   (defn wrap-fx [f]
      (fn wrap-fx-return []
        (let [x (f)]
          (if (fn? x)
@@ -149,14 +149,15 @@
              (to-array deps))))
 
 
-(defmacro use-effect
-  [deps & body]
-  (deps-macro-body
-   &env deps body
-   (fn
-     ([fn-body] `^clj-nil (raw-use-effect (wrap-fx (fn [] ~@fn-body))))
-     ([deps fn-body]
-      `^clj-nil (raw-use-effect (wrap-fx (fn [] ~@fn-body)) ~deps)))))
+#?(:clj
+   (defmacro use-effect
+     [deps & body]
+     (deps-macro-body
+      &env deps body
+      (fn
+        ([fn-body] `^clj-nil (raw-use-effect (wrap-fx (fn [] ~@fn-body))))
+        ([deps fn-body]
+         `^clj-nil (raw-use-effect (wrap-fx (fn [] ~@fn-body)) ~deps))))))
 
 
 #?(:cljs
@@ -172,13 +173,14 @@
       (react/useEffect (wrap-fx f) (to-array deps)))))
 
 
-(defmacro use-layout-effect [deps & body]
-  (deps-macro-body
-   &env deps body
-   (fn
-     ([fn-body] `^clj-nil (raw-use-layout-effect (wrap-fx (fn [] ~@fn-body))))
-     ([deps fn-body]
-      `^clj-nil (raw-use-layout-effect (wrap-fx (fn [] ~@fn-body)) ~deps)))))
+#?(:clj
+   (defmacro use-layout-effect [deps & body]
+     (deps-macro-body
+      &env deps body
+      (fn
+        ([fn-body] `^clj-nil (raw-use-layout-effect (wrap-fx (fn [] ~@fn-body))))
+        ([deps fn-body]
+         `^clj-nil (raw-use-layout-effect (wrap-fx (fn [] ~@fn-body)) ~deps))))))
 
 
 #?(:cljs
@@ -191,22 +193,23 @@
       (react/useLayoutEffect (wrap-fx f) (to-array deps)))))
 
 
-(defmacro use-memo
-  [deps & body]
-  (deps-macro-body
-   &env deps body
-   (fn
-     ([fn-body]
-      (vary-meta
-        `(raw-use-memo (fn [] ~@fn-body))
-        merge
-        {:tag (hana/inferred-type &env fn-body)}))
-     ([deps fn-body]
-      (vary-meta
-        `(raw-use-memo (fn [] ~@fn-body)
-                       ~deps)
-        merge
-        {:tag (hana/inferred-type &env (last fn-body))})))))
+#?(:clj
+   (defmacro use-memo
+     [deps & body]
+     (deps-macro-body
+      &env deps body
+      (fn
+        ([fn-body]
+         (vary-meta
+          `(raw-use-memo (fn [] ~@fn-body))
+          merge
+          {:tag (hana/inferred-type &env fn-body)}))
+        ([deps fn-body]
+         (vary-meta
+          `(raw-use-memo (fn [] ~@fn-body)
+                         ~deps)
+          merge
+          {:tag (hana/inferred-type &env (last fn-body))}))))))
 
 
 #?(:cljs
@@ -219,14 +222,15 @@
       (react/useMemo f (to-array deps)))))
 
 
-(defmacro use-callback
-  [deps & body]
-  (deps-macro-body
-   &env deps body
-   (fn
-     ([fn-body] `^function (raw-use-callback ~@fn-body))
-     ([deps fn-body] `^function (raw-use-callback ~@fn-body
-                                                  ~deps)))))
+#?(:clj
+   (defmacro use-callback
+     [deps & body]
+     (deps-macro-body
+      &env deps body
+      (fn
+        ([fn-body] `^function (raw-use-callback ~@fn-body))
+        ([deps fn-body] `^function (raw-use-callback ~@fn-body
+                                                     ~deps))))))
 
 #?(:cljs
    (defn use-callback*
@@ -238,15 +242,16 @@
       (react/useCallback f (to-array deps)))))
 
 
-(defmacro use-imperative-handle
-  [ref deps & body]
-  (deps-macro-body
-   &env deps body
-   (fn
-     ([fn-body] `(raw-use-imperative-handle ref (fn [] ~@fn-body)))
-     ([deps fn-body] `(raw-use-imperative-handle
-                       (fn [] ~@fn-body)
-                       ~deps)))))
+#?(:clj
+   (defmacro use-imperative-handle
+     [ref deps & body]
+     (deps-macro-body
+      &env deps body
+      (fn
+        ([fn-body] `(raw-use-imperative-handle ref (fn [] ~@fn-body)))
+        ([deps fn-body] `(raw-use-imperative-handle
+                          (fn [] ~@fn-body)
+                          ~deps))))))
 
 
 #?(:cljs
