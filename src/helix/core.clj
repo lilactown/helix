@@ -136,14 +136,12 @@
         ;; feature flags
         flag-fast-refresh? (:fast-refresh feature-flags)
         flag-check-invalid-hooks-usage? (:check-invalid-hooks-usage feature-flags)
-        flag-create-factory? (:create-factory feature-flags)]
+        flag-define-factory? (:define-factory feature-flags)]
     (when flag-check-invalid-hooks-usage?
       (when-some [invalid-hooks (->> (map hana/invalid-hooks-usage body)
                                      (flatten)
                                      (filter (comp not nil?))
                                      (seq))]
-        #_(throw (ex-info "Invalid hooks usage"
-                          {:invalid-hooks invalid-hooks}))
         (doseq [invalid-hook invalid-hooks]
           (hana/warn hana/warning-invalid-hooks-usage
                      &env
@@ -151,7 +149,9 @@
     `(do ~(when flag-fast-refresh?
             `(if ^boolean goog/DEBUG
                (def ~sig-sym (signature!))))
-         (def ~display-name
+         (def ~(if flag-define-factory?
+                 (symbol (str display-name "-render-type"))
+                 display-name)
            ~@(when-not (nil? docstring)
                (list docstring))
            (-> ~(fnc* display-name props-bindings
@@ -165,9 +165,9 @@
                  (doto (goog.object/set "displayName" ~fully-qualified-name)))
                ~@(-> opts :wrap)))
 
-         ~(when flag-create-factory?
-            `(def ~(symbol (str "->" display-name))
-               (cljs-factory ~display-name)))
+         ~(when flag-define-factory?
+            `(def ~display-name
+               (cljs-factory ~(symbol (str display-name "-render-type")))))
 
          ~(when flag-fast-refresh?
             `(when ^boolean goog/DEBUG
