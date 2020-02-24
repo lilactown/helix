@@ -12,15 +12,15 @@
 
  :builds
  {:dev {:target :browser
-        :output-dir "public/dev/js"
-        :asset-path "/js"
+        :output-dir "resources/public/dev/cljs-out"
+        :asset-path "/cljs-out"
         :modules {:shared {}
-                  :main {:entries [workshop]
-                         :depends-on #{:shared}}
+                  :dev-main {:entries [workshop]
+                             :depends-on #{:shared}}
                   :refresh {:entries [refresh-example]
                             :depends-on #{:shared}}}
         :compiler-options {:devcards true}
-        :devtools {:http-root    "public/dev"
+        :devtools {:http-root    "resources/public/dev"
                    :http-port    8700
                    :preloads     [devtools.preload]}}
 
