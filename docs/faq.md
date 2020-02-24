@@ -21,7 +21,7 @@ about warming the planet up just to save a few keystrokes.
 
 Popular libraries like Reagent, which parse hiccup at runtime, ameliorates this
 performance cost by trying to give the developer tight control over when and
-where state updates trigger renders; a single state update, if it is dependend
+where state updates trigger renders; a single state update, if it is depended
 on by 3 leaf nodes, will only trigger a render of those individual leafs. React
 state, passed down by a parent, will instead trigger a render of the parent and
 the entire tree will re-render. This means that using React's local component
