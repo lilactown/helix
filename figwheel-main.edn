@@ -1,1 +1,2 @@
-{:watch-dirs ["dev" "src"]}
+{:watch-dirs ["dev" "src"]
+ :load-warninged-code true}
