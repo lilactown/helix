@@ -100,7 +100,7 @@
         (-type [_] type))))
 
 
-(defn- cljs-factory
+(defn cljs-factory
   [type]
   (-> (fn factory [& args]
         ;; put props detection here so it's easier to detect
@@ -113,7 +113,9 @@
           (apply react/createElement
                  type
                  #js {}
-                 args)))))
+                 args)))
+      (specify! IExtractType
+        (-type [_] type))))
 
 
 (defn extract-cljs-props
