@@ -195,13 +195,14 @@
 
 
 (defnc factory-fn-component
-  [_]
+  [{:keys [foo bar]}]
   {:helix/features {:define-factory true}}
-  (d/div "hello"))
+  (d/div "hello " foo bar))
 
 
 (dc/defcard define-factory
-  (factory-fn-component))
+  (<> (factory-fn-component {:foo "baz" :bar 42})
+      ($ (helix/type factory-fn-component) {:foo "asdf" :bar "jkl"})))
 
 
 ;;
