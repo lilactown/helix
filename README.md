@@ -23,7 +23,7 @@ ClojureScript optimized for modern React development.
      (d/h1 "Welcome!")
       ;; create elements out of components
       ($ Greeting {:name (:name state)})
-      (d/input {:value name
+      (d/input {:value (:name state)
                 :on-change #(set-state assoc :name (.. % -target -value))}))))
 
 ;; start your app with your favorite React renderer
