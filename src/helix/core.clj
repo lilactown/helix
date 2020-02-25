@@ -179,6 +179,38 @@
          ~display-name)))
 
 
+;;
+;; Custom hooks
+;;
+
+
+(defmacro defhook [sym & body]
+  (let [[docstring params body] (if (string? (first body))
+                                  [(first body) (second body) (drop 2 body)]
+                                  [nil (first body) (rest body)])
+        [opts body] (if (map? (first body))
+                      [(first body) (rest body)]
+                      [nil body])
+        feature-flags (:helix/features opts)
+
+        ;; feature flags
+        flag-fast-refresh? (:fast-refresh feature-flags)
+        flag-check-invalid-hooks-usage? (:check-invalid-hooks-usage feature-flags)]
+    (when-not (string/starts-with? (str sym) "use")
+      (hana/warn hana/warning-invalid-hook-name &env {:form &form}))
+    `(defn ~(with-meta sym {:helix/hook? true})
+      ;; use ~@ here so that we don't emit `nil`
+      ~@(when-not (nil? docstring) (list docstring))
+      ~params
+      ~@body)))
+
+
+
+;;
+;; Class components
+;;
+
+
 (defn static? [form]
   (boolean (:static (meta form))))
 
