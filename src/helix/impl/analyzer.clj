@@ -13,6 +13,8 @@
 
 (def warning-invalid-hooks-usage ::invalid-hooks-usage)
 
+(def warning-invalid-hook-name ::invalid-hook-name)
+
 (defn warn [warning-type env extras]
   (ana/warning warning-type env extras))
 
@@ -32,6 +34,10 @@ Example: ($ %s %s ...)"
 (defmethod ana/error-message warning-invalid-hooks-usage
   [warning-type {:keys [form state] :as info}]
   (format "Invalid hooks usage: %s used in %s" form (name state)))
+
+(defmethod ana/error-message warning-invalid-hook-name
+  [warning-type {:keys [form] :as info}]
+  (format "Invalid hook name defined in %s" form))
 
 
 ;;
