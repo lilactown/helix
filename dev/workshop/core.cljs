@@ -38,7 +38,7 @@
     (d/div
      (d/input {:value name
                :on-change #(set-state assoc :name (.. % -target -value))})
-     (subcomponent {:name name}))))
+     ($ subcomponent {:name name}))))
 
 
 (dc/defcard use-state
@@ -192,6 +192,16 @@
 
 (dc/defcard custom-effect-test-card
   (<> ($ custom-effect-test {:deps :always})))
+
+
+(defnc factory-fn-component
+  [_]
+  {:helix/features {:define-factory true}}
+  (d/div "hello"))
+
+
+(dc/defcard define-factory
+  (factory-fn-component))
 
 
 ;;
