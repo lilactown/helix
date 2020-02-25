@@ -15,13 +15,13 @@ with that same information, like [React.createElement](https://reactjs.org/docs/
 ($ "div" "hello")
 ;; => #js {:type "div" :props #js {:children "hello"}}
 
-($ MyComponent {:data {:foo "bar"}} "red text in a div")
+($ my-component {:data {:foo "bar"}} "red text in a div")
 ;; => #js {:type MyComponent :props #js {:data {:foo "bar"}}}
 
-($ MyComponent ($ "div" "first")
+($ my-component ($ "div" "first")
                ($ "div" "second"
                         ($ "span" "last")))
-;; => #js {:type MyComponent
+;; => #js {:type my-component
 ;;         :props #js {:children #js [#js {:type "div"
 ;;                                         :props #js {:children "first"}}
 ;;                                    #js {:type "div"
@@ -82,8 +82,8 @@ syntax is meant to mirror dynamic arity in function definitions.
 ;; dynamic props
 (def extra-props {:prop3 "baz"})
 
-($ MyComponent {:prop1 "foo" :prop2 "bar" & extra-props})
-;; => #js {:type MyComponent :props #js {:prop1 "foo" :prop2 "bar" :prop3 "baz"}}
+($ my-component {:prop1 "foo" :prop2 "bar" & extra-props})
+;; => #js {:type my-component :props #js {:prop1 "foo" :prop2 "bar" :prop3 "baz"}}
 ```
 
 Props in the dynamic map will override props that are defined statically.
@@ -91,8 +91,8 @@ Props in the dynamic map will override props that are defined statically.
 ```clojure
 (def extra-props {:b 3})
 
-($ MyComponent {:a 1 :b 2 & extra-props})
-;; => #js {:type MyComponent :props #js {:a 1 :b 3}}
+($ my-component {:a 1 :b 2 & extra-props})
+;; => #js {:type my-component :props #js {:a 1 :b 3}}
 ```
 
 ## helix.dom
@@ -137,8 +137,8 @@ a [React Context](https://reactjs.org/docs/context.html) value.
 (helix.core/provider
   {:context my-context
    :value "overrides default value"}
-  ($ SomeComponent)
-  ($ OtherComponent))
+  ($ some-component)
+  ($ other-component))
 ;; => #js {:type (.-Provider my-context)
 ;;         :props #js {:value "overrides default value"
 ;;                     :children #js [ ... ]}}
@@ -151,9 +151,9 @@ a [React Context](https://reactjs.org/docs/context.html) value.
 
 ```clojure
 (helix.core/suspense
-  {:fallback ($ Spinner)}
+  {:fallback ($ spinner)}
   ($ "div"
-     ($ OtherComponent)))
+     ($ other-component)))
 ;; => #js {:type react/Suspense
 ;;         :props #js {:fallback #js {:type Spinner}}
 ;;                     :children #js [ ... ]}
