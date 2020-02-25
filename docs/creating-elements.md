@@ -16,7 +16,7 @@ with that same information, like [React.createElement](https://reactjs.org/docs/
 ;; => #js {:type "div" :props #js {:children "hello"}}
 
 ($ my-component {:data {:foo "bar"}} "red text in a div")
-;; => #js {:type MyComponent :props #js {:data {:foo "bar"}}}
+;; => #js {:type my-component :props #js {:data {:foo "bar"}}}
 
 ($ my-component ($ "div" "first")
                ($ "div" "second"
