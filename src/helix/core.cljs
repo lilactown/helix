@@ -120,7 +120,7 @@
 
 (defn extract-cljs-props
   [o]
-  (when (and ^boolean goog/DEBUG (map? o))
+  (when (and ^boolean goog/DEBUG (or (map? o) (nil? o)))
     (throw (ex-info "Props received were a map. This probably means you're calling your component as a function." {:props o})))
   (if-let [props (gobj/get o "helix/props")]
     (assoc props :children (gobj/get o "children"))
