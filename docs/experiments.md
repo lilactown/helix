@@ -9,7 +9,7 @@ just like `defn`. In that map, passing a map of feature flags to the
 `:helix/features` allows you to enable/disable certain features.
 
 ```clojure
-(defnc MyComponent [props]
+(defnc my-component [props]
   {:helix/features {:some-flag true}}
   ...)
 ```
@@ -27,7 +27,7 @@ This experimental feature can be enabled with the `:check-invalid-hooks-usage`
 flag.
 
 ```clojure
-(defnc MyComponent [props]
+(defnc my-component [props]
   {:helix/features {:check-invalid-hooks-usage true}}
   (when (:foo props)
     (hooks/use-effect :once (do-foo (:foo props))))
@@ -57,7 +57,7 @@ To enable this feature, you will need to do two things. First, add
 and then in your component, enable the `:fast-refresh` flag.
 
 ```clojure
-(defnc MyComponent [props]
+(defnc my-component [props]
   {:helix/features {:fast-refresh true}}
   ...)
 ```
