@@ -175,10 +175,13 @@
       ($ ClassComponent {:foo "baz"})))
 
 
-(defn use-custom-effect [deps f]
+(helix/defhook use-custom-effect
+  [deps f]
   (hooks/use-effect deps (f)))
 
-(defnc custom-effect-test [{:keys [deps]}]
+(defnc custom-effect-test
+  [{:keys [deps]}]
+  {:helix/features {:check-invalid-hooks-usage true}}
   (let [[state set-state] (hooks/use-state nil)
         mounted? (hooks/use-ref false)]
     (use-custom-effect
