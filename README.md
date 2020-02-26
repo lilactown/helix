@@ -44,6 +44,10 @@ renderer you are targeting (e.g. `react-dom`).
 npm i react react-dom
 ```
 
+### shadow-cljs and react-native
+
+See [React Native](./docs/react-native.md).
+
 ### lein-cljsbuild / figwheel-main / raw CLJS
 
 Use [CLJSJS](https://github.com/cljsjs/packages/tree/master/react) or package
@@ -83,6 +87,7 @@ react yourself using webpack, ensuring it is provided as the name `"react"`.
 - [Frequently Asked Questions](./docs/faq.md)
   - [What about hx?](./docs/faq.md#what-about-hx)
   - [What about hiccup?](./docs/faq.md#what-about-hiccup)
+- [React Native](./docs/react-native.md)
 
 
 Other resources:
