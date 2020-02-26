@@ -15,8 +15,8 @@ developing with React Native.
 
 In general, the best way to get set up with CLJS + React Native is to create a
 `react-native` directory inside your project and have shadow-cljs compile into
-`react-native/target`. As in [https://github.com/thheller/reagent-react-native](this
-example project).
+`react-native/target`. As in [this example
+project](https://github.com/thheller/reagent-react-native).
 
 ```bash
 $ npx react-native@0.61.5 init MyApp
