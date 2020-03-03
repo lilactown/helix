@@ -84,7 +84,7 @@
     `(fn ^js/React.Element ~display-name
        [props# maybe-ref#]
        (let [~props-bindings [(extract-cljs-props props#) maybe-ref#]]
-         (do ~@body)))))
+         ~@body))))
 
 
 (defmacro defnc
