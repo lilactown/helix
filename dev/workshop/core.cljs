@@ -129,7 +129,8 @@
   (let [div "div"
         props {:style {:color "blue"}}
         children '("foo" "bar")]
-    ($ div {& props} children "baz")))
+    (<> "&" ($ div {& props} children "baz")
+        ":&" ($ div {:& props} children "baz"))))
 
 (dc/defcard dynamic
   ($ dynamic-test))
