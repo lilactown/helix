@@ -74,10 +74,11 @@
 
 
 (defn -native-props
-  ([m] (if-let [spread-sym (get m '&)]
-         `(merge-obj ~(-native-props (dissoc m '&) (primitive-obj))
-                     (-native-props ~spread-sym))
-         (-native-props m (primitive-obj))))
+  ([m] #?(:clj (if-let [spread-sym (get m '&)]
+                 `(merge-obj ~(-native-props (dissoc m '&) (primitive-obj))
+                             (-native-props ~spread-sym))
+                 (-native-props m (primitive-obj)))
+          :cljs (-native-props m (primitive-obj))))
   ([m o]
    (if (seq m)
      (recur (rest m)
