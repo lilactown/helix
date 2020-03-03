@@ -74,7 +74,7 @@
 
 
 (defn -native-props
-  ([m] (if-let [spread-sym (m '&)]
+  ([m] (if-let [spread-sym (get m '&)]
          `(merge-obj ~(-native-props (dissoc m '&) (primitive-obj))
                      (-native-props ~spread-sym))
          (-native-props m (primitive-obj))))
