@@ -59,9 +59,6 @@ as add `{:helix/features {:fast-refresh true}}` to every component.
   (refresh/inject-hook!))
 ```
 
-To automatically add `{:fast-refresh true}` to every component, it's recommended to
-[create a custom defnc macro](pro-tips.md#create-a-custom-macro).
-
 Finally, it's important to note that you must tap the "Disable Fast Refresh" option
 from within the simulator. This doesn't disable Fast Refresh altogether, but rather
 disables React Native's default hooking into Fast Refresh. We are doing our own
@@ -69,3 +66,40 @@ manual hooking into Fast Refresh as per the the above calls to
 `helix.experimental.refresh`.
 
 <img src="disable-fast-refresh.png" width="50%" />
+
+## Custom `defnc` macro
+
+To automatically add `{:fast-refresh true}` to every component, it's recommended to
+[create a custom defnc macro](pro-tips.md#create-a-custom-macro).
+
+If you want hiccup syntax, it's recommended to use
+[hx](https://github.com/Lokeh/hx/)'s fast runtime hiccup interpreter. For example,
+here is a custom macro that expects its body to be hiccup:
+
+```clojure
+(ns myapp.lib
+  (:require [helix.core]
+            [hx.react]))
+
+(defmacro defnc [type params & body]
+  (let [default-opts {:helix/features {:fast-refresh true}}
+        [opts body] (if (map? (first body))
+                      [(first body) (rest body)]
+                      [{} body])]
+    `(helix.core/defnc ~type ~params
+       ~(merge default-opts opts)
+       (hx.react/f (do ~@body)))))
+```
+
+With this macro, the above example `Root` component would become:
+
+```
+(defnc Root [props]
+  [rn/View {:style {:flex 1, :align-items "center", :justify-content "center"}}
+   [rn/Text {:style {:font-size 36}}
+    "Hello Helix!"]])
+```
+
+Note that `hx/f` interprets the hiccup, converts `style` props to `#js` objects, and
+converts keys from kebab-case to camelCase. This happens at runtime per component
+render, so there is a small performance cost.
