@@ -74,8 +74,8 @@ Other special props:
 ### Dynamic props
 
 Props that need to be determined at runtime can be passed in and merged with the
-props map using the `&` key. These are colloquially referred to as "spread
-props", which is a reference to usage of JS' spread operator with JSX and the
+props map using the `&` or `:&` key. This is colloquially referred to as "spread
+props", which is a reference to usage of JS' spread operator with JSX. The
 syntax is meant to mirror dynamic arity in function definitions.
 
 ```clojure
@@ -94,6 +94,11 @@ Props in the dynamic map will override props that are defined statically.
 ($ my-component {:a 1 :b 2 & extra-props})
 ;; => #js {:type my-component :props #js {:a 1 :b 3}}
 ```
+
+You can use either the symbol `&` or the keyword `:&`, as some tools like
+Cursive, joker, etc. use static analysis to find unimported symbols, which
+`&` looks like. Try and be consistent with which you use, especiallly on a
+team!
 
 ## helix.dom
 
