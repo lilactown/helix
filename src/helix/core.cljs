@@ -29,7 +29,7 @@
 
 ;; this is to enable calling `(.createElement (get-react))` without doing
 ;; a dynamic arity dispatch. See https://github.com/Lokeh/helix/issues/20
-(defn get-react [] react)
+(defn ^js/React get-react [] react)
 
 
 (defn $
