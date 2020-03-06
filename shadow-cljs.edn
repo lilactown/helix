@@ -18,11 +18,13 @@
                   :main {:entries [workshop]
                          :depends-on #{:shared}}
                   :refresh {:entries [refresh-example]
-                            :depends-on #{:shared}}}
+                            :depends-on #{:shared}}
+                  :fast-refresh {:entries [fast-refresh-example]
+                                 :depends-on #{:shared}}}
         :compiler-options {:devcards true}
         :devtools {:http-root    "public/dev"
                    :http-port    8700
-                   :preloads     [devtools.preload]}}
+                   :preloads     [devtools.preload helix.experimental.refresh]}}
 
   ;; :test     {:target    :browser-test
   ;;            :test-dir  "public/test/js"
