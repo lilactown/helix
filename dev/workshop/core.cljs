@@ -29,7 +29,16 @@
 
 (defnc memoized
   [{:keys [foo bar]}]
-  {:wrap [(r/memo)]}
+  {:wrap [(helix/memo)]}
+  (let [count (hooks/use-ref 0)]
+    (hooks/use-layout-effect
+     :always
+     (swap! count inc))
+    (pr-str foo bar @count)))
+
+(defnc memoized-key
+  [{:keys [foo bar]}]
+  {:wrap [(helix/memo :bar)]}
   (let [count (hooks/use-ref 0)]
     (hooks/use-layout-effect
      :always
@@ -45,8 +54,14 @@
       (d/div "Top Render Count:" render-count)
       (d/button {:on-click #(force-render inc)} "Render"))
      (d/div
-      ($ memoized
-        {:foo (str "foo" (quot render-count 5)) :bar "bar"})))))
+      (d/div
+       "memoized "
+       ($ memoized
+          {:foo (str "foo" (quot render-count 5)) :bar "bar"}))
+      (d/div
+       "memoized-key "
+       ($ memoized-key
+          {:foo (str "foo" (quot render-count 5)) :bar "bar"}))))))
 
 
 (dc/defcard memoized-props

@@ -127,6 +127,19 @@
     (bean/bean o)))
 
 
+(defn memo
+  "Like React.memo, but passes props as CLJS map-likes instead of JS objects."
+  ([component] (react/memo component))
+  ([component compare]
+   (react/memo
+    component
+    (fn memo-compare
+      [o o']
+      (compare
+       (extract-cljs-props o)
+       (extract-cljs-props o'))))))
+
+
 
 ;;
 ;; -- class components
