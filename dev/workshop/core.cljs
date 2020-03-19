@@ -27,6 +27,32 @@
                                  :camelCase :camelCase}))
 
 
+(defnc memoized
+  [{:keys [foo bar]}]
+  {:wrap [(r/memo)]}
+  (let [count (hooks/use-ref 0)]
+    (hooks/use-layout-effect
+     :always
+     (swap! count inc))
+    (pr-str foo bar @count)))
+
+
+(defnc memoized-test
+  []
+  (let [[render-count force-render] (hooks/use-state 0)]
+    (<>
+     (d/div
+      (d/div "Top Render Count:" render-count)
+      (d/button {:on-click #(force-render inc)} "Render"))
+     (d/div
+      ($ memoized
+        {:foo (str "foo" (quot render-count 5)) :bar "bar"})))))
+
+
+(dc/defcard memoized-props
+  ($ memoized-test))
+
+
 (defnc subcomponent
   [{:keys [name] :as props}]
   (d/div name))
