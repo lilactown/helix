@@ -84,11 +84,11 @@ component is wrapped in them.
 
 ```clojure
 (defnc memoized [props]
-  {:wrap [(React.memo)]}
+  {:wrap [(helix.core/memo)]}
   "I am memoized!")
 ```
 
-The `Memoized` component will be passed to `(React.memo)` (and any other HOCs
+The `Memoized` component will be passed to `(helix.core/memo)` (and any other HOCs
 given to the vector) using the [thread-first](https://clojuredocs.org/clojure.core/-%3E)
 macro.
 
@@ -100,7 +100,7 @@ macro.
   "I am memoized")
 
 (def memoized (-> Memoized--Render
-                  (React.memo)))
+                  (helix.core/memo)))
 ```
 
 
