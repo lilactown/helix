@@ -142,6 +142,25 @@ To only run the effect once on mount, you may pass the `:once` keyword:
   (js/console.log foo bar))
 ```
 
+Using it in real app:
+```clojure
+(defnc App []
+  (let [[state set-state] (hooks/use-state {:height js/window.innerHeight ;; or someother Height stuff
+                                            ...})]
+    (hooks/use-effect
+      :once
+      (let [resizer #(set-state assoc :height js/window.innerHeight)]
+        (js/window.addEventListener "resize" resizer)
+        #(js/window.removeEventListener "resize" resizer))) ...
+```
+
+Wrap it into component or something else:
+```clojure
+(defnc Principal [{:keys [height]}]
+(... {:style #js {:height height} ...)
+)
+```
+
 Finally, helix can use the ClojureScript analyzer to determine which local
 bindings are used in your Effect and automatically add those to your dependency
 vector. To do this, use the keyword `:auto-deps`:
