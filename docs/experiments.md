@@ -58,6 +58,9 @@ package. Then, we'll need to add a hook to run after our code has been reloaded
 to trigger a React refresh. Finally, we'll enable the fast-refresh feature flag
 in our components.
 
+For an example of how this all fits together see the [helix-todo-mvc](https://github.com/Lokeh/helix-todo-mvc)
+project.
+
 ### Triggering a refresh
 
 The suggested way to trigger a refresh is by adding an "after-load" hook in a
