@@ -52,9 +52,65 @@ and creating a signature based on the hooks used. When you change the hooks
 used in the component, it will re-initialize the state; otherwise, it will
 preserve the state.
 
-To enable this feature, you will need to do two things. First, add
-`helix.experimental.refresh` to your preloads (see shadow-cljs or figwheel docs)
-and then in your component, enable the `:fast-refresh` flag.
+To enable this feature, you will need to do three things. First, we'll need to
+install the correct version of the [react-refresh](https://github.com/facebook/react/tree/master/packages/react-refresh)
+package. Then, we'll need to add a hook to run after our code has been reloaded
+to trigger a React refresh. Finally, we'll enable the fast-refresh feature flag
+in our components.
+
+### Triggering a refresh
+
+The suggested way to trigger a refresh is by adding an "after-load" hook in a
+[preload](https://cljs.github.io/api/compiler-options/preloads). Helix provides
+the functions to run in the preload, but not the preload itself.
+
+These docs will assume that you are using [shadow-cljs](https://github.com/thheller/shadow-cljs).
+Pull requests with figwheel docs are appreciated!
+
+In your project, create a `src/my_project/dev.cljs` file. The name is not
+important, but it will need to be consistent with the namespace we put it in and
+on the classpath, just like any other ClojureScript source file.
+
+The contents will need to look something like this:
+
+```clojure
+(ns my-project.dev
+  "A place to add preloads for developer tools!"
+  (:require
+   [helix.experimental.refresh :as r]))
+
+;; inject-hook! needs to run on application start.
+;; For ease, we run it at the top level.
+;; This function adds the react-refresh runtime to the page
+(r/inject-hook!)
+
+;; shadow-cljs allows us to annotate a function name with `:dev/after-load`
+;; to signal that it should be run after any code reload. We call the `refresh!`
+;; function, which will tell react to refresh any components which have a
+;; signature created by turning on the `:fast-refresh` feature flag.
+(defn ^:dev/after-load refresh []
+  (r/refresh!))
+```
+
+We'll need to add this file to the `:preloads` config in our project's
+`shadow-cljs.edn` file. Shadow-cljs also has an optional devtool configuration
+that will reload all namespaces in a dependency chain. If we notice that some
+changes to our app do not trigger a refresh, we can enable it to ensure that
+when we change a namespace, all downstream dependents get the latest code:
+
+```clojure
+{,,,
+
+ :builds
+ {:app {,,,
+        :devtools {
+                   :reload-strategy :full
+                   :preloads [my-project.dev]}}}}
+```
+
+### Enabling the fast-refresh flag
+
+In your components, enable the `:fast-refresh` flag.
 
 ```clojure
 (defnc my-component [props]
@@ -62,6 +118,6 @@ and then in your component, enable the `:fast-refresh` flag.
   ...)
 ```
 
-You also will want to ensure that you do not have an `after-load` function that
-re-renders the app, as that will re-mount the entire app, thus losing all of the
-benefits of Fast Refresh.
+If you want to do this for all components, it's suggested that you [create a
+custom macro](./pro-tips.md#create-a-custom-macro) that you can use throughout
+your project without needing to add all feature flags by hand.
