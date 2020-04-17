@@ -109,9 +109,11 @@
 
 
 (defn -props
-  ([m] (if-let [spread-sym (m '&)]
-         `(merge-obj ~(-props (dissoc m '&) (primitive-obj))
-                     (-props ~spread-sym))
+  ([m] (if-let [spread-sym (cond
+                             (contains? m '&) '&
+                             (contains? m :&) :&)]
+         `(merge-obj ~(-props (dissoc m spread-sym) (primitive-obj))
+                     (-props ~(get m spread-sym)))
          (-props m (primitive-obj))))
   ([m o]
    (if (seq m)
