@@ -40,6 +40,9 @@ Example: ($ %s %s ...)"
   (format "Invalid hook name defined in %s" form))
 
 
+(def resolve-var ana/resolve-var)
+
+
 ;;
 ;; -- Hooks
 ;;

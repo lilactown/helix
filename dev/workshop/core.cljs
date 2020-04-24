@@ -221,7 +221,7 @@
   [deps f]
   (hooks/use-effect deps (f)))
 
-(defnc custom-effect-test
+(defnc ^{:foo "bar"} custom-effect-test
   [{:keys [deps]}]
   {:helix/features {:check-invalid-hooks-usage true}}
   (let [[state set-state] (hooks/use-state nil)
@@ -278,7 +278,7 @@
    (.-children ^js props)))
 
 
-(defnc simple-benchmark-component []
+#_(defnc simple-benchmark-component []
   (let [[re-render set-state] (hooks/use-state 0)
         force-render #(set-state inc)
         [iterations set-iterations] (hooks/use-state 10000)

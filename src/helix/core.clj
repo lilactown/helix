@@ -36,12 +36,14 @@
                (name type)
                type)]
     (cond
-      (map? (first args)) `^js/React.Element (.createElement (get-react)
-                                              ~type
-                                              ~(if native?
-                                                 `(impl.props/native-props ~(first args))
-                                                 `(impl.props/props ~(first args)))
-                                              ~@(rest args))
+      (map? (first args))
+      `^js/React.Element (.createElement
+                          (get-react)
+                          ~type
+                          ~(if native?
+                             `(impl.props/native-props ~(first args))
+                             `(impl.props/props ~(first args)))
+                          ~@(rest args))
 
       :else `^js/React.Element (.createElement (get-react) ~type nil ~@args))))
 
@@ -149,9 +151,12 @@
     `(do ~(when flag-fast-refresh?
             `(if ^boolean goog/DEBUG
                (def ~sig-sym (signature!))))
-         (def ~(if flag-define-factory?
-                 (symbol (str display-name "-render-type"))
-                 display-name)
+         (def ~(vary-meta
+                 (if flag-define-factory?
+                   (symbol (str display-name "-render-type"))
+                   display-name)
+                 merge
+                 {:helix/component? true})
            ~@(when-not (nil? docstring)
                (list docstring))
            (-> ~(fnc* display-name props-bindings
@@ -198,7 +203,7 @@
         flag-check-invalid-hooks-usage? (:check-invalid-hooks-usage feature-flags)]
     (when-not (string/starts-with? (str sym) "use")
       (hana/warn hana/warning-invalid-hook-name &env {:form &form}))
-    `(defn ~(with-meta sym {:helix/hook? true})
+    `(defn ~(vary-meta sym merge {:helix/hook? true})
       ;; use ~@ here so that we don't emit `nil`
       ~@(when-not (nil? docstring) (list docstring))
       ~params
