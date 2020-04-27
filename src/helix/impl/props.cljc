@@ -95,6 +95,9 @@
                                   ;; React Native allows arrays of styles
                                   (into-js-array (map primitive-obj v))
                                   (primitive-obj v)))
+                :value (set-obj o "value" (if (nil? v)
+                                            ""
+                                            v))
                 (set-obj o (camel-case (kw->str k)) v))))
      #?(:clj (list* o)
         :cljs o))))
