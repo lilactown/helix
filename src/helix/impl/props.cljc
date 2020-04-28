@@ -100,7 +100,7 @@
                                                      ~v)
                                              :cljs (if (nil? v)
                                                      js/undefined
-                                                     v))
+                                                     v)))
                 (set-obj o (camel-case (kw->str k)) v))))
      #?(:clj (list* o)
         :cljs o))))
