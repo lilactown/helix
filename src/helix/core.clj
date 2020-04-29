@@ -201,7 +201,7 @@
         ;; feature flags
         flag-fast-refresh? (:fast-refresh feature-flags)
         flag-check-invalid-hooks-usage? (:check-invalid-hooks-usage feature-flags)]
-    (when-not (string/starts-with? (str sym) "use")
+    (when-not (string/starts-with? (str sym) "use-")
       (hana/warn hana/warning-invalid-hook-name &env {:form &form}))
     `(defn ~(vary-meta sym merge {:helix/hook? true})
       ;; use ~@ here so that we don't emit `nil`
@@ -219,10 +219,12 @@
 (defn static? [form]
   (boolean (:static (meta form))))
 
+
 (defn method? [form]
   (and (list? form)
        (simple-symbol? (first form))
        (vector? (second form))))
+
 
 (defn ->method [[sym-name bindings & form]]
   {:assert [(simple-symbol? sym-name)]}
@@ -230,9 +232,11 @@
         `(fn ~sym-name ~bindings
            ~@form)))
 
+
 (defn ->value [[sym-name value]]
   {:assert [(simple-symbol? sym-name)]}
   (list (str sym-name) value))
+
 
 (defmacro defcomponent
   "Defines a React class component."
