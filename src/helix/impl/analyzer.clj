@@ -168,11 +168,10 @@ Example: ($ %s %s ...)"
                     branch?-form (ensure-seq branch?-form)
                     children-form (ensure-seq children-form)
                     root-form (ensure-seq root-form)]
-                (doto (concat
-                       (map #(invalid-hooks-usage (assoc ctx :state :loop) %) branch?-form)
-                       (map #(invalid-hooks-usage (assoc ctx :state :loop) %) children-form)
-                       (map #(invalid-hooks-usage ctx %) root-form))
-                  (prn form)))
+                (concat
+                 (map #(invalid-hooks-usage (assoc ctx :state :loop) %) branch?-form)
+                 (map #(invalid-hooks-usage (assoc ctx :state :loop) %) children-form)
+                 (map #(invalid-hooks-usage ctx %) root-form)))
               ;; ('#{juxt})
               ;; ('#{sort-by})
               ;; ('#{repeatedly})
