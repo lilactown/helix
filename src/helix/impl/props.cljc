@@ -100,7 +100,7 @@
 
 #?(:clj
    (defn normalize-class [class]
-     #p (-> class
+     (-> class
          unquote-class
          clean-class)))
 
