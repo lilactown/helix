@@ -112,3 +112,20 @@
                                   :b :extra-b}]
                  (impl/props {:foo-bar :a :b :b :c :c :d :d & extra-props}))
                #js {:foo-bar :extra-foo-bar :b :extra-b :c :c :d :d}))))
+
+
+(t/deftest test-normalize-class
+  (t/testing "support seqs as :class value"
+    (t/is (= (impl/normalize-class '[foo bar])
+             "foo bar"))
+    (t/is (= (impl/normalize-class '(foo bar))
+             "foo bar"))
+    (t/is (= (impl/normalize-class ["foo" "bar"])
+             "foo bar")))
+  (t/testing "normalize string values"
+    (t/is (= (impl/normalize-class "foo bar ")
+             "foo bar"))
+    (t/is (= (impl/normalize-class "foo
+bar
+ barz")
+             "foo bar barz"))))

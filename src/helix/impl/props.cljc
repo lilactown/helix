@@ -72,6 +72,24 @@
 (defn merge-obj [o1 o2]
   #?(:cljs (js/Object.assign o1 o2)))
 
+(defn seq-to-class [class]
+  (if (sequential? class)
+    (->> class
+         (map str)
+         (string/join " "))
+    class))
+
+(defn clean-class [class]
+  (if (string? class)
+    (-> class
+        (string/replace #"[ \n]+" " ")
+        (string/trim))
+    class))
+
+(defn normalize-class [class]
+  (-> class
+      seq-to-class
+      clean-class))
 
 (defn -native-props
   ([m] #?(:clj (if-let [spread-sym (cond
@@ -88,7 +106,7 @@
                   k (key entry)
                   v (val entry)]
               (case k
-                :class (set-obj o "className" v)
+                :class (set-obj o "className" (normalize-class v))
                 :for (set-obj o "htmlFor" v)
                 :style (set-obj o "style"
                                 (if (vector? v)
