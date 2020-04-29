@@ -42,4 +42,4 @@ jobs:
       run: npx shadow-cljs compile ci
     
     - name: Run CLJS tests
-      run: npx karma start --single-run
+      run: node target/ci.js
