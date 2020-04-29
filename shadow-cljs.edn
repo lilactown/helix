@@ -29,7 +29,7 @@
              :devtools  {:http-port 8021
                          :http-root "public/test"}}
 
-  :ci       {:target :karma
+  :ci       {:target :node-test
              :output-to  "target/ci.js"
              :ns-regexp  "-test$"}
 
