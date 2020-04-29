@@ -115,17 +115,21 @@
 
 
 (t/deftest test-normalize-class
-  (t/testing "support seqs as :class value"
-    (t/is (= (impl/normalize-class '[foo bar])
-             "foo bar"))
-    (t/is (= (impl/normalize-class '(foo bar))
-             "foo bar"))
-    (t/is (= (impl/normalize-class ["foo" "bar"])
-             "foo bar")))
-  (t/testing "normalize string values"
-    (t/is (= (impl/normalize-class "foo bar ")
-             "foo bar"))
-    (t/is (= (impl/normalize-class "foo
-bar
- barz")
-             "foo bar barz"))))
+  #?(:clj
+     (do
+       (t/testing "macro expansion - normal value shall be kept as-is"
+         (t/is (= (impl/normalize-class 'foo)
+                  'foo))
+         (t/is (= (impl/normalize-class '[foo bar])
+                  '[foo bar])))
+       (t/testing "macro expansion - quoted forms shall be converted to string"
+         (t/is (= (impl/normalize-class (quote '[foo bar]))
+                  "foo bar"))
+         (t/is (= (impl/normalize-class (quote 'bar))
+                  "bar")))))
+  #?(:cljs
+     (t/testing "runtime - all shall be converted to string"
+       (t/is (= (impl/normalize-class 'foo)
+                "foo"))
+       (t/is (= (impl/normalize-class '[foo bar])
+                "foo bar")))))
