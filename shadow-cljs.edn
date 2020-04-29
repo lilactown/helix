@@ -7,7 +7,6 @@
  :dependencies
  [[binaryage/devtools "0.9.7"]
   [devcards "0.2.5"]
-  [ilk "1.0.0"]
   [cljs-bean "1.5.0"]]
 
  :builds
@@ -24,15 +23,15 @@
                    :http-port    8700
                    :preloads     [devtools.preload]}}
 
-  ;; :test     {:target    :browser-test
-  ;;            :test-dir  "public/test/js"
-  ;;            :ns-regexp "-test$"
-  ;;            :devtools  {:http-port 8021
-  ;;                        :http-root "public/test/js"}}
+  :test     {:target    :browser-test
+             :test-dir  "public/test"
+             :ns-regexp "-test$"
+             :devtools  {:http-port 8021
+                         :http-root "public/test"}}
 
-  ;; :ci       {:target :karma
-  ;;            :output-to  "target/ci.js"
-  ;;            :ns-regexp  "-test$"}
+  :ci       {:target :karma
+             :output-to  "target/ci.js"
+             :ns-regexp  "-test$"}
 
   ;; :benchmark {:target :node-script
   ;;             :main hx.benchmark/main
