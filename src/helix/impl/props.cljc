@@ -106,10 +106,13 @@
 
 #?(:cljs
    (defn normalize-class [class]
-     (-> class
-         seq-to-class
-         str
-         clean-class)))
+     (if (string? class)
+       ;; quick path
+       class
+       (-> class
+           seq-to-class
+           str
+           clean-class))))
 
 (defn -native-props
   ([m] #?(:clj (if-let [spread-sym (cond
