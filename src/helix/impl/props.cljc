@@ -79,13 +79,6 @@
          (string/join " "))
     class))
 
-(defn clean-class [class]
-  (if (string? class)
-    (-> class
-        (string/replace #"[ \n]+" " ")
-        (string/trim))
-    class))
-
 #?(:clj
    (defn unquote-class
      "Handle the case of (quote '[foo bar])"
@@ -101,8 +94,7 @@
 #?(:clj
    (defn normalize-class [class]
      (-> class
-         unquote-class
-         clean-class)))
+         unquote-class)))
 
 #?(:cljs
    (defn normalize-class [class]
@@ -111,8 +103,7 @@
        class
        (-> class
            seq-to-class
-           str
-           clean-class))))
+           str))))
 
 (defn -native-props
   ([m] #?(:clj (if-let [spread-sym (cond
