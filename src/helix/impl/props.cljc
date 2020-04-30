@@ -75,6 +75,7 @@
 (defn seq-to-class [class]
   (if (sequential? class)
     (->> class
+         (remove nil?)
          (map str)
          (string/join " "))
     class))

@@ -132,4 +132,7 @@
        (t/is (= (impl/normalize-class 'foo)
                 "foo"))
        (t/is (= (impl/normalize-class '[foo bar])
-                "foo bar")))))
+                "foo bar")))
+     (t/testing "runtime - nil shall be filtered out"
+       (t/is (= (impl/normalize-class ["foo" nil])
+                "foo")))))
