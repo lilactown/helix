@@ -59,6 +59,10 @@
                                  (cljs.core/js-obj "asdf" (helix.impl.props/->js ~'jkl))))
                  :cljs #js {:style #js [#js {:color "blue"} #js {:asdf "jkl"}]}))
           "Native props with nested literal vector style"))
+  #?(:cljs (t/testing "JS object"
+             (t/is (let [obj #js {:a 1 :b 2 :fooBar #js {:baz "jkl"}}]
+                     (eq (impl/-native-props obj)
+                         obj)))))
   #?(:clj (t/testing "Spread props"
             (t/is (eq (impl/-native-props '{:a 1 :b 2 & foo})
                       `(impl/merge-obj (cljs.core/js-obj "a" 1 "b" 2)
@@ -89,7 +93,10 @@
                #js {:fooBar :extra-foo-bar :b :extra-b :c :c :d :d}))
      (t/is (eq (let [dynamic-style {:color "blue"}]
                  (impl/native-props {:style dynamic-style}))
-               #js {:style #js {:color "blue"}}))))
+               #js {:style #js {:color "blue"}}))
+     (t/is (eq (impl/native-props {:foo "bar"
+                                   & #js {:baz "asdf"}})
+               #js {:foo "bar" :baz "asdf"}))))
 
 
 #?(:cljs
@@ -111,4 +118,7 @@
      (t/is (eq (let [extra-props {:foo-bar :extra-foo-bar
                                   :b :extra-b}]
                  (impl/props {:foo-bar :a :b :b :c :c :d :d & extra-props}))
-               #js {:foo-bar :extra-foo-bar :b :extra-b :c :c :d :d}))))
+               #js {:foo-bar :extra-foo-bar :b :extra-b :c :c :d :d}))
+     (t/is (eq (impl/props {:foo "bar"
+                                   & #js {:baz "asdf"}})
+               #js {:foo "bar" :baz "asdf"}))))

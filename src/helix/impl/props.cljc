@@ -80,7 +80,10 @@
                  `(merge-obj ~(-native-props (dissoc m spread-sym) (primitive-obj))
                              (-native-props ~(get m spread-sym)))
                  (-native-props m (primitive-obj)))
-          :cljs (-native-props m (primitive-obj))))
+          :cljs (if (map? m)
+                  (-native-props m (primitive-obj))
+                  ;; assume JS obj
+                  m)))
   ([m o]
    (if (seq m)
      (recur (rest m)
@@ -115,12 +118,15 @@
 
 
 (defn -props
-  ([m] (if-let [spread-sym (cond
-                             (contains? m '&) '&
-                             (contains? m :&) :&)]
-         `(merge-obj ~(-props (dissoc m spread-sym) (primitive-obj))
-                     (-props ~(get m spread-sym)))
-         (-props m (primitive-obj))))
+  ([m] #?(:clj (if-let [spread-sym (cond
+                                     (contains? m '&) '&
+                                     (contains? m :&) :&)]
+                 `(merge-obj ~(-props (dissoc m spread-sym) (primitive-obj))
+                             (-props ~(get m spread-sym)))
+                 (-props m (primitive-obj)))
+          :cljs (if (map? m)
+                  (-props m (primitive-obj))
+                  m)))
   ([m o]
    (if (seq m)
      (recur (rest m)
