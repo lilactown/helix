@@ -70,7 +70,8 @@
 
 
 (defn merge-obj [o1 o2]
-  #?(:cljs (js/Object.assign o1 o2)))
+  #?(:cljs (doto o1
+             (gobj/extend o2))))
 
 
 (defn -native-props
