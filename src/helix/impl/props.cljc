@@ -84,13 +84,19 @@
    (defn unquote-class
      "Handle the case of (quote '[foo bar])"
      [class]
-     (if (and (list? class)
-              (= (first class) 'quote))
+     (cond
+       (string? class)
+       class
+
+       (and (list? class)
+            (= (first class) 'quote))
        (-> class
            second
            seq-to-class
            str)
-       class)))
+
+       :default
+       `(normalize-class ~class))))
 
 #?(:clj
    (defn normalize-class [class]
