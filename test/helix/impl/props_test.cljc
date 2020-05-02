@@ -122,3 +122,32 @@
      (t/is (eq (impl/props {:foo "bar"
                                    & #js {:baz "asdf"}})
                #js {:foo "bar" :baz "asdf"}))))
+
+
+(t/deftest test-normalize-class
+  #?(:clj
+     (do
+       (t/testing "macro expansion - string value shall be kept as is"
+         (t/is (= (impl/normalize-class "foo")
+                  "foo")))
+       (t/testing "macro expansion - quoted forms shall be converted to string"
+         (t/is (= (impl/normalize-class (quote '[foo bar]))
+                  "foo bar"))
+         (t/is (= (impl/normalize-class (quote 'bar))
+                  "bar")))
+       (t/testing "macro expansion - other value shall be passed to runtime check"
+         (t/is (= (impl/normalize-class 'foo)
+                  '(helix.impl.props/normalize-class foo)))
+         (t/is (= (impl/normalize-class '[foo bar])
+                  '(helix.impl.props/normalize-class [foo bar])))
+         (t/is (= (impl/normalize-class '(vector foo bar))
+                  '(helix.impl.props/normalize-class (vector foo bar)))))))
+  #?(:cljs
+     (do (t/testing "runtime - all shall be converted to string"
+           (t/is (= (impl/normalize-class 'foo)
+                    "foo"))
+           (t/is (= (impl/normalize-class '[foo bar])
+                    "foo bar")))
+         (t/testing "runtime - nil shall be filtered out"
+           (t/is (= (impl/normalize-class ["foo" nil])
+                    "foo"))))))

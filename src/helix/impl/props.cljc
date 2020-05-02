@@ -73,6 +73,45 @@
   #?(:cljs (doto o1
              (gobj/extend o2))))
 
+(defn seq-to-class [class]
+  (if (sequential? class)
+    (->> class
+         (remove nil?)
+         (map str)
+         (string/join " "))
+    class))
+
+#?(:clj
+   (defn unquote-class
+     "Handle the case of (quote '[foo bar])"
+     [class]
+     (cond
+       (string? class)
+       class
+
+       (and (list? class)
+            (= (first class) 'quote))
+       (-> class
+           second
+           seq-to-class
+           str)
+
+       :default
+       `(normalize-class ~class))))
+
+#?(:clj
+   (defn normalize-class [class]
+     (-> class
+         unquote-class)))
+
+#?(:cljs
+   (defn normalize-class [class]
+     (if (string? class)
+       ;; quick path
+       class
+       (-> class
+           seq-to-class
+           str))))
 
 (defn -native-props
   ([m] #?(:clj (if-let [spread-sym (cond
@@ -92,7 +131,7 @@
                   k (key entry)
                   v (val entry)]
               (case k
-                :class (set-obj o "className" v)
+                :class (set-obj o "className" (normalize-class v))
                 :for (set-obj o "htmlFor" v)
                 :style (set-obj o "style"
                                 (if (vector? v)
