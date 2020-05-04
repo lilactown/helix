@@ -55,6 +55,9 @@ react yourself using webpack, ensuring it is provided as the name `"react"`.
 
 ## Documentation
 
+[![cljdoc badge](https://cljdoc.org/badge/Lokeh/helix)](https://cljdoc.org/d/Lokeh/helix/CURRENT)
+
+
 - [Why Helix](./docs/motivation.md)
 - [Creating Components](./docs/creating-components.md)
   - [Props](./docs/creating-components.md#props)
