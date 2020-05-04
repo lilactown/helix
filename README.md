@@ -55,7 +55,7 @@ react yourself using webpack, ensuring it is provided as the name `"react"`.
 
 ## Documentation
 
-[![cljdoc badge](https://cljdoc.org/badge/lilactown/helix)](https://cljdoc.org/d/lilactown/helix/CURRENT)
+View formatted docs at [![cljdoc badge](https://cljdoc.org/badge/lilactown/helix)](https://cljdoc.org/d/lilactown/helix/CURRENT)
 
 
 - [Why Helix](./docs/motivation.md)
