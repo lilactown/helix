@@ -86,8 +86,11 @@ Example: ($ %s %s ...)"
 
 
 (defn hook? [x]
-  (and (symbol? x)
-       (string/starts-with? (name x) "use-")))
+  (boolean
+   (and (symbol? x)
+        (some #(re-find % (name x))
+              [#"^use\-"
+               #"^use[A-Z]"]))))
 
 (defn hook-expr?
   [x]

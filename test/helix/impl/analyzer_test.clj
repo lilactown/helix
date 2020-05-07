@@ -153,3 +153,19 @@
         '(tree-seq foo use-bar foo)
         '(tree-seq #(use-foo) bar foo)
         '(tree-seq foo #(use-bar) foo)))))
+
+(t/deftest hook-symbol-check
+  (t/testing "hook? true"
+    (t/are [s] (hana/hook? s)
+      'use-foo
+      'foo/use-bar
+      'useFoo
+      'foo/useBar))
+  (t/testing "hook? false"
+    (t/are [s] (not (hana/hook? s))
+      'foo
+      'foo/bar
+      'use
+      'user
+      'foo/use
+      'foo/user)))
