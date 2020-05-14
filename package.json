@@ -15,7 +15,7 @@
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "react-refresh": "^0.8.0",
-    "shadow-cljs": "^2.8.109",
+    "shadow-cljs": "^2.9.3",
     "showdown": "^1.9.1"
   }
 }
