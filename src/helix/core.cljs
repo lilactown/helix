@@ -2,7 +2,7 @@
   (:refer-clojure :exclude [type])
   (:require [goog.object :as gobj]
             [helix.impl.props :as impl.props]
-            ["./impl/class.js" :as helix.class]
+            [helix.impl.classes :as helix.class]
             [cljs-bean.core :as bean]
             ["react" :as react])
   (:require-macros [helix.core]))
