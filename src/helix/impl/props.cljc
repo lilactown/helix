@@ -74,44 +74,42 @@
              (gobj/extend (or o2 #js {})))))
 
 (defn seq-to-class [class]
-  (if (sequential? class)
-    (->> class
-         (remove nil?)
-         (map str)
-         (string/join " "))
-    class))
+  (->> class
+       (remove nil?)
+       (map str)
+       (string/join " ")))
 
 #?(:clj
    (defn unquote-class
      "Handle the case of (quote '[foo bar])"
      [class]
+     (if (sequential? class)
+       (seq-to-class class)
+       (str class))))
+
+#?(:clj
+   (defn normalize-class [class]
      (cond
        (string? class)
        class
 
        (and (list? class)
             (= (first class) 'quote))
-       (-> class
-           second
-           seq-to-class
-           str)
+       (unquote-class (second class))
 
        :default
        `(normalize-class ~class))))
 
-#?(:clj
-   (defn normalize-class [class]
-     (-> class
-         unquote-class)))
-
 #?(:cljs
    (defn normalize-class [class]
-     (if (string? class)
+     (cond
        ;; quick path
-       class
-       (-> class
-           seq-to-class
-           str))))
+       (string? class) class
+
+       (sequential? class) (seq-to-class class)
+
+       ;; not a string or sequential, stringify it
+       true (str class))))
 
 (defn -native-props
   ([m] #?(:clj (if-let [spread-sym (cond
