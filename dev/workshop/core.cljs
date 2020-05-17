@@ -208,6 +208,28 @@
                                  (d/div (.-count (.-state this))))}
                           nil))
 
+
+#_(js/console.log
+ (macroexpand '(defnc use-memo-metadata
+  [{:keys [foo]}]
+  {:helix/features {:metadata-optimizations true}}
+  (let [foobar ^:memo (str foo "bar")]
+    ^:memo (d/div foobar))) ))
+
+
+(defnc use-memo-metadata
+  [{:keys [foo]}]
+  {:helix/features {:metadata-optimizations true}}
+  (let [foobar ^:memo (str foo "bar")
+        example1 (hooks/use-memo :auto-deps (str foo "bar"))
+        example2 (hooks/use-memo [foo] (str foo "bar"))]
+    ^:memo (d/div foobar)))
+
+
+(dc/defcard use-memo-metadata-card
+  ($ use-memo-metadata {:foo "foo"}))
+
+
 (helix/defcomponent ClassComponent
   (render [this props state]
     (d/div "hi")))
