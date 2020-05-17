@@ -212,10 +212,14 @@
 (defnc use-memo-metadata
   [{:keys [foo]}]
   {:helix/features {:metadata-optimizations true}}
-  (let [foobar ^:memo (str foo "bar")
-        example1 (hooks/use-memo :auto-deps (str foo "bar"))
-        example2 (hooks/use-memo [foo] (str foo "bar"))]
-    ^:memo (d/div foobar)))
+  (let [foobar ^:memo (vector foo "bar")
+        first-foobar (hooks/use-ref foobar)
+        [count set-count] (hooks/use-state 0)]
+    (d/div
+     (str (identical? foobar @first-foobar))
+     (d/br)
+     count
+     (d/button {:on-click #(set-count inc)} "render"))))
 
 
 (dc/defcard use-memo-metadata-card
