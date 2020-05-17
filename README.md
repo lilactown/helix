@@ -34,9 +34,10 @@ ClojureScript optimized for modern React development.
 
 [![Clojars Project](https://img.shields.io/clojars/v/lilactown/helix.svg)](https://clojars.org/lilactown/helix)
 
-You'll want to make sure you have the latest version of `react`, and whatever
-renderer you are targeting (e.g. `react-dom`).
+Install the latest verion from clojars in your project.
 
+A version of "react" and "react-refresh" should be installed automatically;
+install the corresponding version of your favorite renderer (e.g. "react-dom").
 
 ### shadow-cljs and npm
 
