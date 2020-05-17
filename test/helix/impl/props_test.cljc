@@ -96,7 +96,11 @@
                #js {:style #js {:color "blue"}}))
      (t/is (eq (impl/native-props {:foo "bar"
                                    & #js {:baz "asdf"}})
-               #js {:foo "bar" :baz "asdf"}))))
+               #js {:foo "bar" :baz "asdf"}))
+
+     (t/is (eq (impl/native-props {:foo "bar"
+                                   & nil})
+               #js {:foo "bar"}))))
 
 
 #?(:cljs
@@ -121,7 +125,11 @@
                #js {:foo-bar :extra-foo-bar :b :extra-b :c :c :d :d}))
      (t/is (eq (impl/props {:foo "bar"
                                    & #js {:baz "asdf"}})
-               #js {:foo "bar" :baz "asdf"}))))
+               #js {:foo "bar" :baz "asdf"}))
+
+     (t/is (eq (impl/props {:foo "bar"
+                                   & nil})
+               #js {:foo "bar"}))))
 
 
 (t/deftest test-normalize-class
