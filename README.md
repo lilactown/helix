@@ -40,9 +40,20 @@ renderer you are targeting (e.g. `react-dom`).
 
 ### shadow-cljs and npm
 
+During development, you'll want to emit ES6 code until [polyfills are handled
+differently](https://github.com/thheller/shadow-cljs/issues/709). You can do
+this by passing in a dev compiler configuration:
+
+```clojure
+;; shadow-cljs.edn
+{,,,
+ :builds 
+ {:app
+ {,,,
+  :dev {:compiler-options {:output-feature-set :es6}}}}}
 ```
-npm i react react-dom
-```
+
+Release builds should be able to emit all the way back to ES3.
 
 ### shadow-cljs and react-native
 
