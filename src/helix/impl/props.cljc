@@ -71,7 +71,7 @@
 
 (defn merge-obj [o1 o2]
   #?(:cljs (doto o1
-             (gobj/extend o2))))
+             (gobj/extend (or o2 #js {})))))
 
 (defn seq-to-class [class]
   (if (sequential? class)
