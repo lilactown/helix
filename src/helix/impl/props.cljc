@@ -68,10 +68,12 @@
   #?(:clj (list* (into '[cljs.core/array] aseq))
      :cljs (into-array aseq)))
 
-
-(defn merge-obj [o1 o2]
-  #?(:cljs (doto o1
-             (gobj/extend (or o2 #js {})))))
+#?(:cljs
+   (defn merge-obj [o1 o2]
+     (if (nil? o2)
+       o1
+       (doto o1
+         (gobj/extend o2)))))
 
 (defn seq-to-class [class]
   (->> class
