@@ -138,7 +138,11 @@
         ;; feature flags
         flag-fast-refresh? (:fast-refresh feature-flags)
         flag-check-invalid-hooks-usage? (:check-invalid-hooks-usage feature-flags)
-        flag-define-factory? (:define-factory feature-flags)]
+        flag-define-factory? (:define-factory feature-flags)
+
+        component-fn-name (if flag-define-factory?
+                            (symbol (str display-name "-render-type"))
+                            display-name)]
     (when flag-check-invalid-hooks-usage?
       (when-some [invalid-hooks (->> (map hana/invalid-hooks-usage body)
                                      (flatten)
@@ -152,14 +156,12 @@
             `(if ^boolean goog/DEBUG
                (def ~sig-sym (signature!))))
          (def ~(vary-meta
-                 (if flag-define-factory?
-                   (symbol (str display-name "-render-type"))
-                   display-name)
-                 merge
-                 {:helix/component? true})
+                component-fn-name
+                merge
+                {:helix/component? true})
            ~@(when-not (nil? docstring)
                (list docstring))
-           (-> ~(fnc* display-name props-bindings
+           (-> ~(fnc* component-fn-name props-bindings
                       (cons (when flag-fast-refresh?
                               `(if ^boolean goog/DEBUG
                                  (when ~sig-sym
@@ -177,10 +179,10 @@
          ~(when flag-fast-refresh?
             `(when ^boolean goog/DEBUG
                (when ~sig-sym
-                 (~sig-sym ~display-name ~(string/join hooks)
+                 (~sig-sym ~component-fn-name ~(string/join hooks)
                   nil ;; forceReset
                   nil)) ;; getCustomHooks
-               (register! ~display-name ~fully-qualified-name)))
+               (register! ~component-fn-name ~fully-qualified-name)))
          ~display-name)))
 
 
