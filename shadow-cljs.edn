@@ -19,6 +19,7 @@
                   :refresh {:entries [refresh-example]
                             :depends-on #{:shared}}}
         :compiler-options {:devcards true}
+        :dev {:compiler-options {:output-feature-set :es6}}
         :devtools {:http-root    "public/dev"
                    :http-port    8700
                    :preloads     [devtools.preload]}}
