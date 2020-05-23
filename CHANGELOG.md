@@ -14,6 +14,7 @@
 - Spread props using keyword `:&` works with non-native components
 - Fix a bug where passing in non-existent value to a native element would pass in `nil`, when the element expected `js/undefined`
 - Helix now works with the vanilla CLJS compiler, including figwheel projects
+- `:define-factory` works with `:fast-refresh` feature flag
 
 
 ### Breaking
