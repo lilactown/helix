@@ -34,15 +34,27 @@ ClojureScript optimized for modern React development.
 
 [![Clojars Project](https://img.shields.io/clojars/v/lilactown/helix.svg)](https://clojars.org/lilactown/helix)
 
-You'll want to make sure you have the latest version of `react`, and whatever
-renderer you are targeting (e.g. `react-dom`).
+Install the latest verion from clojars in your project.
 
+A version of "react" and "react-refresh" should be installed automatically;
+install the corresponding version of your favorite renderer (e.g. "react-dom").
 
 ### shadow-cljs and npm
 
+During development, you'll want to emit ES6 code until [polyfills are handled
+differently](https://github.com/thheller/shadow-cljs/issues/709). You can do
+this by passing in a dev compiler configuration:
+
+```clojure
+;; shadow-cljs.edn
+{,,,
+ :builds 
+ {:app
+ {,,,
+  :dev {:compiler-options {:output-feature-set :es6}}}}}
 ```
-npm i react react-dom
-```
+
+Release builds should be able to emit all the way back to ES3.
 
 ### shadow-cljs and react-native
 
@@ -99,9 +111,6 @@ Other resources:
 
 - [#helix Slack channel](https://clojurians.slack.com/archives/CRRJBCX7S) ([Sign up for Slack here](http://clojurians.net))
 - [Example TodoMVC](https://github.com/Lokeh/helix-todo-mvc)
-- [Future looking example and discussion](https://gist.github.com/Lokeh/e93a1a0ab25d40df006d77f405c1e535)
-
-Everything in the forward-looking example and discussion has been implemented except for annotating expressions with metadata like `^:memo` and `^:callback`.
 
 
 ## License
