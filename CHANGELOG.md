@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+
+## 0.0.11
+
 ### Added
 
 - Added `deps.cljs` which specifies react, react-refresh
