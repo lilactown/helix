@@ -208,6 +208,24 @@
                                  (d/div (.-count (.-state this))))}
                           nil))
 
+
+(defnc use-memo-metadata
+  [{:keys [foo]}]
+  {:helix/features {:metadata-optimizations true}}
+  (let [foobar ^:memo (vector foo "bar")
+        first-foobar (hooks/use-ref foobar)
+        [count set-count] (hooks/use-state 0)]
+    (d/div
+     (str (identical? foobar @first-foobar))
+     (d/br)
+     count
+     (d/button {:on-click #(set-count inc)} "render"))))
+
+
+(dc/defcard use-memo-metadata-card
+  ($ use-memo-metadata {:foo "foo"}))
+
+
 (helix/defcomponent ClassComponent
   (render [this props state]
     (d/div "hi")))

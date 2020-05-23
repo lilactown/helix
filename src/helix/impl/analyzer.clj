@@ -236,79 +236,58 @@ Example: ($ %s %s ...)"
             (seq))))))
 
 
-#_(invalid-hooks-usage
- '(let [foo "bar"]
-    (if (use-asdf)
-      (let [baz "23iou3i"]
-        (use-jkl foo))
-      (bar))))
+
+(defn make-seqable
+  [node children]
+  ;; ????
+  (with-meta
+    ;; preserve type of node
+    (cond
+      (vector? node) (vec children)
+      :else children)
+    ;; preserve meta
+    (meta node)))
 
 
-(comment
-  (def example '[foo (fn foo [x] "foo")
-                 bar {:a 1}
-                 baz "baz"])
-
-  (inferred-type (ana/empty-env) '{})
-
-  (defn seqable-zip [root]
-    (zip/zipper (every-pred (comp not string?)
-                            (comp not #(and (sequential? %) (string/starts-with?
-                                                             (name (first %))
-                                                             "use")))
-                            sequential?)
-                seq
-                (fn [_ c] c)
-                root))
-
-  (def z (seqable-zip example))
-
-  (defn prn-all-nodes [loc]
-    (if (zip/end? loc)
-      (zip/root loc)
-      (do (prn (zip/node loc))
-          (recur (zip/next loc)))))
-
-  (prn-all-nodes z)
-
-  (-> z zip/next zip/next
-      (zip/edit (fn [node] `(use-callback ~node)))
-      (zip/next)
-      (zip/next)
-      (zip/edit (fn [node] `(use-memo ~node)))
-      (zip/next)
-      (zip/next)
-      (zip/root)
-      #_(zip/node)
-      (->> (into [])))
-
-  (def z' (seqable-zip '(let [foo "bar"
-                              baz (use-state {})]
-                          (use-effect :once (asdf foo))
-                          (if (= foo "bar")
-                            (use-effect :every (jkl foo))
-                            (use-effect :Every (qwerty foo)))
-                          (div foo))))
-
-  (-> z'
-      (zip/next)
-      (zip/next)
-      (zip/next)
-      (zip/node))
+(defn seqable-zip
+  [root]
+  (zip/zipper
+   #(and (seqable? %)
+         (not (string? %)))
+   identity
+   make-seqable
+   root))
 
 
-  (let [forms  '[^:meta (fn [x] 1)
-                 (fn [x] 1)]
-        env cljs.env/*compiler*]
-    (for [f forms]
-      (cljs.analyzer/infer-tag env (ana-api/analyze env f))))
+(defn map-forms-with-meta
+  [body meta-table ]
+  (let [meta-keys (set (keys meta-table))
+        body-zip (seqable-zip body)]
+    (loop [cur-loc body-zip
+           ;; this max-loop count is here because I accidentally blew this up
+           ;; too many times w/ an infinite loop
+           max-loop 10000]
+      (let [node (zip/node cur-loc)
+            node-meta (meta node)
+            mapped-meta-value (some
+                               #(when-some [meta-v (get node-meta %)]
+                                  ((get meta-table %)
+                                   ;; strip the metadata that triggered this to
+                                   ;; avoid an infinite loop!
+                                   (vary-meta node dissoc %)
+                                   meta-v))
+                               meta-keys)
+            cur-loc' (if mapped-meta-value
+                       (zip/replace cur-loc mapped-meta-value)
+                       cur-loc)]
+        (cond
+          (zip/end? cur-loc') (zip/root cur-loc')
 
-  (let [env (ana-api/empty-env)]
-    (for [f example]
-      [(meta f)
-       (cljs.analyzer/infer-tag env (ana-api/analyze env f))
-       f]))
-  )
+          (= 0 max-loop) (throw (ex-info
+                                 "Infinite loop detected!"
+                                 {:zipper cur-loc'
+                                  :body (zip/root cur-loc')}))
 
-
-;; => (nil cljs.core/IMap)
+          :else
+          (recur (zip/next cur-loc')
+                 (dec max-loop)))))))

@@ -89,6 +89,21 @@
          ~@body))))
 
 
+(def meta->form
+  {:memo (fn [form deps]
+           `(helix.hooks/use-memo
+             ~(if (coll? deps)
+                deps
+                :auto-deps)
+             ~form))
+   :callback (fn [form deps]
+               `(helix.hooks/use-callback
+                 ~(if (coll? deps)
+                    deps
+                    :auto-deps)
+                 ~form))})
+
+
 (defmacro defnc
   "Creates a new functional React component. Used like:
 
@@ -127,10 +142,6 @@
         opts (if opts-map?
                (first body)
                {})
-        body (if opts-map?
-               (rest body)
-               body)
-        hooks (hana/find-hooks body)
         sig-sym (gensym "sig")
         fully-qualified-name (str *ns* "/" display-name)
         feature-flags (:helix/features opts)
@@ -139,6 +150,14 @@
         flag-fast-refresh? (:fast-refresh feature-flags)
         flag-check-invalid-hooks-usage? (:check-invalid-hooks-usage feature-flags)
         flag-define-factory? (:define-factory feature-flags)
+        flag-metadata-optimizations (:metadata-optimizations feature-flags)
+
+
+        body (cond-> body
+               opts-map? (rest)
+               flag-metadata-optimizations (hana/map-forms-with-meta meta->form))
+
+        hooks (hana/find-hooks body)
 
         component-fn-name (if flag-define-factory?
                             (symbol (str display-name "-render-type"))
@@ -152,6 +171,7 @@
           (hana/warn hana/warning-invalid-hooks-usage
                      &env
                      invalid-hook))))
+
     `(do ~(when flag-fast-refresh?
             `(if ^boolean goog/DEBUG
                (def ~sig-sym (signature!))))
@@ -166,7 +186,7 @@
                               `(if ^boolean goog/DEBUG
                                  (when ~sig-sym
                                    (~sig-sym))))
-                                         body))
+                            body))
                (cond->
                  (true? ^boolean goog/DEBUG)
                  (doto (goog.object/set "displayName" ~fully-qualified-name)))
