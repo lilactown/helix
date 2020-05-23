@@ -111,9 +111,6 @@ Other resources:
 
 - [#helix Slack channel](https://clojurians.slack.com/archives/CRRJBCX7S) ([Sign up for Slack here](http://clojurians.net))
 - [Example TodoMVC](https://github.com/Lokeh/helix-todo-mvc)
-- [Future looking example and discussion](https://gist.github.com/Lokeh/e93a1a0ab25d40df006d77f405c1e535)
-
-Everything in the forward-looking example and discussion has been implemented except for annotating expressions with metadata like `^:memo` and `^:callback`.
 
 
 ## License
