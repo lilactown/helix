@@ -58,6 +58,8 @@ package. Then, we'll need to add a hook to run after our code has been reloaded
 to trigger a React refresh. Finally, we'll enable the fast-refresh feature flag
 in our components.
 
+**Please note:** [React Developer Tools](https://fb.me/react-devtools) have to be installed.
+
 For an example of how this all fits together see the [helix-todo-mvc](https://github.com/Lokeh/helix-todo-mvc)
 project.
 
@@ -67,12 +69,11 @@ The suggested way to trigger a refresh is by adding an "after-load" hook in a
 [preload](https://cljs.github.io/api/compiler-options/preloads). Helix provides
 the functions to run in the preload, but not the preload itself.
 
-These docs will assume that you are using [shadow-cljs](https://github.com/thheller/shadow-cljs).
-Pull requests with figwheel docs are appreciated!
-
 In your project, create a `src/my_project/dev.cljs` file. The name is not
 important, but it will need to be consistent with the namespace we put it in and
 on the classpath, just like any other ClojureScript source file.
+
+#### [shadow-cljs](https://github.com/thheller/shadow-cljs)-specific setup
 
 The contents will need to look something like this:
 
@@ -109,6 +110,41 @@ when we change a namespace, all downstream dependents get the latest code:
         :devtools {
                    :reload-strategy :full
                    :preloads [my-project.dev]}}}}
+```
+
+#### [figwheel-main](https://figwheel.org)-specific setup
+
+The contents will need to look something like this:
+
+```clojure
+;; figwheel-main allows us to annotate a namespace with `:fighweel-hooks`
+;; to configure reload callbacks at runtime.
+(ns ^:figwheel-hooks my-project.dev
+  "A place to add preloads for developer tools!"
+  (:require
+   [helix.experimental.refresh :as r]))
+
+;; inject-hook! needs to run on application start.
+;; For ease, we run it at the top level.
+;; This function adds the react-refresh runtime to the page
+(r/inject-hook!)
+
+;; figwheel-main allows us to annotate a function name with `:after-load`
+;; to signal that it should be run after any code reload. We call the `refresh!`
+;; function, which will tell react to refresh any components which have a
+;; signature created by turning on the `:fast-refresh` feature flag.
+(defn ^:after-load refresh []
+  (r/refresh!))
+```
+
+We'll need to add this file to the `:preloads`
+[config](https://figwheel.org/docs/compile_config.html#the-preloads-option) in our project's
+`[build-name].cljs.edn` file:
+
+```clojure
+{,,,
+
+ :preloads [my-project.dev]}
 ```
 
 ### Enabling the fast-refresh flag
