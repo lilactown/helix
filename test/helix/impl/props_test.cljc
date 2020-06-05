@@ -91,9 +91,14 @@
                                   :b :extra-b}]
                  (impl/native-props {:foo-bar :a :b :b :c :c :d :d & extra-props}))
                #js {:fooBar :extra-foo-bar :b :extra-b :c :c :d :d}))
-     (t/is (eq (let [dynamic-style {:color "blue"}]
+     (t/is (eq (let [dynamic-style {:background-color "blue"}]
                  (impl/native-props {:style dynamic-style}))
-               #js {:style #js {:color "blue"}}))
+               #js {:style #js {:backgroundColor "blue"}}))
+     (t/is (eq (impl/native-props {:style #js {:backgroundColor "blue"}})
+               #js {:style #js {:backgroundColor "blue"}}))
+     (t/is (eq (let [dynamic-js-style #js {:backgroundColor "blue"}]
+                 (impl/native-props {:style dynamic-js-style}))
+               #js {:style #js {:backgroundColor "blue"}}))
      (t/is (eq (impl/native-props {:foo "bar"
                                    & #js {:baz "asdf"}})
                #js {:foo "bar" :baz "asdf"}))

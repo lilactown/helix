@@ -113,6 +113,28 @@
        ;; not a string or sequential, stringify it
        true (str class))))
 
+
+#?(:cljs
+   (defn or-undefined
+     [v]
+     (if (nil? v)
+       js/undefined
+       v)))
+
+
+(defn native-style
+  [style]
+  (cond
+    ;; React Native allows arrays of styles
+    (vector? style) (into-js-array (map primitive-obj style))
+    ;; when map, convert to an object w/ camel casing
+    (map? style) (primitive-obj style)
+    ;; if anything else, at compile time fall back to runtime
+    ;; at runtime just pass it through and assume it's a JS style obj!
+    true #?(:clj `(native-style ~style)
+            :cljs style)))
+
+
 (defn -native-props
   ([m] #?(:clj (if-let [spread-sym (cond
                                      (contains? m '&) '&
@@ -133,17 +155,9 @@
               (case k
                 :class (set-obj o "className" (normalize-class v))
                 :for (set-obj o "htmlFor" v)
-                :style (set-obj o "style"
-                                (if (vector? v)
-                                  ;; React Native allows arrays of styles
-                                  (into-js-array (map primitive-obj v))
-                                  (primitive-obj v)))
-                :value (set-obj o "value" #?(:clj `(if (nil? ~v)
-                                                     js/undefined
-                                                     ~v)
-                                             :cljs (if (nil? v)
-                                                     js/undefined
-                                                     v)))
+                :style (set-obj o "style" (native-style v))
+                :value (set-obj o "value" #?(:clj `(or-undefined ~v)
+                                             :cljs (or-undefined v)))
                 (set-obj o (camel-case (kw->str k)) v))))
      #?(:clj (list* o)
         :cljs o))))
