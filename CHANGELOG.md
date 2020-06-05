@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.0.12
+
+### Added
+
+- for "native" elements the `:style` prop now accepts an arbitrary JS object as well as a map or vector
 
 
 ## 0.0.11
