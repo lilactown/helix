@@ -1,4 +1,16 @@
 (ns helix.hooks
+  "Wrapper around react hooks.
+
+  Many functions take a `deps` argument, corresponding to their React
+  equivalent.  This is an argument which can either be a a vector of
+  deps or a special keyword:
+
+  vector of deps  Use specified deps explicitly.
+  :always         Re-run hook on every render, equivalent to passing no deps
+                  vector to the hook.
+  :once           Equivalent to using [] as the deps.
+  :auto-deps      Infer the dependencies automatically from the code by finding
+                  local vars.  Not available for the function form of a hook."
   #?(:clj (:require [helix.impl.analyzer :as hana])
      :cljs (:require
              ["react" :as react]
@@ -41,8 +53,9 @@
 
 #?(:cljs
    (defn use-ref
-     "Just like react/useRef. Supports accessing the \"current\" property via
-  dereference (@) and updating the \"current\" property via `reset!` and `swap!`"
+     "Like react/useRef. Supports accessing the \"current\" property via
+     dereference (@) and updating the \"current\" property via `reset!` and
+     `swap!`"
      [x]
      (let [ref (react/useRef nil)]
        (when (nil? (.-current ^js ref))
@@ -151,6 +164,12 @@
 
 #?(:clj
    (defmacro use-effect
+     "Like react/useEffect.  See namespace doc for `deps`.  `body` should be a
+     code form which will be wrapped in a function and passed to
+     react/useEffect.  If it returns a function, that will be used to clean up.
+     
+     Unlike react/useEffect, only if you return a function will it be used, you
+     DO NOT need to return js/undefined."
      [deps & body]
      (deps-macro-body
       &env deps body
@@ -165,6 +184,7 @@
    ;; as a value. This will be slower, `:auto-deps` won't work and devtools will
    ;; be harder to read
    (defn use-effect*
+     "Like react/useEffect.  See `use-effect` for details on what `f`'s return values.  See namespace doc for `deps`."
      ([f] (react/useEffect (wrap-fx f)))
      ([f deps]
       (when js/goog.DEBUG
@@ -174,7 +194,9 @@
 
 
 #?(:clj
-   (defmacro use-layout-effect [deps & body]
+   (defmacro use-layout-effect
+     "Like `use-effect` but instead calls react/useLayoutEffect."
+     [deps & body]
      (deps-macro-body
       &env deps body
       (fn
@@ -185,6 +207,7 @@
 
 #?(:cljs
    (defn use-layout-effect*
+     "Like `use-effect*` but instead calls react/useLayoutEffect."
      ([f] (react/useLayoutEffect (wrap-fx f)))
      ([f deps]
       (when js/goog.DEBUG
@@ -195,6 +218,8 @@
 
 #?(:clj
    (defmacro use-memo
+     "Like react/useMemo.  See namespace doc for `deps`.  `body` should be a
+     code form which will be wrapped in a function."
      [deps & body]
      (deps-macro-body
       &env deps body
@@ -214,6 +239,8 @@
 
 #?(:cljs
    (defn use-memo*
+     "Like react/useMemo.  `f` is unchanged in meaning.  See namespace doc for
+     `deps`."
      ([f] (react/useMemo f))
      ([f deps]
       (when js/goog.DEBUG
@@ -224,9 +251,11 @@
 
 #?(:clj
    (defmacro use-callback
-     [deps & body]
+     "Like react/useCallback.  See namespace doc for `deps`.  `fn-body` should
+     be a code form which returns a function."
+     [deps & fn-body]
      (deps-macro-body
-      &env deps body
+      &env deps fn-body
       (fn
         ([fn-body] `^function (raw-use-callback ~@fn-body))
         ([deps fn-body] `^function (raw-use-callback ~@fn-body
@@ -234,6 +263,8 @@
 
 #?(:cljs
    (defn use-callback*
+     "`f` is a function which will be passed to react/useCallback.  See
+     namespace doc for `deps`."
      ([f] (react/useCallback f))
      ([f deps]
       (when js/goog.DEBUG
@@ -244,6 +275,9 @@
 
 #?(:clj
    (defmacro use-imperative-handle
+     "Like react/useImperativeHandle.  `ref` is unchanged in meaning.  See
+     namespace doc for `deps`.  `body` should be a code form which will be
+     wrapped in a function."
      [ref deps & body]
      (deps-macro-body
       &env deps body
@@ -256,6 +290,8 @@
 
 #?(:cljs
    (defn use-imperative-handle*
+     "Like react/useImperativeHandle.  `ref` and `f` are unchanged in meaning.
+     See namespace doc for `deps`"
      ([ref f] (react/useImperativeHandle ref f))
      ([ref f deps]
       (when js/goog.DEBUG
@@ -266,6 +302,6 @@
 
 #?(:cljs
    (def use-debug-value
-     "just react/useDebugValue"
+     "Just react/useDebugValue"
      react/debugValue))
 
