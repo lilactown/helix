@@ -103,13 +103,17 @@
 (defn cljs-factory
   [type]
   (-> (fn factory [& args]
-        ;; put props detection here so it's easier to detect
-        ;; slow paths in render
         (if (map? (first args))
-          (apply react/createElement
-                 type
-                 #js {"helix/props" (first args)}
-                 (rest args))
+          (let [props (first args)]
+            (apply react/createElement
+                   type
+                   #js {"helix/props"
+                        (dissoc props
+                                :key
+                                :ref)
+                        "key" (get props :key js/undefined)
+                        "ref" (get props :ref js/undefined)}
+                   (rest args)))
           (apply react/createElement
                  type
                  #js {}
@@ -118,12 +122,18 @@
         (-type [_] type))))
 
 
+(defn assoc-some [m k x]
+  (if (some? x)
+    (assoc m k x)
+    m))
+
+
 (defn extract-cljs-props
   [o]
   (when (and ^boolean goog/DEBUG (or (map? o) (nil? o)))
     (throw (ex-info "Props received were a map. This probably means you're calling your component as a function." {:props o})))
   (if-let [props (gobj/get o "helix/props")]
-    (assoc props :children (gobj/get o "children"))
+    (assoc-some props :children (gobj/get o "children"))
     (bean/bean o)))
 
 
