@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Passing in `:ref` and `:key` props with factory functions
+- Docstrings for `defnc` and `$`
+
 ## 0.0.12
 
 ### Added
