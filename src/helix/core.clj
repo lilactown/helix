@@ -7,17 +7,26 @@
 (defmacro $
   "Create a new React element from a valid React type.
 
-  Will try to statically convert props to a JS object. Falls back to `$$` when
-  ambiguous.
+  Will try to statically convert props to a JS object.
 
-  Example:
-  ```
-  ($ MyComponent
-   \"child1\"
-   ($ \"span\"
-     {:style {:color \"green\"}}
-     \"child2\" ))
-  ```"
+  To pass in dynamic props, use the special `&` or `:&` key in the props map
+  to have the map merged in.
+
+  Simple example:
+
+  ($ my-component
+     \"child1\"
+     ($ \"span\"
+        {:style {:color \"green\"}}
+        \"child2\" ))
+
+  Dynamic exmaple:
+
+  (let [dynamic-props {:foo \"bar\"}]
+    ($ my-component
+       {:static \"prop\"
+        & dynamic-props}))
+  "
   [type & args]
   (when (and (symbol? (first args))
              (= (hana/inferred-type &env (first args))
@@ -126,6 +135,7 @@
   'opts-map' is optional and can be used to pass some configuration options to the
   macro. Current options:
    - ':wrap' - ordered sequence of higher-order components to wrap the component in
+   - ':helix/features' - a map of feature flags to enable. See \"Experimental\" docs.
 
   'body' should return a React Element."
   [display-name & form-body]
