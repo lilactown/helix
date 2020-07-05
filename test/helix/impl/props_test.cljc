@@ -105,7 +105,10 @@
 
      (t/is (eq (impl/native-props {:foo "bar"
                                    & nil})
-               #js {:foo "bar"}))))
+               #js {:foo "bar"}))
+
+     (t/is (eq (impl/native-props {:style ["bar"]})
+               #js {:style #js ["bar"]}))))
 
 
 #?(:cljs
