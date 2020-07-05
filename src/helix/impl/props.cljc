@@ -125,10 +125,10 @@
 (defn native-style
   [style]
   (cond
-    ;; React Native allows arrays of styles
-    (vector? style) (into-js-array (map primitive-obj style))
     ;; when map, convert to an object w/ camel casing
     (map? style) (primitive-obj style)
+    ;; React Native allows arrays of styles
+    (vector? style) (into-js-array (map #(if (map? %) (primitive-obj %) %) style))
     ;; if anything else, at compile time fall back to runtime
     ;; at runtime just pass it through and assume it's a JS style obj!
     true #?(:clj `(native-style ~style)
@@ -165,6 +165,8 @@
 
 (comment
   (-native-props {:asdf "jkl" :style 'foo})
+  
+  (-native-props {:style ["fs1"]})
   )
 
 (defmacro native-props [m]
