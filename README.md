@@ -95,6 +95,7 @@ View formatted docs at [![cljdoc badge](https://cljdoc.org/badge/lilactown/helix
   - [Optimizations](./docs/hooks.md#optimizations)
   - [Other miscellaneous](./docs/hooks.md#other-miscellaneous)
 - [Experiments](./docs/experiments.md)
+  - [Define as factory function](./docs/experiments.md#define-as-factory-function)
   - [Detect invalid hooks usage](./docs/experiments.md#detect-invalid-hooks-usage)
   - [Fast Refresh](./docs/experiments.md#fast-refresh)
 - [Pro-tips](./docs/pro-tips.md)
