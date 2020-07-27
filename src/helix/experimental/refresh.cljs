@@ -17,4 +17,4 @@
 
 (defn refresh!
   []
-  (js/console.log (refresh/performReactRefresh)))
+  (refresh/performReactRefresh))
