@@ -46,18 +46,21 @@
   (t/testing "Literal styles"
     (let [handler #?(:clj '(fn [])
                      :cljs (fn []))]
-      (t/is (eq (impl/-native-props {:foo-bar "baz" :style {:color "blue"} :on-click handler})
+      (t/is (eq (impl/-native-props {:foo-bar "baz" :style {:color "blue" :--custom-property "1px"} :on-click handler})
                 #?(:clj `(cljs.core/js-obj "fooBar" "baz"
-                                           "style" (cljs.core/js-obj "color" (helix.impl.props/->js "blue"))
+                                           "style" (cljs.core/js-obj "color" (helix.impl.props/->js "blue")
+                                                                     "--custom-property" (helix.impl.props/->js "1px"))
                                            "onClick" ~handler)
-                   :cljs #js {:fooBar "baz", :style #js {:color "blue"}, :onClick handler}))
+                   :cljs #js {:fooBar "baz", :style #js {:color "blue"
+                                                         :--custom-property "1px"}, :onClick handler}))
             "Native props with nested literal style"))
-    (t/is (eq (impl/-native-props {:style [{:color "blue"} {:asdf 'jkl}]})
+    (t/is (eq (impl/-native-props {:style [{:color "blue"} {:asdf 'jkl} {:--custom-property "1px"}]})
               #?(:clj `(cljs.core/js-obj
                         "style" (cljs.core/array
                                  (cljs.core/js-obj "color" (helix.impl.props/->js "blue"))
-                                 (cljs.core/js-obj "asdf" (helix.impl.props/->js ~'jkl))))
-                 :cljs #js {:style #js [#js {:color "blue"} #js {:asdf "jkl"}]}))
+                                 (cljs.core/js-obj "asdf" (helix.impl.props/->js ~'jkl))
+                                 (cljs.core/js-obj "--custom-property" (helix.impl.props/->js "1px"))))
+                 :cljs #js {:style #js [#js {:color "blue"} #js {:asdf "jkl"} #js {:--custom-property "1px"}]}))
           "Native props with nested literal vector style"))
   #?(:cljs (t/testing "JS object"
              (t/is (let [obj #js {:a 1 :b 2 :fooBar #js {:baz "jkl"}}]
@@ -76,29 +79,38 @@
      (t/is (eq (impl/native-props {:foo-bar "baz"
                                    :style {:color "blue"
                                            :background-color "red"
-                                           :display :flex}})
-               #js {:fooBar "baz" :style #js {:color "blue" :backgroundColor "red" :display "flex"}})
+                                           :display :flex
+                                           :--custom-property "1px"}})
+               #js {:fooBar "baz" :style #js {:color "blue" :backgroundColor "red" :display "flex" :--custom-property "1px"}})
            "literal styles")
      (t/is (eq (impl/native-props {:foo-bar "baz"
                                    :style [{:color "blue"}
                                            {:background-color "red"}
-                                           {:display :flex}]})
+                                           {:display :flex}
+                                           {:--custom-property "1px"}]})
                #js {:fooBar "baz"
                     :style #js [#js {:color "blue"}
                                 #js {:backgroundColor "red"}
-                                #js {:display "flex"}]}))
+                                #js {:display "flex"}
+                                #js {:--custom-property "1px"}]}))
      (t/is (eq (let [extra-props {:foo-bar :extra-foo-bar
                                   :b :extra-b}]
                  (impl/native-props {:foo-bar :a :b :b :c :c :d :d & extra-props}))
                #js {:fooBar :extra-foo-bar :b :extra-b :c :c :d :d}))
-     (t/is (eq (let [dynamic-style {:background-color "blue"}]
+     (t/is (eq (let [dynamic-style {:background-color "blue"
+                                    :--custom-property "1px"}]
                  (impl/native-props {:style dynamic-style}))
-               #js {:style #js {:backgroundColor "blue"}}))
-     (t/is (eq (impl/native-props {:style #js {:backgroundColor "blue"}})
-               #js {:style #js {:backgroundColor "blue"}}))
-     (t/is (eq (let [dynamic-js-style #js {:backgroundColor "blue"}]
+               #js {:style #js {:backgroundColor "blue"
+                                :--custom-property "1px"}}))
+     (t/is (eq (impl/native-props {:style #js {:backgroundColor "blue"
+                                               :--custom-property "1px"}})
+               #js {:style #js {:backgroundColor "blue"
+                                :--custom-property "1px"}}))
+     (t/is (eq (let [dynamic-js-style #js {:backgroundColor "blue"
+                                           :--custom-property "1px"}]
                  (impl/native-props {:style dynamic-js-style}))
-               #js {:style #js {:backgroundColor "blue"}}))
+               #js {:style #js {:backgroundColor "blue"
+                                :--custom-property "1px"}}))
      (t/is (eq (impl/native-props {:foo "bar"
                                    & #js {:baz "asdf"}})
                #js {:foo "bar" :baz "asdf"}))
@@ -115,17 +127,19 @@
    (t/deftest props
      (t/is (eq (impl/props {:foo-bar "baz"})
                #js {:foo-bar "baz"}))
-     (t/is (eq (impl/props {:foo-bar "baz" :style {:color "blue" :background-color "red" :display :flex}})
-               #js {:foo-bar "baz" :style {:color "blue" :background-color "red" :display :flex}})
+     (t/is (eq (impl/props {:foo-bar "baz" :style {:color "blue" :background-color "red" :display :flex :--custom-property "1px"}})
+               #js {:foo-bar "baz" :style {:color "blue" :background-color "red" :display :flex :--custom-property "1px"}})
            "doesn't recurse into style")
      (t/is (eq (impl/props {:foo-bar "baz"
                             :style [{:color "blue"}
                                     {:background-color "red"}
-                                    {:display :flex}]})
+                                    {:display :flex}
+                                    {:--custom-property "1px"}]})
                #js {:foo-bar "baz"
                     :style [{:color "blue"}
                             {:background-color "red"}
-                            {:display :flex}]})
+                            {:display :flex}
+                            {:--custom-property "1px"}]})
            "doesn't recurse into vector style")
      (t/is (eq (let [extra-props {:foo-bar :extra-foo-bar
                                   :b :extra-b}]
