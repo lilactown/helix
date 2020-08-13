@@ -4,7 +4,7 @@
                        [goog.object :as gobj]]))
   #?(:cljs (:require-macros [helix.impl.props])))
 
-(def aria-data-special-case-re #"^(aria-|data-).*")
+(def aria-data-css-custom-prop-special-case-re #"^(aria-|data-|--).*")
 
 #?(:cljs (def camel-regexp (js/RegExp "-(\\w)", "g")))
 
@@ -17,11 +17,11 @@
     (let [name-str (name s)]
       ; this is hot path so we want to use low-level interop
       #?(:clj  (cond
-                 (some? (re-matches aria-data-special-case-re name-str)) name-str
+                 (some? (re-matches aria-data-css-custom-prop-special-case-re name-str)) name-str
                  (= (subs name-str 0 1) "'") (subs name-str 1)
                  :else (string/replace name-str #"-(\w)" #(string/upper-case (second %))))
          :cljs (cond
-                 (some? (.match name-str aria-data-special-case-re)) name-str
+                 (some? (.match name-str aria-data-css-custom-prop-special-case-re)) name-str
                  (= (.substring name-str 0 1) "'") (.substring name-str 1)
                  :else (.replace name-str camel-regexp #(.toUpperCase %2)))))
       s))
