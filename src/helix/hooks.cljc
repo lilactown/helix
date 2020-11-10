@@ -187,7 +187,7 @@
      "Like react/useEffect.  See `use-effect` for details on what `f`'s return values.  See namespace doc for `deps`."
      ([f] (react/useEffect (wrap-fx f)))
      ([f deps]
-      (when js/goog.DEBUG
+      (when goog/DEBUG
         (when (= deps :auto-deps)
           (throw (js/Error. "Can't use `:auto-deps` with `use-effect*`; use `use-effect` macro for that"))))
       (react/useEffect (wrap-fx f) (to-array deps)))))
@@ -210,7 +210,7 @@
      "Like `use-effect*` but instead calls react/useLayoutEffect."
      ([f] (react/useLayoutEffect (wrap-fx f)))
      ([f deps]
-      (when js/goog.DEBUG
+      (when goog/DEBUG
         (when (= deps :auto-deps)
           (throw (js/Error. "Can't use `:auto-deps` with `use-layout-effect*`; use `use-layout-effect` macro for that"))))
       (react/useLayoutEffect (wrap-fx f) (to-array deps)))))
@@ -243,7 +243,7 @@
      `deps`."
      ([f] (react/useMemo f))
      ([f deps]
-      (when js/goog.DEBUG
+      (when goog/DEBUG
         (when (= deps :auto-deps)
           (throw (js/Error. "Can't use `:auto-deps` with `use-memo*`; use `use-memo` macro for that"))))
       (react/useMemo f (to-array deps)))))
@@ -267,7 +267,7 @@
      namespace doc for `deps`."
      ([f] (react/useCallback f))
      ([f deps]
-      (when js/goog.DEBUG
+      (when goog/DEBUG
         (when (= deps :auto-deps)
           (throw (js/Error. "Can't use `:auto-deps` with `use-callback*`; use `use-callback` macro for that"))))
       (react/useCallback f (to-array deps)))))
@@ -294,7 +294,7 @@
      See namespace doc for `deps`"
      ([ref f] (react/useImperativeHandle ref f))
      ([ref f deps]
-      (when js/goog.DEBUG
+      (when goog/DEBUG
         (when (= deps :auto-deps)
           (throw (js/Error. "Can't use `:auto-deps` with `use-imperative-handle*`; use `use-imperative-handle` macro for that"))))
       (react/useImperativeHandle ref f (to-array deps)))))
