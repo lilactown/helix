@@ -162,15 +162,16 @@
              (to-array deps))))
 
 
-#?(:clj
-   (defmacro use-effect
-     "Like react/useEffect.  See namespace doc for `deps`.  `body` should be a
+(defmacro use-effect
+  "Like react/useEffect.  See namespace doc for `deps`.  `body` should be a
      code form which will be wrapped in a function and passed to
      react/useEffect.  If it returns a function, that will be used to clean up.
      
      Unlike react/useEffect, only if you return a function will it be used, you
      DO NOT need to return js/undefined."
-     [deps & body]
+  {:style/indent :defn}
+  [deps & body]
+  #?(:clj
      (deps-macro-body
       &env deps body
       (fn
@@ -193,10 +194,11 @@
       (react/useEffect (wrap-fx f) (to-array deps)))))
 
 
-#?(:clj
-   (defmacro use-layout-effect
-     "Like `use-effect` but instead calls react/useLayoutEffect."
-     [deps & body]
+(defmacro use-layout-effect
+  "Like `use-effect` but instead calls react/useLayoutEffect."
+  {:style/indent :defn}
+  [deps & body]
+  #?(:clj
      (deps-macro-body
       &env deps body
       (fn
@@ -216,11 +218,12 @@
       (react/useLayoutEffect (wrap-fx f) (to-array deps)))))
 
 
-#?(:clj
-   (defmacro use-memo
-     "Like react/useMemo.  See namespace doc for `deps`.  `body` should be a
+(defmacro use-memo
+  "Like react/useMemo.  See namespace doc for `deps`.  `body` should be a
      code form which will be wrapped in a function."
-     [deps & body]
+  {:style/indent :defn}
+  [deps & body]
+  #?(:clj
      (deps-macro-body
       &env deps body
       (fn
@@ -249,11 +252,12 @@
       (react/useMemo f (to-array deps)))))
 
 
-#?(:clj
-   (defmacro use-callback
-     "Like react/useCallback.  See namespace doc for `deps`.  `fn-body` should
+(defmacro use-callback
+  "Like react/useCallback.  See namespace doc for `deps`.  `fn-body` should
      be a code form which returns a function."
-     [deps & fn-body]
+  {:style/indent :defn}
+  [deps & fn-body]
+  #?(:clj
      (deps-macro-body
       &env deps fn-body
       (fn
@@ -273,12 +277,13 @@
       (react/useCallback f (to-array deps)))))
 
 
-#?(:clj
-   (defmacro use-imperative-handle
-     "Like react/useImperativeHandle.  `ref` is unchanged in meaning.  See
+(defmacro use-imperative-handle
+  "Like react/useImperativeHandle.  `ref` is unchanged in meaning.  See
      namespace doc for `deps`.  `body` should be a code form which will be
      wrapped in a function."
-     [ref deps & body]
+  {:style/indent :defn}
+  [ref deps & body]
+  #?(:clj
      (deps-macro-body
       &env deps body
       (fn
