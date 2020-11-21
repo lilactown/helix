@@ -13,8 +13,8 @@
                   local vars.  Not available for the function form of a hook."
   #?(:clj (:require [helix.impl.analyzer :as hana])
      :cljs (:require
-             ["react" :as react]
-             [goog.object :as gobj]))
+            ["react" :as react]
+            [goog.object :as gobj]))
   #?(:cljs (:require-macros [helix.hooks])))
 
 #?(:cljs
@@ -166,7 +166,7 @@
   "Like react/useEffect.  See namespace doc for `deps`.  `body` should be a
      code form which will be wrapped in a function and passed to
      react/useEffect.  If it returns a function, that will be used to clean up.
-     
+
      Unlike react/useEffect, only if you return a function will it be used, you
      DO NOT need to return js/undefined."
   {:style/indent :defn}
@@ -310,3 +310,96 @@
      "Just react/useDebugValue"
      react/debugValue))
 
+
+#?(:cljs
+   (defn use-subscription
+     "Hook used for safely managing subscriptions, respecting Clojure equality.
+
+  In order to avoid removing and re-adding subscriptions each time this hook is
+  called, the parameters passed to this hook should be memoized in some way–
+  either by wrapping the entire params object with `use-memo` or by wrapping the
+  individual callbacks with `use-callback`."
+     [{:keys [get-current-value subscribe]}]
+     (let [[state set-state] (react/useState
+                              (fn []
+                                ;; Read the current value from our subscription.
+                                ;; When this value changes, we'll schedule an update with React.
+                                ;; It's important to also store the hook params so that we can check for staleness.
+                                ;; (See the comment in checkForUpdates() below for more info.)
+                                #js {:get-current-value get-current-value
+                                     :subscribe subscribe
+                                     :value (get-current-value)}))]
+
+       ;; It is important not to subscribe while rendering because this can lead to memory leaks.
+       ;; (Learn more at reactjs.org/docs/strict-mode.html#detecting-unexpected-side-effects)
+       ;; Instead, we wait until the commit phase to attach our handler.
+       ;;
+       ;; We intentionally use a passive effect (useEffect) rather than a synchronous one (useLayoutEffect)
+       ;; so that we don't stretch the commit phase.
+       ;; This also has an added benefit when multiple components are subscribed to the same source:
+       ;; It allows each of the event handlers to safely schedule work without potentially removing an another handler.
+       ;; (Learn more at https://codesandbox.io/s/k0yvr5970o)
+       (use-effect
+        [get-current-value subscribe]
+        (let [did-unsubscribe #js {:value false}
+              check-for-updates
+              (fn check-for-updates
+                []
+                ;; It's possible that this callback will be invoked even after being unsubscribed,
+                ;; if it's removed as a result of a subscription event/update.
+                ;; In this case, React will log a DEV warning about an update from an unmounted component.
+                ;; We can avoid triggering that warning with this check.
+                (when (not (gobj/get did-unsubscribe "value"))
+                  (let [value (get-current-value)]
+                    (set-state
+                     (fn [prev]
+                       (cond
+                         ;; Ignore values from stale sources!
+                         ;; Since we subscribe and unsubscribe in a passive effect,
+                         ;; it's possible that this callback will be invoked for a stale (previous) subscription.
+                         ;; This check avoids scheduling an update for that stale subscription.
+                         (or (not= get-current-value
+                                   (gobj/get prev "get-current-value"))
+                             (not= subscribe
+                                   (gobj/get prev "subscribe")))
+                         prev
+
+                         ;; The moment we've all been waiting for... the entire
+                         ;; point of rewriting this hook in ClojureScript.
+                         ;; If the value is equal under Clojure equality to the
+                         ;; previous value, then return the previous value to
+                         ;; preserve reference equality and allow React to bail.
+                         (= value (gobj/get prev "value"))
+                         prev
+
+                         ;; return the new value
+                         :else #js {:get-current-value (gobj/get prev "get-current-value")
+                                    :subscribe (gobj/get prev "subscribe")
+                                    :value value}))))))
+              unsubscribe (subscribe check-for-updates)]
+          ;; Because we're subscribing in a passive effect,
+          ;; it's possible that an update has occurred between render and our effect handler.
+          ;; Check for this and schedule an update if work has occurred.
+          (check-for-updates)
+          (fn []
+            (gobj/set did-unsubscribe "value" true)
+            (unsubscribe))))
+
+       (doto (if (or
+                  (not= get-current-value (gobj/get state "get-current-value"))
+                  (not= subscribe (gobj/get state "subscribe")))
+               ;; If parameters have changed since our last render,
+               ;; schedule an update with its current value.
+               (let [value (get-current-value)]
+                 (set-state #js {:get-current-value get-current-value
+                                 :subscribe subscribe
+                                 :value value})
+                 ;; If the subscription has been updated, we'll schedule another update with React.
+                 ;; React will process this update immediately, so the old subscription value won't be committed.
+                 ;; It is still nice to avoid returning a mismatched value though, so let's override the return value.
+                 value)
+
+               ;; If parameters haven't changed, return value stored in state
+               (gobj/get state "value"))
+         ;; Display the current value for this hook in React DevTools.
+         (use-debug-value)))))
