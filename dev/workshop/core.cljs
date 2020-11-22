@@ -268,6 +268,45 @@
       ($ (helix/type factory-fn-component) {:foo "asdf" :bar "jkl"})))
 
 
+(def sub-atom (atom {:foo 0}))
+
+
+(add-watch sub-atom :global prn)
+
+
+(defn subscribe-atom
+  [f]
+  (let [k (gensym "subscribe")]
+    (add-watch sub-atom k f)
+    #(remove-watch sub-atom k)))
+
+
+(defn get-atom-value
+  []
+  @sub-atom)
+
+
+(defnc use-subscription-test
+  []
+  (let [value (hooks/use-subscription {:get-current-value get-atom-value
+                                       :subscribe subscribe-atom})
+        [changes set-changes] (hooks/use-state 0)]
+    (hooks/use-effect
+     [value]
+     (set-changes inc))
+    (d/div
+     "Value: " (:foo value) " "
+     (d/button {:on-click #(do
+                             (swap! sub-atom update :foo inc)
+                             (swap! sub-atom into {}))} "+")
+     (d/div
+      "Changes: " changes))))
+
+
+(dc/defcard use-subscription
+  ($ use-subscription-test))
+
+
 ;;
 ;; -- Benchmarking
 ;;
