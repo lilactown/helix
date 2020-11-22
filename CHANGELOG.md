@@ -11,6 +11,7 @@
 - (@wilkerlucio) Correctly declare deps in deps.edn
 - (@jimmyhmiller) Change from js/goog.DEBUG to goog/DEBUG to help with infer-externs
 - (@jimmyhmiller) Add style/indent :defn to hooks that have deps
+- use-debug-value correctly refers React's useDebugValue
 
 ### Added
 
