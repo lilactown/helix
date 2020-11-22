@@ -308,7 +308,7 @@
 #?(:cljs
    (def use-debug-value
      "Just react/useDebugValue"
-     react/debugValue))
+     react/useDebugValue))
 
 
 #?(:cljs
@@ -339,7 +339,7 @@
        ;; This also has an added benefit when multiple components are subscribed to the same source:
        ;; It allows each of the event handlers to safely schedule work without potentially removing an another handler.
        ;; (Learn more at https://codesandbox.io/s/k0yvr5970o)
-       (use-effect
+       (helix.hooks/use-effect
         [get-current-value subscribe]
         (let [did-unsubscribe #js {:value false}
               check-for-updates
@@ -402,4 +402,5 @@
                ;; If parameters haven't changed, return value stored in state
                (gobj/get state "value"))
          ;; Display the current value for this hook in React DevTools.
-         (use-debug-value)))))
+         (-> (pr-str)
+             (use-debug-value))))))
