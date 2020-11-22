@@ -12,10 +12,10 @@
     "karma": "^5.0.2",
     "karma-chrome-launcher": "^3.1.0",
     "karma-cljs-test": "^0.1.0",
-    "react": "^16.13.0",
-    "react-dom": "^16.13.0",
-    "react-refresh": "^0.8.0",
-    "shadow-cljs": "^2.9.3",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-refresh": "^0.9.0",
+    "shadow-cljs": "^2.11.7",
     "showdown": "^1.9.1"
   }
 }
