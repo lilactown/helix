@@ -170,7 +170,8 @@
         hooks (hana/find-hooks body)
 
         component-fn-name (if flag-define-factory?
-                            (symbol (str display-name "-render-type"))
+                            (with-meta (symbol (str display-name "-render-type"))
+                              {:private true})
                             display-name)]
     (when flag-check-invalid-hooks-usage?
       (when-some [invalid-hooks (->> (map hana/invalid-hooks-usage body)
