@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.0.14 (UNRELEASED)
+
+### Fixed
+
+- (@alidlorenzo) Correctly handle objects when passing a vector into React Native `style` prop
+- (@aiba) Don't log result of `performFastRefresh`
+- (@stanislas) Don't camel case CSS custom properties
+- (@wilkerlucio) Declare DOM macros to allow Cursive's static analysis to detect them
+- (@wilkerlucio) Correctly declare deps in deps.edn
+- (@jimmyhmiller) Change from js/goog.DEBUG to goog/DEBUG to help with infer-externs
+- (@jimmyhmiller) Add style/indent :defn to hooks that have deps
+
+### Added
+
+- `use-subscription` hook that respects Clojure equality
+
+### Breaking
+
+- mark component-fn private when using factory functions
+
 ## 0.0.13
 
 ### Fixed
