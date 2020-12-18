@@ -339,8 +339,7 @@
        ;; This also has an added benefit when multiple components are subscribed to the same source:
        ;; It allows each of the event handlers to safely schedule work without potentially removing an another handler.
        ;; (Learn more at https://codesandbox.io/s/k0yvr5970o)
-       (helix.hooks/use-effect
-        [get-current-value subscribe]
+       (react/useEffect
         (let [did-unsubscribe #js {:value false}
               check-for-updates
               (fn check-for-updates
@@ -383,7 +382,8 @@
           (check-for-updates)
           (fn []
             (gobj/set did-unsubscribe "value" true)
-            (unsubscribe))))
+            (unsubscribe)))
+        #js [get-current-value subscribe])
 
        (doto (if (or
                   (not= get-current-value (gobj/get state "get-current-value"))
