@@ -338,49 +338,50 @@
        ;; It allows each of the event handlers to safely schedule work without potentially removing an another handler.
        ;; (Learn more at https://codesandbox.io/s/k0yvr5970o)
        (react/useEffect
-        (let [did-unsubscribe #js {:value false}
-              check-for-updates
-              (fn check-for-updates
-                []
-                ;; It's possible that this callback will be invoked even after being unsubscribed,
-                ;; if it's removed as a result of a subscription event/update.
-                ;; In this case, React will log a DEV warning about an update from an unmounted component.
-                ;; We can avoid triggering that warning with this check.
-                (when (not (gobj/get did-unsubscribe "value"))
-                  (let [value (get-current-value)]
-                    (set-state
-                     (fn [prev]
-                       (cond
-                         ;; Ignore values from stale sources!
-                         ;; Since we subscribe and unsubscribe in a passive effect,
-                         ;; it's possible that this callback will be invoked for a stale (previous) subscription.
-                         ;; This check avoids scheduling an update for that stale subscription.
-                         (or (not= get-current-value
-                                   (gobj/get prev "get-current-value"))
-                             (not= subscribe
-                                   (gobj/get prev "subscribe")))
-                         prev
+        (fn []
+          (let [did-unsubscribe #js {:value false}
+                check-for-updates
+                (fn check-for-updates
+                  []
+                  ;; It's possible that this callback will be invoked even after being unsubscribed,
+                  ;; if it's removed as a result of a subscription event/update.
+                  ;; In this case, React will log a DEV warning about an update from an unmounted component.
+                  ;; We can avoid triggering that warning with this check.
+                  (when (not (gobj/get did-unsubscribe "value"))
+                    (let [value (get-current-value)]
+                      (set-state
+                       (fn [prev]
+                         (cond
+                           ;; Ignore values from stale sources!
+                           ;; Since we subscribe and unsubscribe in a passive effect,
+                           ;; it's possible that this callback will be invoked for a stale (previous) subscription.
+                           ;; This check avoids scheduling an update for that stale subscription.
+                           (or (not= get-current-value
+                                     (gobj/get prev "get-current-value"))
+                               (not= subscribe
+                                     (gobj/get prev "subscribe")))
+                           prev
 
-                         ;; The moment we've all been waiting for... the entire
-                         ;; point of rewriting this hook in ClojureScript.
-                         ;; If the value is equal under Clojure equality to the
-                         ;; previous value, then return the previous value to
-                         ;; preserve reference equality and allow React to bail.
-                         (= value (gobj/get prev "value"))
-                         prev
+                           ;; The moment we've all been waiting for... the entire
+                           ;; point of rewriting this hook in ClojureScript.
+                           ;; If the value is equal under Clojure equality to the
+                           ;; previous value, then return the previous value to
+                           ;; preserve reference equality and allow React to bail.
+                           (= value (gobj/get prev "value"))
+                           prev
 
-                         ;; return the new value
-                         :else #js {:get-current-value (gobj/get prev "get-current-value")
-                                    :subscribe (gobj/get prev "subscribe")
-                                    :value value}))))))
-              unsubscribe (subscribe check-for-updates)]
-          ;; Because we're subscribing in a passive effect,
-          ;; it's possible that an update has occurred between render and our effect handler.
-          ;; Check for this and schedule an update if work has occurred.
-          (check-for-updates)
-          (fn []
-            (gobj/set did-unsubscribe "value" true)
-            (unsubscribe)))
+                           ;; return the new value
+                           :else #js {:get-current-value (gobj/get prev "get-current-value")
+                                      :subscribe (gobj/get prev "subscribe")
+                                      :value value}))))))
+                unsubscribe (subscribe check-for-updates)]
+            ;; Because we're subscribing in a passive effect,
+            ;; it's possible that an update has occurred between render and our effect handler.
+            ;; Check for this and schedule an update if work has occurred.
+            (check-for-updates)
+            (fn []
+              (gobj/set did-unsubscribe "value" true)
+              (unsubscribe))))
         #js [get-current-value subscribe])
 
        (doto (if (or
