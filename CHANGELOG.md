@@ -1,5 +1,11 @@
 # Changelog
 
+## UNRELEASED
+
+## Fixed
+
+- (@jimmyhmiller) Fix `use-subscription` infinite render
+
 ## 0.0.14
 
 ### Fixed
