@@ -1,6 +1,8 @@
 (ns helix.dom
   (:refer-clojure :exclude [map meta time])
-  (:require [helix.core :as hx])
+  (:require
+   [helix.core :as hx]
+   [helix.impl.props :as impl.props])
   #?(:cljs (:require-macros [helix.dom])))
 
 (declare
@@ -145,6 +147,22 @@
     radialGradient
     stop
     tspan])
+
+
+(defmacro $d
+  [type & args]
+  (if (map? (first args))
+    `^js/React.Element (.createElement
+                        (hx/get-react)
+                        ~type
+                        (impl.props/dom-props ~(first args))
+                        ~@(rest args))
+    `^js/React.Element (.createElement
+                        (hx/get-react)
+                        ~type
+                        nil
+                        ~@args)))
+
 
 #?(:clj (defn gen-tag
           [tag]

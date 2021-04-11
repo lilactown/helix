@@ -50,7 +50,7 @@
                           (get-react)
                           ~type
                           ~(if native?
-                             `(impl.props/native-props ~(first args))
+                             `(impl.props/dom-props ~(first args))
                              `(impl.props/props ~(first args)))
                           ~@(rest args))
 

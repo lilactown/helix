@@ -122,7 +122,7 @@
        v)))
 
 
-(defn native-style
+(defn dom-style
   [style]
   (cond
     ;; when map, convert to an object w/ camel casing
@@ -131,19 +131,19 @@
     (vector? style) (into-js-array (map #(if (map? %) (primitive-obj %) %) style))
     ;; if anything else, at compile time fall back to runtime
     ;; at runtime just pass it through and assume it's a JS style obj!
-    true #?(:clj `(native-style ~style)
+    true #?(:clj `(dom-style ~style)
             :cljs style)))
 
 
-(defn -native-props
+(defn -dom-props
   ([m] #?(:clj (if-let [spread-sym (cond
                                      (contains? m '&) '&
                                      (contains? m :&) :&)]
-                 `(merge-obj ~(-native-props (dissoc m spread-sym) (primitive-obj))
-                             (-native-props ~(get m spread-sym)))
-                 (-native-props m (primitive-obj)))
+                 `(merge-obj ~(-dom-props (dissoc m spread-sym) (primitive-obj))
+                             (-dom-props ~(get m spread-sym)))
+                 (-dom-props m (primitive-obj)))
           :cljs (if (map? m)
-                  (-native-props m (primitive-obj))
+                  (-dom-props m (primitive-obj))
                   ;; assume JS obj
                   m)))
   ([m o]
@@ -155,7 +155,7 @@
               (case k
                 :class (set-obj o "className" (normalize-class v))
                 :for (set-obj o "htmlFor" v)
-                :style (set-obj o "style" (native-style v))
+                :style (set-obj o "style" (dom-style v))
                 :value (set-obj o "value" #?(:clj `(or-undefined ~v)
                                              :cljs (or-undefined v)))
                 (set-obj o (camel-case (kw->str k)) v))))
@@ -164,13 +164,13 @@
 
 
 (comment
-  (-native-props {:asdf "jkl" :style 'foo})
+  (-dom-props {:asdf "jkl" :style 'foo})
   
-  (-native-props {:style ["fs1"]})
+  (-dom-props {:style ["fs1"]})
   )
 
-(defmacro native-props [m]
-  (-native-props m))
+(defmacro dom-props [m]
+  (-dom-props m))
 
 
 (defn -props
