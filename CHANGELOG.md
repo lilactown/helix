@@ -1,8 +1,15 @@
 # Changelog
 
+## UNRELEASED
+
+### Added
+
+- `helix.dom/$d` helper for rendering components with DOM props
+coercion; e.g. `($d material-ui/button {:class ["foo" "bar"]})`
+
 ## 0.0.15
 
-## Fixed
+### Fixed
 
 - (@jimmyhmiller) Fix `use-subscription` infinite render
 
