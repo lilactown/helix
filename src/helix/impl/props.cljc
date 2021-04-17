@@ -165,7 +165,7 @@
 
 (comment
   (-dom-props {:asdf "jkl" :style 'foo})
-  
+
   (-dom-props {:style ["fs1"]})
   )
 

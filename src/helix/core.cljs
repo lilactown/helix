@@ -56,7 +56,7 @@
       (apply create-element
              type'
              (if native?
-               (impl.props/-native-props ?p)
+               (impl.props/-dom-props ?p)
                (impl.props/-props ?p))
              ?c)
       (apply create-element
