@@ -158,7 +158,7 @@
 
         ;; feature flags
         flag-fast-refresh? (:fast-refresh feature-flags)
-        flag-check-invalid-hooks-usage? (:check-invalid-hooks-usage feature-flags)
+        flag-check-invalid-hooks-usage? (:check-invalid-hooks-usage feature-flags true)
         flag-define-factory? (:define-factory feature-flags)
         flag-metadata-optimizations (:metadata-optimizations feature-flags)
 
@@ -233,7 +233,7 @@
 
         ;; feature flags
         flag-fast-refresh? (:fast-refresh feature-flags)
-        flag-check-invalid-hooks-usage? (:check-invalid-hooks-usage feature-flags)]
+        flag-check-invalid-hooks-usage? (:check-invalid-hooks-usage feature-flags true)]
     (when-not (string/starts-with? (str sym) "use-")
       (hana/warn hana/warning-invalid-hook-name &env {:form &form}))
     `(defn ~(vary-meta sym merge {:helix/hook? true})
