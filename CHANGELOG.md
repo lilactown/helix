@@ -1,10 +1,10 @@
 # Changelog
 
-## 0.1.0 (UNRELEASED)
+## 0.1.0
 
 ### Breaking
 
-- Enable 
+- Enable `:check-invalid-hooks-usage` by default
 
 ### Added
 
