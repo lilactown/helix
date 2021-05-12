@@ -384,22 +384,23 @@
               (unsubscribe))))
         #js [get-current-value subscribe])
 
-       (doto (if (or
-                  (not= get-current-value (gobj/get state "get-current-value"))
-                  (not= subscribe (gobj/get state "subscribe")))
-               ;; If parameters have changed since our last render,
-               ;; schedule an update with its current value.
-               (let [value (get-current-value)]
-                 (set-state #js {:get-current-value get-current-value
-                                 :subscribe subscribe
-                                 :value value})
-                 ;; If the subscription has been updated, we'll schedule another update with React.
-                 ;; React will process this update immediately, so the old subscription value won't be committed.
-                 ;; It is still nice to avoid returning a mismatched value though, so let's override the return value.
-                 value)
+       (when goog/DEBUG
+         (doto (if (or
+                    (not= get-current-value (gobj/get state "get-current-value"))
+                    (not= subscribe (gobj/get state "subscribe")))
+                 ;; If parameters have changed since our last render,
+                 ;; schedule an update with its current value.
+                 (let [value (get-current-value)]
+                   (set-state #js {:get-current-value get-current-value
+                                   :subscribe subscribe
+                                   :value value})
+                   ;; If the subscription has been updated, we'll schedule another update with React.
+                   ;; React will process this update immediately, so the old subscription value won't be committed.
+                   ;; It is still nice to avoid returning a mismatched value though, so let's override the return value.
+                   value)
 
-               ;; If parameters haven't changed, return value stored in state
-               (gobj/get state "value"))
-         ;; Display the current value for this hook in React DevTools.
-         (-> (pr-str)
-             (use-debug-value))))))
+                 ;; If parameters haven't changed, return value stored in state
+                 (gobj/get state "value"))
+           ;; Display the current value for this hook in React DevTools.
+           (-> (pr-str)
+               (use-debug-value)))))))
