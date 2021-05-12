@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1 (UNRELEASED)
+
+### Fixed
+
+- Fix performance issue with `use-subscription` by only calling `pr-str` when
+`goog/DEBUG` is true
+
 ## 0.1.0
 
 ### Breaking
