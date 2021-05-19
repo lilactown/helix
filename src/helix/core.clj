@@ -91,7 +91,7 @@
 (defn- fnc*
   [display-name props-bindings body]
   ;; maybe-ref for react/forwardRef support
-  `(fn ^js/React.Element ~display-name
+  `(fn ^js/React.Element ~@(when (some? display-name) [display-name])
      [props# maybe-ref#]
      (let [~props-bindings [(extract-cljs-props props#) maybe-ref#]]
        ~@body)))
@@ -110,6 +110,61 @@
                     deps
                     :auto-deps)
                  ~form))})
+
+
+(defmacro fnc
+  "Creates a new anonymous function React component. Used like:
+
+  (fnc ?optional-component-name
+    [props ?forwarded-ref]
+    {,,,opts-map}
+    ,,,body)
+
+  Returns a function that can be used just like a component defined with
+  `defnc`, i.e. accepts a JS object as props and the body receives them as a
+  map, can be used with `$` macro, forwardRef, etc.
+
+  `opts-map` is optional and can be used to pass some configuration options.
+  Current options:
+   - ':wrap' - ordered sequence of higher-order components to wrap the component in
+   - ':helix/features' - a map of feature flags to enable.
+
+  Some feature flags only pertain to named components, i.e. Fast Refresh and
+  factory functions, and thus can not be used with `fnc`."
+  [& body]
+  (let [[display-name props-bindings body] (if (symbol? (first body))
+                                             [(first body) (second body)
+                                              (rest (rest body))]
+                                             [nil (first body) (rest body)])
+        opts-map? (map? (first body))
+        opts (if opts-map?
+               (first body)
+               {})
+        feature-flags (:helix/features opts)
+
+        ;; feature flags
+        flag-check-invalid-hooks-usage? (:check-invalid-hooks-usage feature-flags true)
+        flag-metadata-optimizations (:metadata-optimizations feature-flags)
+
+
+        body (cond-> body
+               opts-map? (rest)
+               flag-metadata-optimizations (hana/map-forms-with-meta meta->form))
+
+        hooks (hana/find-hooks body)]
+    (when flag-check-invalid-hooks-usage?
+      (when-some [invalid-hooks (->> (map hana/invalid-hooks-usage body)
+                                     (flatten)
+                                     (filter (comp not nil?))
+                                     (seq))]
+        (doseq [invalid-hook invalid-hooks]
+          (hana/warn hana/warning-invalid-hooks-usage
+                     &env
+                     invalid-hook))))
+
+    `(-> ~(fnc* nil props-bindings
+                body)
+         ~@(-> opts :wrap))))
 
 
 (defmacro defnc
