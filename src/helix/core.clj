@@ -232,6 +232,15 @@
         ;; feature flags
         flag-fast-refresh? (:fast-refresh feature-flags)
         flag-check-invalid-hooks-usage? (:check-invalid-hooks-usage feature-flags true)]
+    (when flag-check-invalid-hooks-usage?
+      (when-some [invalid-hooks (->> (map hana/invalid-hooks-usage body)
+                                     (flatten)
+                                     (filter (comp not nil?))
+                                     (seq))]
+        (doseq [invalid-hook invalid-hooks]
+          (hana/warn hana/warning-invalid-hooks-usage
+                     &env
+                     invalid-hook))))
     (when-not (string/starts-with? (str sym) "use-")
       (hana/warn hana/warning-invalid-hook-name &env {:form &form}))
     `(defn ~(vary-meta sym merge {:helix/hook? true})
