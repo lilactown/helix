@@ -1,0 +1,3 @@
+{:lint-as {helix.core/defnc clojure.core/defn
+           helix.core/defhook clojure.core/defn
+           helix.core/fnc clojure.core/fn}}
