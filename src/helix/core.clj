@@ -90,12 +90,11 @@
 
 (defn- fnc*
   [display-name props-bindings body]
-  (let [ret (gensym "return_value")]
-    ;; maybe-ref for react/forwardRef support
-    `(fn ^js/React.Element ~display-name
-       [props# maybe-ref#]
-       (let [~props-bindings [(extract-cljs-props props#) maybe-ref#]]
-         ~@body))))
+  ;; maybe-ref for react/forwardRef support
+  `(fn ^js/React.Element ~display-name
+     [props# maybe-ref#]
+     (let [~props-bindings [(extract-cljs-props props#) maybe-ref#]]
+       ~@body)))
 
 
 (def meta->form
@@ -147,7 +146,6 @@
         body (if (nil? docstring)
                (rest form-body)
                (rest (rest form-body)))
-        wrapped-name (symbol (str display-name "-helix-render"))
         opts-map? (map? (first body))
         opts (if opts-map?
                (first body)
@@ -290,7 +288,9 @@
                                            (->value %)))
                                    (apply concat)))]
     ;; TODO handle render specially
-    `(def ~display-name (create-component ~js-spec ~js-statics))))
+    `(def ~display-name
+       ~@(when docstring docstring)
+       (create-component ~js-spec ~js-statics))))
 
 (comment
   (macroexpand
