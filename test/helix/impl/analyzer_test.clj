@@ -41,7 +41,9 @@
         '(condp = (use-foo)
            bar (baz))
         '(condp = asdf
-           (use-foo) (baz))))
+           (use-foo) (baz))
+        '(when true
+           '(use-foo))))
     (t/testing "incorrect hooks usage in branch"
       (t/are [form] (seq (hana/invalid-hooks-usage form))
         '(if (foo)
@@ -169,3 +171,11 @@
       'user
       'foo/use
       'foo/user)))
+
+(t/deftest find-hooks
+  (t/are [hooks body] (= hooks (hana/find-hooks body))
+         [] '(do '(use-foo))
+         '[(use-foo)] '(use-foo)
+         '[(use-foo)] '{:foo (use-foo)}
+         '[(use-foo)] '{:foo #{use-bar (use-foo)}}
+         '[] '('use-foo bar)))

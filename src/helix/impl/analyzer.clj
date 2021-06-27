@@ -71,20 +71,6 @@ Example: ($ %s %s ...)"
 ;; - Handle re-ordering
 ;;   - Detect hooks used in let-bindings and add left-hand side to signature
 
-(defn find-all
-  "Recursively walks a tree structure and finds all elements
-  that match `pred`. Returns a vector of results."
-  [pred tree]
-  (let [results (atom [])]
-    (clojure.walk/postwalk
-     (fn walker [x]
-       (when (pred x)
-         (swap! results conj x))
-       x)
-     tree)
-    @results))
-
-
 (defn hook? [x]
   (boolean
    (and (symbol? x)
@@ -99,7 +85,24 @@ Example: ($ %s %s ...)"
 
 (defn find-hooks
   [body]
-  (find-all hook-expr? body))
+  (let [f (fn f [matches form]
+            (if (and (seqable? form)
+                     (not
+                       ;; Ignore quoted forms, e.g. '(use-foo)
+                       (and
+                         (list? form)
+                         (= 'quote (first form)))))
+              (cond-> (reduce
+                        (fn [acc x]
+                          (f acc x))
+                        matches
+                        form)
+                (hook-expr? form)
+                (conj form))
+              matches))]
+    (f
+     []
+     body)))
 
 
 (defn inferred-type [env x]
@@ -128,6 +131,9 @@ Example: ($ %s %s ...)"
      :else
      (let [hd (first form)]
        (->> (cond
+              ;; Ignore quoted forms, e.g. '(use-foo)
+              ('#{quote} hd)
+              nil
               ;;
               ;; -- Loops
               ;;
