@@ -1,5 +1,16 @@
 # Changelog
 
+## UNRELEASED
+
+### Fixed
+
+- Fix invalid hooks check false warnings when a `use-` symbol appears in a
+quoted form (@SevereOverfl0w)
+
+### Added
+
+- Invalid hooks check now happens in `defhook` forms
+
 ## 0.1.1
 
 ### Fixed
