@@ -10,6 +10,7 @@ quoted form (@SevereOverfl0w)
 ### Added
 
 - Invalid hooks check now happens in `defhook` forms
+- `fnc` for constructing anonymous components
 
 ## 0.1.1
 
