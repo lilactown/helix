@@ -3,12 +3,17 @@
             [cljs-bean.core :as b])
   (:refer-clojure :exclude [find]))
 
+
 (defonce id->root (atom {}))
 
-(defn on-commit-fiber-root [id root _maybe-priority-level _did-error?]
+
+(defn on-commit-fiber-root
+  [id root _maybe-priority-level _did-error?]
   (swap! id->root assoc id root))
 
-(defn inject-hook! []
+
+(defn inject-hook!
+  []
   (let [hook (gobj/get js/window "__REACT_DEVTOOLS_GLOBAL_HOOK__")
         onCommitFiberRoot (gobj/get hook "onCommitFiberRoot")]
     (gobj/set hook "onCommitFiberRoot"
@@ -17,16 +22,10 @@
                 (this-as this
                   (.apply onCommitFiberRoot this (to-array args)))))))
 
-#_(inject-hook)
-
-#_(add-watch id->root :dev (fn [_ _ _ r]
-                             (js/console.log r)))
 
 (defn current-fiber
   ([] (current-fiber 1))
   ([id] (gobj/get (get @id->root id) "current")))
-
-#_(current)
 
 
 (defn child-node
@@ -69,11 +68,13 @@
 ;; Displaying
 ;;
 
-(defn- hooks? [node]
+(defn- hooks?
+  [node]
   (not (nil? (gobj/get node "_debugHookTypes"))))
 
 
-(defn hook-info [hook-type hook]
+(defn hook-info
+  [hook-type hook]
   (let [queue (gobj/get hook "queue")]
     (cond-> {:type (keyword hook-type)
              :current (gobj/get hook "memoizedState")}
@@ -81,7 +82,8 @@
       (assoc :dispatch (gobj/get queue "dispatch")))))
 
 
-(defn- accumulate-hooks [node]
+(defn- accumulate-hooks
+  [node]
   ;; :memoizedState linked list of hooks each w/ :next, :baseState and :memoizedState
   ;; type is in _debugHookTypes
   (let [hook-types (gobj/get node "_debugHookTypes")]
@@ -96,7 +98,8 @@
         hooks))))
 
 
-(defn fiber->map [node]
+(defn fiber->map
+  [node]
   (when (some? node)
     (with-meta
       {:props (b/bean (gobj/get node "memoizedProps"))
