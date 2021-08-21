@@ -8,6 +8,4 @@
 
 (defn init! []
   (start!)
-  (repl/inject-hook))
-
-(init!)
+  (repl/inject-hook!))

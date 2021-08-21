@@ -88,19 +88,23 @@
 
 
 (comment
-  (require '[helix.experimental.repl :as helix.repl])
+  (require '[helix.experimental.repl])
 
-  ((->> (helix.repl/as-tree-seq)
-       (helix.repl/q {:type state-test})
-       (helix.repl/info)
-       :state
-       first
-       :dispatch) {:name "jkl"})
 
-  (->> (helix.repl/as-tree-seq)
-       (helix.repl/q {:type state-test})
-       (helix.repl/info)
-       (cljs.pprint/pprint))
+  (helix.experimental.repl/all-fibers)
+
+
+  (doseq [f (helix.experimental.repl/find-all state-test) ]
+    (js/console.log f))
+
+  (js/console.log (helix.experimental.repl/find state-test))
+
+
+  (-> (helix.experimental.repl/find state-test)
+      (:state)
+      (first)
+      (:dispatch)
+      (.call nil {:name "bar"}))
   )
 
 

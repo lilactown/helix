@@ -1,10 +1,11 @@
 (ns helix.experimental.repl
   (:require [goog.object :as gobj]
-            [cljs-bean.core :as b]))
+            [cljs-bean.core :as b])
+  (:refer-clojure :exclude [find]))
 
 (defonce id->root (atom {}))
 
-(defn on-commit-fiber-root [id root maybe-priority-level did-error?]
+(defn on-commit-fiber-root [id root _maybe-priority-level _did-error?]
   (swap! id->root assoc id root))
 
 (defn inject-hook! []
@@ -21,44 +22,46 @@
 #_(add-watch id->root :dev (fn [_ _ _ r]
                              (js/console.log r)))
 
-(defn current
-  ([] (current 1))
+(defn current-fiber
+  ([] (current-fiber 1))
   ([id] (gobj/get (get @id->root id) "current")))
 
 #_(current)
 
 
-(defn child
+(defn child-node
   [node]
   (gobj/get node "child"))
 
 
-(defn child?
+(defn has-child?
   [node]
-  (-> (child node) nil? not))
+  (-> (child-node node) nil? not))
 
 
-(defn sibling
+(defn sibling-node
   [node]
   (gobj/get node "sibling"))
 
 
+(defn siblings
+  [node]
+  (when (some? node)
+    (lazy-seq
+     (cons node (siblings (sibling-node node))))))
+
+
 (defn children
   [node]
-  (loop [last (child node)
-         childs (vector (child node))]
-    (if-let [sibl (sibling last)]
-      (recur sibl
-             (conj childs sibl))
-      childs)))
+  (siblings (child-node node)))
 
 
-(defn as-tree-seq
+(defn all-fibers
   ([]
-   (->> (current)
-        (tree-seq child? children)))
+   (->> (current-fiber)
+        (tree-seq has-child? children)))
   ([root]
-   (tree-seq child? children root)))
+   (tree-seq has-child? children root)))
 
 
 
@@ -93,19 +96,21 @@
         hooks))))
 
 
-(defn info [node]
-  (if (nil? node)
-    node
-    {:props (b/bean (gobj/get node "memoizedProps"))
-     :type (gobj/get node "type")
-     :dom-el (gobj/get node "stateNode")
-     :state (if (hooks? node)
-              (->> node
-                   (accumulate-hooks)
-                   (map #(hook-info (first %) (second %))))
-              (-> node
-                  (gobj/get "memoizedState")
-                  (b/bean)))}))
+(defn fiber->map [node]
+  (when (some? node)
+    (with-meta
+      {:props (b/bean (gobj/get node "memoizedProps"))
+       :type (gobj/get node "type")
+       :dom-el (gobj/get node "stateNode")
+       :state (if (hooks? node)
+                (->> node
+                     (accumulate-hooks)
+                     (map #(hook-info (first %) (second %))))
+                (-> node
+                    (gobj/get "memoizedState")
+                    (b/bean)))
+       :children (map fiber->map (children node))}
+      {:fiber node})))
 
 
 #_(->  (tree)
@@ -122,6 +127,18 @@
 ;;
 ;; Querying
 ;;
+
+
+(defn find-all
+  [type]
+  (->> (all-fibers)
+       (filter #(= (gobj/get % "type") type))
+       (map fiber->map)))
+
+
+(defn find
+  [type]
+  (first (find-all type)))
 
 
 (defn q
