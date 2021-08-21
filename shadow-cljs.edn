@@ -15,7 +15,8 @@
         :asset-path "/js"
         :modules {:shared {}
                   :main {:entries [workshop]
-                         :depends-on #{:shared}}
+                         :depends-on #{:shared}
+                         :init-fn workshop/init!}
                   :refresh {:entries [refresh-example]
                             :depends-on #{:shared}}}
         :compiler-options {:devcards true}
