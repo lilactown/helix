@@ -113,17 +113,6 @@
       {:fiber node})))
 
 
-#_(->  (tree)
-     (as-> tree (take-last 4 tree))
-     (first)
-     #_(b/bean)
-     #_(keys)
-     ;;:type
-     #_(dissoc :props :pendingProps :memoizedProps)
-     #_(cljs.pprint/pprint)
-     (js/console.log))
-
-
 ;;
 ;; Querying
 ;;
@@ -139,31 +128,3 @@
 (defn find
   [type]
   (first (find-all type)))
-
-
-(defn q
-  ([query]
-   (let [type (if-let [t (:type query)]
-                (if (.-displayName ^js t)
-                  #(= t %)
-                  t)
-                identity)
-         props (:props query identity)
-         state (:state query identity)]
-     (fn [node]
-       (and (-> node (gobj/get "type") (type))
-            (-> node (gobj/get "memoizedProps") (b/bean) (props))
-            (if (hooks? node)
-              (->> node
-                   (accumulate-hooks)
-                   (map #(hook-info (first %) (second %)))
-                   (map :current)
-                   (some state))
-              ;; class components
-              (-> node
-                  (gobj/get "memoizedState")
-                  (or #js {})
-                  (b/bean)
-                  (state)))))))
-  ([query coll]
-   (first (filter (q query) coll))))
