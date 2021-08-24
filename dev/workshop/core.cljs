@@ -89,23 +89,15 @@
 
 
 (comment
-  (require '[helix.experimental.repl])
-
-
-  (helix.experimental.repl/all-fibers)
-
-
-  (doseq [f (helix.experimental.repl/find-all state-test) ]
-    (js/console.log f))
-
-  (js/console.log (helix.experimental.repl/find state-test))
-
-
-  (-> (helix.experimental.repl/find state-test)
+  (-> (react-repl-tools.core/find state-test)
       (:state)
       (first)
-      (:dispatch)
-      (.call nil {:name "bar"}))
+      (react-repl-tools.core/hook-dispatch {:name "jkl"}))
+
+  (-> (react-repl-tools.core/find state-test)
+      (:state)
+      (second)
+      (react-repl-tools.core/hook-deps))
   )
 
 

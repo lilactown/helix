@@ -99,6 +99,25 @@
 
 
 ;;
+;; Hook operations
+;;
+
+
+(defn hook-deps
+  [hook]
+  (case (:type hook)
+    (:useEffect
+     :useLayoutEffect
+     :useMemo
+     :useCallback) (second (:current hook))))
+
+
+(defn hook-dispatch
+  [{:keys [dispatch] :as _hook} & args]
+  (apply dispatch args))
+
+
+;;
 ;; Querying
 ;;
 
