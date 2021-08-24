@@ -76,10 +76,11 @@
 
 (defnc state-test
   []
-  (let [[{:keys [name]} set-state] (hooks/use-state {:name "asdf"})]
+  (let [[{:keys [name]} set-state] (hooks/use-state {:name "jkl"})]
     (d/div
-     (d/input {:value name
-               :on-change #(set-state assoc :name (.. % -target -value))})
+     (d/input
+      {:value name
+       :on-change #(set-state assoc :name (.. % -target -value))})
      ($ subcomponent {:name name}))))
 
 

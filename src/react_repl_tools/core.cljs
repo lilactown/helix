@@ -1,31 +1,14 @@
-(ns helix.experimental.repl
-  (:require [goog.object :as gobj]
-            [cljs-bean.core :as b])
+(ns react-repl-tools.core
+  (:require
+   [goog.object :as gobj]
+   [cljs-bean.core :as b]
+   [react-repl-tools.state :as state])
   (:refer-clojure :exclude [find]))
-
-
-(defonce id->root (atom {}))
-
-
-(defn on-commit-fiber-root
-  [id root _maybe-priority-level _did-error?]
-  (swap! id->root assoc id root))
-
-
-(defn inject-hook!
-  []
-  (let [hook (gobj/get js/window "__REACT_DEVTOOLS_GLOBAL_HOOK__")
-        onCommitFiberRoot (gobj/get hook "onCommitFiberRoot")]
-    (gobj/set hook "onCommitFiberRoot"
-              (fn [& args]
-                (apply on-commit-fiber-root args)
-                (this-as this
-                  (.apply onCommitFiberRoot this (to-array args)))))))
 
 
 (defn current-fiber
   ([] (current-fiber 1))
-  ([id] (gobj/get (get @id->root id) "current")))
+  ([id] (gobj/get (get @state/roots id) "current")))
 
 
 (defn child-node
@@ -57,16 +40,15 @@
 
 (defn all-fibers
   ([]
-   (->> (current-fiber)
-        (tree-seq has-child? children)))
+   (tree-seq has-child? children (current-fiber)))
   ([root]
    (tree-seq has-child? children root)))
-
 
 
 ;;
 ;; Displaying
 ;;
+
 
 (defn- hooks?
   [node]
