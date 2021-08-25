@@ -1,3 +1,3 @@
 (ns cljs.user
   (:require
-   [react-repl-tools.core :as rr]))
+   [react-repl.core :as rr]))

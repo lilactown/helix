@@ -24,7 +24,7 @@
         :devtools {:http-root    "public/dev"
                    :http-port    8700
                    :preloads     [devtools.preload
-                                  react-repl-tools.preload]}}
+                                  react-repl.preload]}}
 
   :test     {:target    :browser-test
              :test-dir  "public/test"

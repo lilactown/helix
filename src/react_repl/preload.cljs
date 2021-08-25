@@ -1,7 +1,7 @@
-(ns react-repl-tools.preload
+(ns react-repl.preload
   (:require
    [goog.object :as gobj]
-   [react-repl-tools.state :as state]))
+   [react-repl.state :as state]))
 
 
 (defn on-commit-fiber-root

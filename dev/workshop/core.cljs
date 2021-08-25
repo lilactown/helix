@@ -37,6 +37,7 @@
      (swap! count inc))
     (pr-str foo bar @count)))
 
+
 (defnc memoized-key
   [{:keys [foo bar]}]
   {:wrap [(helix/memo :bar)]}
@@ -45,6 +46,21 @@
      :always
      (swap! count inc))
     (pr-str foo bar @count)))
+
+
+(comment
+  (react-repl.core/find memoized-key)
+
+  (-> memoized-key
+      (react-repl.core/find)
+      (react-repl.core/props))
+
+
+  (js/console.log (react-repl.core/parent (react-repl.core/find memoized-key)))
+
+  (react-repl.dom/parent-el
+   (react-repl.core/find memoized-key))
+  )
 
 
 (defnc memoized-test
@@ -89,15 +105,20 @@
 
 
 (comment
-  (-> (react-repl-tools.core/find state-test)
-      (:state)
+  (-> (react-repl.core/find state-test)
+      (react-repl.core/state)
       (first)
-      (react-repl-tools.core/hook-dispatch {:name "jkl"}))
+      :current)
 
-  (-> (react-repl-tools.core/find state-test)
-      (:state)
+  (-> (react-repl.core/find state-test)
+      (react-repl.core/state)
+      (first)
+      (react-repl.core/hook-dispatch {:name "foo"}))
+
+  (-> (react-repl.core/find state-test)
+      (react-repl.core/state)
       (second)
-      (react-repl-tools.core/hook-deps))
+      (react-repl.core/hook-deps))
   )
 
 
