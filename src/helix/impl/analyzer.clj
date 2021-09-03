@@ -78,10 +78,12 @@ Example: ($ %s %s ...)"
               [#"^use\-"
                #"^use[A-Z]"]))))
 
+
 (defn hook-expr?
   [x]
   (when (list? x)
     (hook? (first x))))
+
 
 (defn find-hooks
   [body]

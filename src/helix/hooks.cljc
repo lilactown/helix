@@ -119,14 +119,14 @@
 
 
 #?(:clj
-   (defn deps-macro-body [env deps body deps->hook-body]
+   (defn deps-macro-body [env deps body simple-body-ok? deps->hook-body]
      (cond
        ;;
        ;; Warn on typical errors writing body
        ;;
 
        ;; a single symbol
-       (and (= (count body) 1) (symbol? (first body)))
+       (and (= (count body) 1) (symbol? (first body)) (not simple-body-ok?))
        (do (hana/warn hana/warning-simple-body env {:form body})
            nil)
 
@@ -171,7 +171,7 @@
   [deps & body]
   #?(:clj
      (deps-macro-body
-      &env deps body
+      &env deps body false
       (fn
         ([fn-body] `^clj-nil (raw-use-effect (wrap-fx (fn [] ~@fn-body))))
         ([deps fn-body]
@@ -198,7 +198,7 @@
   [deps & body]
   #?(:clj
      (deps-macro-body
-      &env deps body
+      &env deps body false
       (fn
         ([fn-body] `^clj-nil (raw-use-layout-effect (wrap-fx (fn [] ~@fn-body))))
         ([deps fn-body]
@@ -223,7 +223,7 @@
   [deps & body]
   #?(:clj
      (deps-macro-body
-      &env deps body
+      &env deps body false
       (fn
         ([fn-body]
          (vary-meta
@@ -257,7 +257,7 @@
   [deps & fn-body]
   #?(:clj
      (deps-macro-body
-      &env deps fn-body
+      &env deps fn-body true
       (fn
         ([fn-body] `^function (raw-use-callback ~@fn-body))
         ([deps fn-body] `^function (raw-use-callback ~@fn-body
@@ -283,7 +283,7 @@
   [ref deps & body]
   #?(:clj
      (deps-macro-body
-      &env deps body
+      &env deps body false
       (fn
         ([fn-body] `(raw-use-imperative-handle ref (fn [] ~@fn-body)))
         ([deps fn-body] `(raw-use-imperative-handle
