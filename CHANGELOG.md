@@ -1,11 +1,12 @@
 # Changelog
 
-## UNRELEASED
+## 0.1.2
 
 ### Fixed
 
 - Fix invalid hooks check false warnings when a `use-` symbol appears in a
 quoted form (@SevereOverfl0w)
+- Allow a single var/binding to be passed to `use-callback`
 
 ### Added
 
