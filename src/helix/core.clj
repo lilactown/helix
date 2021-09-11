@@ -222,10 +222,12 @@
 
         hooks (hana/find-hooks body)
 
-        component-fn-name (if flag-define-factory?
-                            (with-meta (symbol (str display-name "-render-type"))
-                              {:private true})
-                            display-name)]
+        component-var-name (if flag-define-factory?
+                             (with-meta (symbol (str display-name "-type"))
+                               {:private true})
+                             display-name)
+
+        component-fn-name (symbol (str display-name "-render"))]
     (when flag-check-invalid-hooks-usage?
       (when-some [invalid-hooks (->> (map hana/invalid-hooks-usage body)
                                      (flatten)
@@ -240,7 +242,7 @@
             `(if ^boolean goog/DEBUG
                (def ~sig-sym (signature!))))
          (def ~(vary-meta
-                component-fn-name
+                component-var-name
                 merge
                 {:helix/component? true})
            ~@(when-not (nil? docstring)
@@ -258,15 +260,15 @@
 
          ~(when flag-define-factory?
             `(def ~display-name
-               (cljs-factory ~(symbol (str display-name "-render-type")))))
+               (cljs-factory ~component-var-name)))
 
          ~(when flag-fast-refresh?
             `(when ^boolean goog/DEBUG
                (when ~sig-sym
-                 (~sig-sym ~component-fn-name ~(string/join hooks)
+                 (~sig-sym ~component-var-name ~(string/join hooks)
                   nil ;; forceReset
                   nil)) ;; getCustomHooks
-               (register! ~component-fn-name ~fully-qualified-name)))
+               (register! ~component-var-name ~fully-qualified-name)))
          ~display-name)))
 
 
