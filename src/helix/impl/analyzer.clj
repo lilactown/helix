@@ -4,7 +4,9 @@
             [clojure.string :as string]
             [cljs.env]
             [cljs.analyzer.api :as ana-api]
-            [cljs.analyzer :as ana]))
+            [cljs.analyzer :as ana]
+            [cljs.tagged-literals])
+  (:import [cljs.tagged_literals JSValue]))
 
 
 (def warning-simple-body ::simple-body)
@@ -54,10 +56,15 @@ Example: ($ %s %s ...)"
   (let [sym-list (atom #{})]
     (clojure.walk/postwalk
      (fn w [x]
-       (if (symbol? x)
+       (cond
+         (symbol? x)
          (do (swap! sym-list conj x)
              x)
-         x))
+
+         (= (type x) JSValue)
+         (.-val x)
+
+         :else x))
      body)
 
     (->> @sym-list
@@ -88,20 +95,23 @@ Example: ($ %s %s ...)"
 (defn find-hooks
   [body]
   (let [f (fn f [matches form]
-            (if (and (seqable? form)
-                     (not
-                       ;; Ignore quoted forms, e.g. '(use-foo)
-                       (and
+            (let [form (if (= (type form) JSValue)
+                         (.-val form)
+                         form)]
+              (if (and (seqable? form)
+                       (not
+                        ;; Ignore quoted forms, e.g. '(use-foo)
+                        (and
                          (list? form)
                          (= 'quote (first form)))))
-              (cond-> (reduce
-                        (fn [acc x]
-                          (f acc x))
-                        matches
-                        form)
-                (hook-expr? form)
-                (conj form))
-              matches))]
+                (cond-> (reduce
+                         (fn [acc x]
+                           (f acc x))
+                         matches
+                         form)
+                  (hook-expr? form)
+                  (conj form))
+                matches)))]
     (f
      []
      body)))
