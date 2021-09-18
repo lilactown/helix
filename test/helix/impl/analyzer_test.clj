@@ -96,7 +96,18 @@
            true (bar)
            (use-foo) (baz))
         '(condp #(use-foo %) asdf
-           123 (baz))))
+           123 (baz))
+        '(when x
+           [(hooks/use-foo)])
+        '(when x
+           {:a (hooks/use-foo)})
+        '{:a (when x (hooks/use-foo))}
+        '[(when x
+            (hooks/use-foo))]
+        '(when x
+           #{(hooks/use-foo)})
+        '#{(when x
+             (hooks/use-foo))}))
 
     (t/testing "correct hooks usage in loop"
       (t/are [form] (nil? (hana/invalid-hooks-usage form))

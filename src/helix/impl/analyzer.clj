@@ -140,6 +140,14 @@ Example: ($ %s %s ...)"
      (not (and (seqable? form) (seq form)))
      nil
 
+     (or (vector? form) (set? form))
+     (map #(invalid-hooks-usage ctx %) form)
+
+     (map? form)
+     (concat
+      (map #(invalid-hooks-usage ctx %) (keys form))
+      (map #(invalid-hooks-usage ctx %) (vals form)))
+
      :else
      (let [hd (first form)]
        (->> (cond
