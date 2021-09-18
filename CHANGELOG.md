@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.3
+
+### Fixed
+
+- Fix invalid hooks check when hooks appear inside literals, i.e. `(when x [(use-foo)])`
+- Fix recursive calls to components wrapped in HOC
+- Detect hooks inside of JS literals
+
 ## 0.1.2
 
 ### Fixed
