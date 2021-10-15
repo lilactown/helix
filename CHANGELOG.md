@@ -1,5 +1,11 @@
 # Changelog
 
+## UNRELEASED
+
+### Fixed
+
+- Correctly compare props when using `helix.core/memo` without a custom comparator combined with `:define-factory`
+
 ## 0.1.3
 
 ### Fixed

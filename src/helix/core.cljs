@@ -137,9 +137,21 @@
     (bean/bean o)))
 
 
+(defn- props-kvs-identical?
+  [prev cur]
+  (let [prev-props (extract-cljs-props prev)
+        cur-props (extract-cljs-props cur)]
+    (and (= (count prev-props) (count cur-props))
+         (every?
+          #(identical? (get prev-props %) (get cur-props %))
+          (keys cur-props)))))
+
+
 (defn memo
-  "Like React.memo, but passes props as CLJS map-likes instead of JS objects."
-  ([component] (react/memo component))
+  "Like React.memo, but passes props to `compare` as CLJS map-likes instead of
+  JS objects.
+  `compare` should return true if props are equal, and false if not."
+  ([component] (react/memo component props-kvs-identical?))
   ([component compare]
    (react/memo
     component
