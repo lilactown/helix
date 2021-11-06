@@ -5,6 +5,7 @@
 ### Fixed
 
 - Correctly compare props when using `helix.core/memo` without a custom comparator combined with `:define-factory`
+- CLJS 1.10.891 compat: don't assume `goog.object` is globally available
 
 ## 0.1.3
 
