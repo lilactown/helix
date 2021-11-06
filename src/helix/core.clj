@@ -152,7 +152,7 @@
   factory functions, and thus can not be used with `fnc`."
   {:style/indent :defn}
   [& body]
-  (let [[display-name props-bindings body] (if (symbol? (first body))
+  (let [[_display-name props-bindings body] (if (symbol? (first body))
                                              [(first body) (second body)
                                               (rest (rest body))]
                                              [nil (first body) (rest body)])
@@ -171,7 +171,8 @@
                opts-map? (rest)
                flag-metadata-optimizations (hana/map-forms-with-meta meta->form))
 
-        hooks (hana/find-hooks body)]
+        ;; TODO add fast refresh support somehow?
+        _hooks (hana/find-hooks body)]
     (when flag-check-invalid-hooks-usage?
       (when-some [invalid-hooks (->> (map hana/invalid-hooks-usage body)
                                      (flatten)
@@ -328,8 +329,16 @@
         feature-flags (:helix/features opts)
 
         ;; feature flags
-        flag-fast-refresh? (:fast-refresh feature-flags)
-        flag-check-invalid-hooks-usage? (:check-invalid-hooks-usage feature-flags true)]
+        #_#_flag-fast-refresh? (:fast-refresh feature-flags)
+        flag-check-invalid-hooks-usage? (:check-invalid-hooks-usage
+                                         feature-flags
+                                         ;; default on
+                                         true)
+        ;; find the first param marked as ^:deps
+        auto-deps-pos (->> (map-indexed vector params)
+                           (some (fn [[i param]]
+                                   (when (:deps (meta param))
+                                     i))))]
     (when flag-check-invalid-hooks-usage?
       (when-some [invalid-hooks (->> (map hana/invalid-hooks-usage body)
                                      (flatten)
@@ -341,7 +350,8 @@
                      invalid-hook))))
     (when-not (string/starts-with? (str sym) "use-")
       (hana/warn hana/warning-invalid-hook-name &env {:form &form}))
-    `(defn ~(vary-meta sym merge {:helix/hook? true})
+    `(defn ~(vary-meta sym merge {:helix/hook? true
+                                  :helix/auto-deps-pos auto-deps-pos})
       ;; use ~@ here so that we don't emit `nil`
       ~@(when-not (nil? docstring) (list docstring))
       ~params
