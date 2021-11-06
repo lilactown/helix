@@ -6,7 +6,7 @@
             [cljs-bean.core :as bean]
             ["react" :as react]
             ["react/jsx-runtime" :as jsx-runtime])
-  (:require-macros [helix.core]))
+  (:require-macros [helix.core :as core]))
 
 
 (when (exists? js/Symbol)
@@ -281,5 +281,131 @@
 
 (defn signature! []
   ;; grrr `maybe` bug strikes again
+
   (and (exists? js/window.$$Register$$)
        (js/window.$$Signature$$)))
+
+
+;;
+;; -- Core hooks
+;;
+
+
+(core/defhook use-state
+  [initial]
+  (let [[v u] (react/useState initial)
+        updater (react/useCallback (fn updater
+                                     ([x] (u x))
+                                     ([f & xs]
+                                      (updater (fn spread-updater [x]
+                                                 (apply f x xs)))))
+                                   ;; `u` is guaranteed to be stable so we elide it
+                                   #js [])]
+    [v updater]))
+
+
+(core/defhook use-ref
+  "Like react/useRef. Supports accessing the \"current\" property via
+   dereference (@) and updating the \"current\" property via `reset!` and
+   `swap!`"
+  [x]
+  (let [ref (react/useRef nil)]
+    (when (nil? (.-current ^js ref))
+      (set! (.-current ^js ref)
+            (specify! #js {:current x}
+              IDeref
+              (-deref [this]
+                (.-current ^js this))
+
+              IReset
+              (-reset! [this v]
+                (gobj/set this "current" v))
+
+              ISwap
+              (-swap!
+                ([this f]
+                 (gobj/set this "current" (f (.-current ^js this))))
+                ([this f a]
+                 (gobj/set this "current" (f (.-current ^js this) a)))
+                ([this f a b]
+                 (gobj/set this "current" (f (.-current ^js this) a b)))
+                ([this f a b xs]
+                 (gobj/set this "current" (apply f (.-current ^js this) a b xs)))))))
+    (.-current ^js ref)))
+
+
+(core/defhook use-reducer
+  "Just react/useReducer."
+  ([reducer init-state]
+   (use-reducer reducer init-state js/undefined))
+  ([reducer init-state init]
+   (react/useReducer
+    ;; handle ifn, e.g. multi-methods
+    (react/useMemo
+     #(if (and (not (fn? reducer)) (ifn? reducer))
+        (fn wrap-ifn [state action]
+          (reducer state action))
+        reducer)
+     #js [reducer])
+    init-state
+    init)))
+
+
+(def use-context
+  "Just react/useContext"
+  react/useContext)
+
+
+(core/defhook use-effect
+  [^:deps deps f]
+  (react/useEffect
+   (fn wrap-effect-undefined []
+     (or (f) js/undefined))
+   (case deps
+     :once #js []
+     :always js/undefined
+     deps)))
+
+
+(core/defhook use-layout-effect
+  [^:deps deps f]
+  (react/useLayoutEffect
+   (fn wrap-effect-undefined []
+     (or (f) js/undefined))
+   (case deps
+     :once #js []
+     :always js/undefined
+     deps)))
+
+
+(core/defhook use-memo
+  [^:deps deps f]
+  (react/useMemo
+   f
+   (case deps
+     :once #js []
+     :always js/undefined
+     deps)))
+
+
+(core/defhook use-callback
+  [^:deps deps f]
+  (react/useCallback
+   f
+   (case deps
+     :once #js []
+     :always js/undefined
+     deps)))
+
+
+(core/defhook use-imperative-handle
+  [^:deps deps ref f]
+  (react/useImperativeHandle
+   ref f
+   (case deps
+     :once #js []
+     :always js/undefined
+     deps)))
+
+
+(def use-debug-value react/useDebugValue)
