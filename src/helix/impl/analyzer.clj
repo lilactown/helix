@@ -276,9 +276,13 @@ Example: ($ %s %s ...)"
   ;; ????
   (with-meta
     ;; preserve type of node
-    (cond
+    #_(cond
       (vector? node) (vec children)
       :else children)
+    (cond
+      (map-entry? node) (into [] children)
+      (list? node) (into '() (reverse children))
+      :else (into (empty node) children))
     ;; preserve meta
     (meta node)))
 
@@ -294,7 +298,7 @@ Example: ($ %s %s ...)"
 
 
 (defn map-forms-with-meta
-  [body meta-table ]
+  [body meta-table]
   (let [meta-keys (set (keys meta-table))
         body-zip (seqable-zip body)]
     (loop [cur-loc body-zip
