@@ -113,17 +113,12 @@
 ;;
 
 
-(defmacro determine-deps-array
-  [deps-val body]
-  (doto (cond
-          (vector? deps-val) `(cljs.core/array ~@deps-val)
-
-          (= :auto deps-val) `(cljs.core/array ~@(hana/resolve-local-vars &env body))
-
-          (symbol? deps-val) `(cljs.core/to-array ~deps-val)
-
-          :else deps-val)
-    prn))
+(defmacro infer-deps
+  [deps-binding & body]
+  {:style/indent :defn}
+  (let [deps (hana/resolve-local-vars &env body)]
+    `(let [~deps-binding ~deps]
+       ~@body)))
 
 
 (defn- fnc*
@@ -287,43 +282,6 @@
         body (cond-> body
                opts-map? (rest)
                flag-metadata-optimizations (hana/map-forms-with-meta meta->form))
-
-        body (loop [loc (hana/seqable-zip body)
-                    max-loop 100]
-               (let [node (zip/node loc)]
-                 (cond
-                   (zip/end? loc) (zip/root loc)
-
-                   (= 0 max-loop) (throw (ex-info
-                                          "Infinite loop"
-                                          {:form (zip/node loc)}))
-
-                   (list? node)
-                   (let [fst (first node)]
-                     (if (symbol? fst)
-                       (let [m (merge (:meta (hana/resolve-var &env fst))
-                                      (meta fst))]
-                         (if-let [pos (:helix/auto-deps-pos m)]
-                           (recur
-                            ;; TODO what if hooks are nested?
-                            (-> (vec node)
-                                (update
-                                 pos
-                                 (fn [deps]
-                                   `(determine-deps-array ~deps ~node)))
-                                (->> (into '())
-                                     (zip/replace loc))
-                                (skip)
-                                (doto (-> zip/node prn))
-                                )
-                            (dec max-loop))
-                           (recur (zip/next loc)
-                                  (dec max-loop))))
-                       (recur (zip/next loc)
-                              (dec max-loop))))
-
-                   :else (recur (zip/next loc)
-                                (dec max-loop)))))
 
         hooks (hana/find-hooks body)
 
@@ -531,3 +489,39 @@
      ($ "fqfw")
      ($ "123"))
   )
+
+
+(defmacro use-auto-effect
+  [f]
+  `(infer-deps
+    deps#
+    (use-effect
+     deps#
+     ~f)))
+
+
+(defmacro use-auto-layout-effect
+  [f]
+  `(infer-deps
+    deps#
+    (use-layout-effect
+     deps#
+     ~f)))
+
+
+(defmacro use-auto-memo
+  [f]
+  `(infer-deps
+    deps#
+    (use-memo
+     deps#
+     ~f)))
+
+
+(defmacro use-auto-callback
+  [f]
+  `(infer-deps
+    deps#
+    (use-callback
+     deps#
+     ~f)))

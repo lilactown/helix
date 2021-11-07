@@ -357,55 +357,55 @@
 
 
 (core/defhook use-effect
-  [^:deps deps f]
+  [deps f]
   (react/useEffect
    (fn wrap-effect-undefined []
      (or (f) js/undefined))
    (case deps
      :once #js []
      :always js/undefined
-     deps)))
+     (to-array deps))))
 
 
 (core/defhook use-layout-effect
-  [^:deps deps f]
+  [deps f]
   (react/useLayoutEffect
    (fn wrap-effect-undefined []
      (or (f) js/undefined))
    (case deps
      :once #js []
      :always js/undefined
-     deps)))
+     (to-array deps))))
 
 
 (core/defhook use-memo
-  [^:deps deps f]
+  [deps f]
   (react/useMemo
    f
    (case deps
      :once #js []
      :always js/undefined
-     deps)))
+     (to-array deps))))
 
 
 (core/defhook use-callback
-  [^:deps deps f]
+  [deps f]
   (react/useCallback
    f
    (case deps
      :once #js []
      :always js/undefined
-     deps)))
+     (to-array deps))))
 
 
 (core/defhook use-imperative-handle
-  [^:deps deps ref f]
+  [deps ref f]
   (react/useImperativeHandle
    ref f
    (case deps
      :once #js []
      :always js/undefined
-     deps)))
+     (to-array deps))))
 
 
 (def use-debug-value react/useDebugValue)
