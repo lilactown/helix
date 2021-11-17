@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.5
+
+### Breaking
+
+- Removed `deps.cljs` which declares dependencies on React. This was causing unnecessary build warnings/errors.
+Consumers should install `react` and `react-dom` themselves. This will not break existing projects.
+
 ## 0.1.4
 
 ### Fixed
