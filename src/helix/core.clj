@@ -44,13 +44,7 @@
                &env
                {:form (cons type args)
                 :props-form (first args)}))
-  (let [inferred (hana/inferred-type &env type)
-        native? (or (keyword? type)
-                    (string? type)
-                    (= inferred 'string)
-                    (= inferred 'cljs.core/Keyword)
-                    (:native (meta type)))
-        type (if (keyword? type)
+  (let [type (if (keyword? type)
                (name type)
                type)
         has-props? (or (map? (first args))
@@ -59,9 +53,7 @@
                    (rest args)
                    args)
         props (if (map? (first args))
-                (if native?
-                  `(impl.props/dom-props ~(first args) ~(jsx-children children))
-                  `(impl.props/props     ~(first args) ~(jsx-children children)))
+                `(impl.props/props ~(first args) ~(jsx-children children))
                 (tl/->JSValue (cond-> {}
                                 (not-empty children)
                                 (assoc :children (jsx-children children)))))
@@ -75,6 +67,7 @@
     (if has-key?
       `^js/React.Element (~emit-fn ~type ~props ~the-key)
       `^js/React.Element (~emit-fn ~type ~props))))
+
 
 (defmacro <>
   "Creates a new React Fragment Element"

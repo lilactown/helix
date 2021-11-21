@@ -17,6 +17,8 @@
 
 (def warning-invalid-hook-name ::invalid-hook-name)
 
+(def warning-dom-type-used-with-$ ::dom-type-used-with-$)
+
 (defn warn [warning-type env extras]
   (ana/warning warning-type env extras))
 
