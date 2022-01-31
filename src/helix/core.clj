@@ -239,7 +239,7 @@
                      invalid-hook))))
 
     `(do ~(when flag-fast-refresh?
-            `(if ^boolean goog/DEBUG
+            `(if  ~(with-meta 'goog/DEBUG {:tag 'boolean})
                (def ~sig-sym (signature!))))
          (def ~(vary-meta
                 component-var-name
@@ -263,7 +263,7 @@
                (cljs-factory ~component-var-name)))
 
          ~(when flag-fast-refresh?
-            `(when ^boolean goog/DEBUG
+            `(when (with-meta 'goog/DEBUG {:tag 'boolean})
                (when ~sig-sym
                  (~sig-sym ~component-var-name ~(string/join hooks)
                   nil ;; forceReset
