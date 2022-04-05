@@ -103,6 +103,16 @@ macro.
                   (helix.core/memo)))
 ```
 
+## Anonymous Components
+
+Like functions, sometimes we want to create anonymous inline components. For that we can
+use the `fnc` macro.
+
+```clojure
+(let [my-button (fnc [{:keys [class on-click] :as props}]
+                  (d/button {:class class :on-click on-click}))]
+  ($ my-button {:class ["foo" "bar] :on-click #(js/alert "hi")})
+```
 
 ## Class Components
 
