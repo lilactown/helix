@@ -6,3 +6,5 @@ node_modules
 /package-lock.json
 /pom.xml
 /target
+.clj-kondo/.cache
+.cpcache
