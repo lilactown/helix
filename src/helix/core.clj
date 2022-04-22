@@ -193,14 +193,14 @@
 
   'body' should return a React Element."
   [display-name & form-body]
-  (let [docstring (when (string? (first form-body))
-                    (first form-body))
-        props-bindings (if (nil? docstring)
-                         (first form-body)
-                         (second form-body))
-        body (if (nil? docstring)
-               (rest form-body)
-               (rest (rest form-body)))
+  (let [[docstring form-body] (if (string? (first form-body))
+                                [(first form-body) (rest form-body)]
+                                [nil form-body])
+        [fn-meta form-body] (if (map? (first form-body))
+                              [(first form-body) (rest form-body)]
+                              [nil form-body])
+        props-bindings (first form-body)
+        body (rest form-body)
         opts-map? (map? (first body))
         opts (if opts-map?
                (first body)
@@ -244,7 +244,8 @@
          (def ~(vary-meta
                 component-var-name
                 merge
-                {:helix/component? true})
+                {:helix/component? true}
+                fn-meta)
            ~@(when-not (nil? docstring)
                (list docstring))
            (-> ~(fnc* component-fn-name props-bindings
