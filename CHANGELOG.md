@@ -1,5 +1,11 @@
 # Changelog
 
+## UNRELEASED
+
+### Added
+
+- Allow metadata to be set on vars created with `defnc` as a map after the name and before the args list, just like `defn`
+
 ## 0.1.5
 
 ### Breaking
