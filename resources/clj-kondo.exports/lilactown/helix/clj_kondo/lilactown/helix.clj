@@ -17,11 +17,14 @@
                                                           component-sym
                                                           (api/map-node new-props)
                                                           children))]
-    (when (->> children (some api/map-node?))
-      (api/reg-finding! (doto (merge
-                               {:message "Map passed as children"
-                                :type    :helix/invalid-children}
-                               (meta children)))))
+    (comment
+      ;; FIXME: @lilactown I'd like your opinion on this diagnostic and its
+      ;; semantics before committing.
+      (when (->> children
+                 (some api/map-node?))
+        (api/reg-finding! (doto (merge {:message "Map passed as children"
+                                        :type    :helix/invalid-children}
+                                       (meta children))))))
     {:node expanded}))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
@@ -57,14 +60,10 @@
                                                                       :children)))))
                                         api/coerce)
                                     opts-node)
-        expanded                  (api/list-node (list* (api/token-node 'defn)
-                                                        component-name
-                                                        (filter some? [docstring
-                                                                       metadata-map
-                                                                       argvec
-                                                                       new-opts
-                                                                       render-children])))]
-    (comment #_do (prn)
-             (-> node api/sexpr prn)
-             (-> expanded api/sexpr prn))
+        expanded                  (api/list-node
+                                    (list* (api/token-node 'defn)
+                                           component-name
+                                           (filter some?
+                                             [docstring metadata-map argvec
+                                              new-opts render-children])))]
     {:node expanded}))
