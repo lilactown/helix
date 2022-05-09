@@ -1,1 +1,2 @@
-{:config-paths ["../resources/clj-kondo.exports/lilactown/helix"]}
+{:config-paths ["../resources/clj-kondo.exports/lilactown/helix"]
+ :lint-as {devcards.core/defcard clojure.core/def}}

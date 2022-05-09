@@ -1,3 +1,6 @@
-{:lint-as {helix.core/defnc clojure.core/defn
+{:lint-as {helix.core/defnc   clojure.core/defn
            helix.core/defhook clojure.core/defn
-           helix.core/fnc clojure.core/fn}}
+           helix.core/fnc     clojure.core/fn}
+ :hooks   {:analyze-call {helix.core/$     clj-kondo.lilactown.helix/$
+                          helix.core/defnc clj-kondo.lilactown.helix/defnc}}
+ :linters {:helix/invalid-children {:level :error}}}
