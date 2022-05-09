@@ -6,28 +6,22 @@
   "Macro analysis for `helix.core/$`."
   [{:keys [node]}]
   (let [[dollar-sym component-sym & body] (-> node :children)
-
         old-props                         (-> body first :children)
         children                          (-> body rest)
         new-props                         (->> old-props
-                                               (map #(if (cond-> (api/sexpr %)
-                                                           symbol? (= '&))
+                                               (map #(if (cond-> (api/sexpr %) symbol? (= '&))
                                                        (api/keyword-node :&)
                                                        %)))
-
-        expanded                          (api/list-node
-                                           (list*
-                                            dollar-sym
-                                            component-sym
-                                            (api/map-node new-props)
-                                            children))]
-
+        expanded                          (api/list-node (list*
+                                                          dollar-sym
+                                                          component-sym
+                                                          (api/map-node new-props)
+                                                          children))]
     (when (->> children (some api/map-node?))
       (api/reg-finding! (doto (merge
                                {:message "Map passed as children"
                                 :type    :helix/invalid-children}
                                (meta children)))))
-
     {:node expanded}))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
@@ -50,18 +44,26 @@
                                     (first the-rest))
         ;; wrap-opts                 (if opts-node  opts-node)
         ;; new-wrap-opts             (if opts-node  wrap-opts)
-        new-opts                  (if opts-node (-> opts-node
-                                                    api/sexpr
-                                                    (assoc :wrap (api/sexpr (api/list-node (list* (api/token-node '->) (api/token-node '(helix.core/fnc [] "")) (-> opts-node api/sexpr :wrap api/coerce :children)))))
-                                                    api/coerce) opts-node)
-        expanded                  (api/list-node
-                                   (list* (api/token-node 'defn)
-                                          component-name
-                                          (filter some? [docstring
-                                                         metadata-map
-                                                         argvec
-                                                         new-opts
-                                                         render-children])))]
+        new-opts                  (if opts-node
+                                    (-> opts-node api/sexpr
+                                        (assoc :wrap (api/sexpr (api/list-node
+                                                                 (list*
+                                                                  (api/token-node '->)
+                                                                  (api/token-node '(helix.core/fnc [] ""))
+                                                                  (-> opts-node
+                                                                      api/sexpr
+                                                                      :wrap
+                                                                      api/coerce
+                                                                      :children)))))
+                                        api/coerce)
+                                    opts-node)
+        expanded                  (api/list-node (list* (api/token-node 'defn)
+                                                        component-name
+                                                        (filter some? [docstring
+                                                                       metadata-map
+                                                                       argvec
+                                                                       new-opts
+                                                                       render-children])))]
     (comment #_do (prn)
              (-> node api/sexpr prn)
              (-> expanded api/sexpr prn))
