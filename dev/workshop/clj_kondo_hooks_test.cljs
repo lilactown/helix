@@ -10,7 +10,7 @@
   "optional docstring"
   {:meta 'data}
   [{:keys [children]} _ref]
-  {:helix/features :fast-refresh
+  {:helix/features {:fast-refresh true}
    :wrap           [(comp-printer) (react/forwardRef)]}
   (d/div {:style {:display "flex"}} children))
 
