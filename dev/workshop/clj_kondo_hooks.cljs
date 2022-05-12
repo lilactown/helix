@@ -1,4 +1,4 @@
-(ns workshop.clj-kondo-hooks-test
+(ns workshop.clj-kondo-hooks
   (:require ["react" :as react]
             [helix.core :refer-macros [defnc] :refer [$]]
             [helix.dom :as d]))
