@@ -12,13 +12,13 @@
   [{:keys [children]} _ref]
   {:helix/features {:fast-refresh true}
    :wrap           [(comp-printer) (react/forwardRef)]}
-  (d/div {:style {:display "flex"}} children))
+  (d/div {:style {:display "flex"} & {:dynamic 'prop}} children))
 
 (defnc my-comp-no-doc
   [{:keys [children]} _ref]
   {:helix/features {:fast-refresh true}
    :wrap           [(comp-printer) (react/forwardRef)]}
-  ($ my-comp {:style {:display "flex"}} children))
+  ($ my-comp {:style {:display "flex"} & {:dynamic 'prop}} children))
 
 (defnc my-comp-no-opts
   "optional docstring"
