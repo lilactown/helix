@@ -1,5 +1,6 @@
 {:hooks   {:analyze-call {helix.core/$             clj-kondo.lilactown.helix/$
                           helix.core/defnc         clj-kondo.lilactown.helix/defnc
+                          helix.dom/$d             clj-kondo.lilactown.helix/$
                           helix.dom/a              clj-kondo.lilactown.helix/$
                           helix.dom/abbr           clj-kondo.lilactown.helix/$
                           helix.dom/address        clj-kondo.lilactown.helix/$
