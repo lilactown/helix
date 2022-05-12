@@ -8,3 +8,6 @@ node_modules
 /target
 .clj-kondo/.cache
 .cpcache
+
+# clojure-lsp will automatically copy the following from resources to here at runtime
+.clj-kondo/lilactown/helix/*
