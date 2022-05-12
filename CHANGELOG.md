@@ -1,10 +1,11 @@
 # Changelog
 
-## UNRELEASED
+## 0.1.6
 
 ### Added
 
 - Allow metadata to be set on vars created with `defnc` as a map after the name and before the args list, just like `defn`
+- clj-kondo hooks for `defnc`, `$` et al.
 
 ## 0.1.5
 
