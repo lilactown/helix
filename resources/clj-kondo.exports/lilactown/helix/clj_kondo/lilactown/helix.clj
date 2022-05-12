@@ -17,14 +17,7 @@
                                                           component-sym
                                                           (api/map-node new-props)
                                                           children))]
-    (comment
-      ;; FIXME: @lilactown I'd like your opinion on this diagnostic and its
-      ;; semantics before committing.
-      (when (->> children
-                 (some api/map-node?))
-        (api/reg-finding! (doto (merge {:message "Map passed as children"
-                                        :type    :helix/invalid-children}
-                                       (meta children))))))
+
     {:node expanded}))
 
 #_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
