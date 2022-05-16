@@ -88,7 +88,7 @@
     :else (s/put! stream (to-str el))))
 
 
-(defn page [{:keys [count] :or {count 10}}]
+(core/defnc page [{:keys [count] :or {count 10}}]
   (let [color (get ["red" "green" "blue" "black"] (rand-int 3))]
     ($d "html"
         ($d "head"
@@ -98,13 +98,16 @@
             ($d "div"
                 ($d "div"
                     ($d "input"))
-                (for [i (range 0 count)]
-                ;; every 10 wait 100ms
-                  (if (zero? (mod i 10))
-                    (d/future
-                      (Thread/sleep 100)
-                      ($d "div" {:key i} "hello" i))
-                    ($d "div" {:key i} "hi" i))))))))
+                ($d "div"
+                    {:style {:display "flex"
+                             :flex-direction "column-reverse"}}
+                    (for [i (range 0 count)]
+                      ;; every 10 wait 100ms
+                      (if (zero? (mod i 10))
+                        (d/future
+                          (Thread/sleep 100)
+                          ($d "div" {:key i} "hello" i))
+                        ($d "div" {:key i} "hi" i)))))))))
 
 
 #_(let [stream (s/stream)]

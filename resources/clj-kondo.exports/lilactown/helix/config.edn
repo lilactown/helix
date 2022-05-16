@@ -132,5 +132,7 @@
                           helix.dom/video          clj-kondo.lilactown.helix/$
                           helix.dom/wbr            clj-kondo.lilactown.helix/$}}
  :lint-as {helix.core/defhook clojure.core/defn
-           helix.core/fnc     clojure.core/fn}
+           helix.core/fnc     clojure.core/fn
+           helix.server.core/defnc clojure.core/defn
+           helix.server.core/fnc clojure.core/fn}
  :linters {:helix/invalid-children {:level :error}}}
