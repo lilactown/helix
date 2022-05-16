@@ -31,12 +31,14 @@
   [styles]
   (reduce-kv
    (fn [s k v]
-     (str s (name k) ": " v ";"))
+     (str s (if (string? k) k (name k)) ": " v ";"))
    ""
    styles))
 
 
 #_(style-str {:color "red"})
+
+#_(style-str {"color" "blue"})
 
 
 (defn props->attrs
