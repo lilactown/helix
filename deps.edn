@@ -1,5 +1,7 @@
 {:paths ["src"]
- :deps {cljs-bean/cljs-bean {:mvn/version "1.5.0"}}
+ :deps {cljs-bean/cljs-bean {:mvn/version "1.5.0"}
+        manifold/manifold {:mvn/version "0.2.3"}
+        aleph/aleph {:mvn/version "0.4.7"}}
  :aliases {:test {:extra-paths ["test"]
                   :extra-deps {lambdaisland/kaocha {:mvn/version "1.66.1034"}
                                org.clojure/clojurescript {:mvn/version "LATEST"}}

@@ -1,17 +1,27 @@
 (ns helix.server.core)
 
 
+(defprotocol IRenderable
+  (-render [c props]))
+
+
+(extend-protocol IRenderable
+  clojure.lang.IFn
+  (-render [f props]
+    (f props)))
+
+
 (defrecord Element [type props key])
 
 
 (defn $
   [type & args]
-  (if (map? (first args))
+  (if (and (map? (first args)) (not (instance? Element (first args))))
     (let [props (first args)
           children (rest args)
           key (:key props)]
       (->Element type (-> props (dissoc :key) (assoc :children children)) key))
-    (->Element type nil (rest args))))
+    (->Element type {:children args} nil)))
 
 
 (defn <>
