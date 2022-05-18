@@ -55,6 +55,33 @@
 #_(props->attrs {:style {:color "red"}})
 
 
+(defn realize-elements
+  [boundaries el]
+  (cond
+    (and (instance? Element el)
+         (or (string? (:type el)) ; DOM element type
+             (= 'react/Fragment (:type el))))
+    (update-in el [:props :children] #(map (partial realize-elements boundaries) %))
+
+    (and (instance? Element el)
+         (= 'react/Suspense (:type el)))
+    (let [suspense-id (gensym)]
+      (-> el
+          (assoc-in [:props :sespense-id] suspense-id)
+          (update-in [:props :children]
+                     #(map (partial realize-elements
+                                    (assoc boundaries :suspense suspense-id))
+                           %))))
+
+    (instance? Element el)
+    (realize-elements boundaries (core/-render (:type el) (:props el)))
+
+    (sequential? el)
+    (map (partial realize-elements boundaries) el)
+
+    :else (to-str el)))
+
+
 (defn put-el!
   [stream el]
   (cond
@@ -73,21 +100,29 @@
       (doseq [child (-> el :props :children)]
         (put-el! stream child))
 
+
+      (= 'react/Suspense (:type el))
+      (do
+        (s/put! stream "<!--$?-->")
+        (s/put! stream (str "<template id=\"" (gensym) "\"></template>"))
+        (doseq [child (-> el :props :children)]
+          (put-el! stream child))
+        (s/put! stream "<!--/$-->"))
+
       :else (put-el! stream (core/-render (:type el) (:props el))))
-
-
-    (d/deferrable? el)
-    (put-el! stream @el)
-    #_(d/on-realized
-     el
-     #(put-el! stream %)
-     #(throw (ex-info "oh no" {:error %})))
 
     (sequential? el)
     (doseq [x el]
       (put-el! stream x))
 
     :else (s/put! stream (to-str el))))
+
+
+(core/defnc item
+  [{:keys [i]}]
+  (if (zero? (mod i 10))
+    ($d "div" "hello" i)
+    ($d "div" "hi" i)))
 
 
 (core/defnc page [{:keys [count] :or {count 10}}]
@@ -105,15 +140,15 @@
                              :flex-direction "column-reverse"}}
                     (for [i (range 0 count)]
                       ;; every 10 wait 100ms
-                      (if (zero? (mod i 10))
-                        (d/future
-                          (Thread/sleep 100)
-                          ($d "div" {:key i} "hello" i))
-                        ($d "div" {:key i} "hi" i)))))))))
+                      (core/$ item {:i i :key i}))))))))
 
 
-#_(let [stream (s/stream)]
-  (put-el! stream (core/$ page))
+(realize-elements {} (core/$ page))
+
+
+(let [stream (s/stream)
+      tree (realize-elements {} (core/$ page))]
+  (put-el! stream tree)
   (s/close! stream)
   (s/stream->seq stream))
 
@@ -135,7 +170,9 @@
     (let [stream (s/stream)]
       (s/put! stream "<!doctype html>")
       (d/future
-        (put-el! stream (core/$ page {:count 1000}))
+        (->> (core/$ page)
+             (realize-elements {})
+             (put-el! stream))
         (s/close! stream)
         (prn "closed"))
       {:status 200
