@@ -56,28 +56,31 @@
 
 
 (defn realize-elements
-  [boundaries el]
+  [el]
   (cond
     (and (instance? Element el)
          (or (string? (:type el)) ; DOM element type
              (= 'react/Fragment (:type el))))
-    (update-in el [:props :children] #(map (partial realize-elements boundaries) %))
+    (update-in el [:props :children] #(doall (map realize-elements %)))
 
     (and (instance? Element el)
          (= 'react/Suspense (:type el)))
     (let [suspense-id (gensym)]
-      (-> el
-          (assoc-in [:props :sespense-id] suspense-id)
-          (update-in [:props :children]
-                     #(map (partial realize-elements
-                                    (assoc boundaries :suspense suspense-id))
-                           %))))
+      (try
+        (-> el
+            (update-in [:props :children]
+                       #(doall (map realize-elements %))))
+        (catch clojure.lang.ExceptionInfo e
+          (if-let [p (::core/deferred (ex-data e))]
+            (-> el
+                (assoc-in [:props ::core/fallback?] true))
+            (throw e)))))
 
     (instance? Element el)
-    (realize-elements boundaries (core/-render (:type el) (:props el)))
+    (realize-elements (core/-render (:type el) (:props el)))
 
     (sequential? el)
-    (map (partial realize-elements boundaries) el)
+    (doall (map realize-elements el))
 
     :else (to-str el)))
 
@@ -102,14 +105,16 @@
 
 
       (= 'react/Suspense (:type el))
-      (do
-        (s/put! stream "<!--$?-->")
-        (s/put! stream (str "<template id=\"" (gensym) "\"></template>"))
-        (doseq [child (-> el :props :children)]
-          (put-el! stream child))
-        (s/put! stream "<!--/$-->"))
-
-      :else (put-el! stream (core/-render (:type el) (:props el))))
+      (if (::core/fallback? (:props el))
+        (do (s/put! stream "<!--$?-->")
+            (s/put! stream (str "<template id=\"" (gensym) "\"></template>"))
+            (put-el! stream (-> el :props :fallback))
+            (s/put! stream "<!--/$-->"))
+        (do
+          (s/put! stream "<!--$-->")
+          (doseq [child (-> el :props :children)]
+            (put-el! stream child))
+          (s/put! stream "<!--/$-->"))))
 
     (sequential? el)
     (doseq [x el]
@@ -120,6 +125,7 @@
 
 (core/defnc item
   [{:keys [i]}]
+  (throw (ex-info "dunno" {::core/deferred (d/success-deferred "foo")}))
   (if (zero? (mod i 10))
     ($d "div" "hello" i)
     ($d "div" "hi" i)))
@@ -135,19 +141,21 @@
             ($d "div"
                 ($d "div"
                     ($d "input"))
-                ($d "div"
-                    {:style {:display "flex"
-                             :flex-direction "column-reverse"}}
-                    (for [i (range 0 count)]
-                      ;; every 10 wait 100ms
-                      (core/$ item {:i i :key i}))))))))
+                (core/suspense
+                 {:fallback "Loading.."}
+                 ($d "div"
+                     {:style {:display "flex"
+                              :flex-direction "column-reverse"}}
+                     (for [i (range 0 count)]
+                       ;; every 10 wait 100ms
+                       (core/$ item {:i i :key i})))))))))
 
 
-(realize-elements {} (core/$ page))
+(realize-elements (core/$ page))
 
 
 (let [stream (s/stream)
-      tree (realize-elements {} (core/$ page))]
+      tree (realize-elements (core/$ page))]
   (put-el! stream tree)
   (s/close! stream)
   (s/stream->seq stream))
@@ -171,7 +179,7 @@
       (s/put! stream "<!doctype html>")
       (d/future
         (->> (core/$ page)
-             (realize-elements {})
+             (realize-elements)
              (put-el! stream))
         (s/close! stream)
         (prn "closed"))
