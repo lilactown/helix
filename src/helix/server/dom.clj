@@ -55,6 +55,9 @@
 #_(props->attrs {:style {:color "red"}})
 
 
+(def ^:dynamic *suspended-results*) ; stream
+
+
 (defn realize-elements
   [el]
   (cond
@@ -65,15 +68,20 @@
 
     (and (instance? Element el)
          (= 'react/Suspense (:type el)))
-    (let [suspense-id (gensym)]
+    (let [suspense-id (gensym "suspense")]
       (try
         (-> el
+            (assoc-in [:props ::core/suspense-id] suspense-id)
             (update-in [:props :children]
                        #(doall (map realize-elements %))))
         (catch clojure.lang.ExceptionInfo e
           (if-let [p (::core/deferred (ex-data e))]
-            (-> el
-                (assoc-in [:props ::core/fallback?] true))
+            (let [sr *suspended-results*] ; lexically bind just in case
+              (d/on-realized p (fn [_] (s/put! sr [suspense-id el]))
+                             identity)
+              (-> el
+                  (assoc-in [:props ::core/fallback?] true)
+                  (assoc-in [:props ::core/suspense-id] suspense-id)))
             (throw e)))))
 
     (instance? Element el)
@@ -107,7 +115,9 @@
       (= 'react/Suspense (:type el))
       (if (::core/fallback? (:props el))
         (do (s/put! stream "<!--$?-->")
-            (s/put! stream (str "<template id=\"" (gensym) "\"></template>"))
+            (s/put! stream (str "<template id=\""
+                                (-> el :props ::core/suspense-id)
+                                "\"></template>"))
             (put-el! stream (-> el :props :fallback))
             (s/put! stream "<!--/$-->"))
         (do
@@ -123,11 +133,15 @@
     :else (s/put! stream (to-str el))))
 
 
+(def *cached? (atom false))
+
+
 (core/defnc item
   [{:keys [i]}]
-  (throw (ex-info "dunno" {::core/deferred (d/success-deferred "foo")}))
   (if (zero? (mod i 10))
-    ($d "div" "hello" i)
+    (do (when-not @*cached?
+          (throw (ex-info "dunno" {::core/deferred (d/future (reset! *cached? true))})))
+        ($d "div" "hello" i))
     ($d "div" "hi" i)))
 
 
@@ -141,25 +155,33 @@
             ($d "div"
                 ($d "div"
                     ($d "input"))
-                (core/suspense
-                 {:fallback "Loading.."}
-                 ($d "div"
-                     {:style {:display "flex"
-                              :flex-direction "column-reverse"}}
+                ($d "div"
+                    {:style {:display "flex"
+                             :flex-direction "column-reverse"}}
+                    (core/suspense
+                     {:fallback "Loading..."}
                      (for [i (range 0 count)]
-                       ;; every 10 wait 100ms
                        (core/$ item {:i i :key i})))))))))
 
 
-(realize-elements (core/$ page))
+@*cached?
 
+(reset! *cached? false)
 
 (let [stream (s/stream)
-      tree (realize-elements (core/$ page))]
+      suspended (s/stream)
+      tree (binding [*suspended-results* suspended]
+             (realize-elements (core/$ page)))]
   (put-el! stream tree)
+  (s/consume
+   (fn [[suspense-id el]]
+     (binding [*suspended-results* (s/stream)] ; ignore for now
+       (s/put! stream (str "<template id=\"S:" suspense-id "\">"))
+       (put-el! stream (realize-elements el))
+       (s/put! stream (str "</template>"))))
+   suspended)
   (s/close! stream)
   (s/stream->seq stream))
-
 
 
 (comment
@@ -169,18 +191,34 @@
 
   (s/put! stream "hi\n")
 
-  (dotimes [_ 100]
+  (dotimes [_ 1000]
     (s/put! stream "hi\n"))
 
   (s/close! stream)
+
+  (defn handler [_]
+    {:status 200
+     :headers {"content-type" "text/plain"}
+     :body stream})
 
   (defn handler [req]
     (let [stream (s/stream)]
       (s/put! stream "<!doctype html>")
       (d/future
-        (->> (core/$ page)
-             (realize-elements)
-             (put-el! stream))
+        (binding [*suspended-results* (s/stream)]
+          (->> (core/$ page)
+               (realize-elements)
+               (put-el! stream))
+          (s/consume
+           (fn [[suspense-id el]]
+             (prn suspense-id)
+             (binding [*suspended-results* (s/stream)] ; ignore for now
+               (s/put! stream (str "<template id=\"S:" suspense-id "\">"))
+               (put-el! stream (realize-elements el))
+               (s/put! stream (str "</template>"))))
+           *suspended-results*)
+          (s/close! *suspended-results*)
+          )
         (s/close! stream)
         (prn "closed"))
       {:status 200
