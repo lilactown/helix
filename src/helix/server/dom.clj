@@ -1,5 +1,6 @@
 (ns helix.server.dom
   (:require
+   [clojure.java.io :as io]
    [clojure.string :as string]
    [helix.server.core :as core]
    [manifold.deferred :as d]
@@ -55,7 +56,7 @@
 #_(props->attrs {:style {:color "red"}})
 
 
-(def ^:dynamic *suspended-results*) ; stream
+(def ^:dynamic *suspended*) ; atom
 
 
 (defn realize-elements
@@ -75,13 +76,11 @@
             (update-in [:props :children]
                        #(doall (map realize-elements %))))
         (catch clojure.lang.ExceptionInfo e
-          (if-let [p (::core/deferred (ex-data e))]
-            (let [sr *suspended-results*] ; lexically bind just in case
-              (d/on-realized p (fn [_] (s/put! sr [suspense-id el]))
-                             identity)
-              (-> el
-                  (assoc-in [:props ::core/fallback?] true)
-                  (assoc-in [:props ::core/suspense-id] suspense-id)))
+          (if-let [d (::core/deferred (ex-data e))]
+            (do (swap! *suspended* assoc suspense-id [d el])
+                (-> el
+                    (assoc-in [:props ::core/fallback?] true)
+                    (assoc-in [:props ::core/suspense-id] suspense-id)))
             (throw e)))))
 
     (instance? Element el)
@@ -121,10 +120,10 @@
             (put-el! stream (-> el :props :fallback))
             (s/put! stream "<!--/$-->"))
         (do
-          (s/put! stream "<!--$-->")
+          #_(s/put! stream "<!--$-->")
           (doseq [child (-> el :props :children)]
             (put-el! stream child))
-          (s/put! stream "<!--/$-->"))))
+          #_(s/put! stream "<!--/$-->"))))
 
     (sequential? el)
     (doseq [x el]
@@ -133,6 +132,14 @@
     :else (s/put! stream (to-str el))))
 
 
+(def complete-boundary-function
+  (slurp (io/resource "helix/server/rc.js")))
+
+
+;;
+;; Example
+;;
+
 (def *cached? (atom false))
 
 
@@ -140,7 +147,9 @@
   [{:keys [i]}]
   (if (zero? (mod i 10))
     (do (when-not @*cached?
-          (throw (ex-info "dunno" {::core/deferred (d/future (reset! *cached? true))})))
+          (throw (ex-info "dunno" {::core/deferred (d/future
+                                                     (Thread/sleep 4000)
+                                                     (reset! *cached? true))})))
         ($d "div" "hello" i))
     ($d "div" "hi" i)))
 
@@ -155,6 +164,8 @@
             ($d "div"
                 ($d "div"
                     ($d "input"))
+                (for [i (range 0 1000)]
+                  ($d "span" i))
                 ($d "div"
                     {:style {:display "flex"
                              :flex-direction "column-reverse"}}
@@ -168,59 +179,48 @@
 
 (reset! *cached? false)
 
-(let [stream (s/stream)
-      suspended (s/stream)
-      tree (binding [*suspended-results* suspended]
-             (realize-elements (core/$ page)))]
-  (put-el! stream tree)
-  (s/consume
-   (fn [[suspense-id el]]
-     (binding [*suspended-results* (s/stream)] ; ignore for now
-       (s/put! stream (str "<template id=\"S:" suspense-id "\">"))
-       (put-el! stream (realize-elements el))
-       (s/put! stream (str "</template>"))))
-   suspended)
-  (s/close! stream)
-  (s/stream->seq stream))
-
 
 (comment
   (require '[aleph.http :as http])
 
-  (def stream (s/stream))
-
-  (s/put! stream "hi\n")
-
-  (dotimes [_ 1000]
-    (s/put! stream "hi\n"))
-
-  (s/close! stream)
-
-  (defn handler [_]
-    {:status 200
-     :headers {"content-type" "text/plain"}
-     :body stream})
-
   (defn handler [req]
-    (let [stream (s/stream)]
+    (let [stream (s/stream)
+          loaded-boundary-script? (atom false)
+          suspended-results (s/stream)]
       (s/put! stream "<!doctype html>")
       (d/future
-        (binding [*suspended-results* (s/stream)]
+        (binding [*suspended* (atom {})]
           (->> (core/$ page)
                (realize-elements)
                (put-el! stream))
+          ;; TODO figure out how to handle these one at a time, rather than waiting for all
+          @(apply d/zip (for [[suspense-id [d el]] @*suspended*]
+                          (d/chain
+                           d
+                           (fn [_]
+                             (s/put! suspended-results
+                                     [suspense-id el])
+                             ;; don't return deferred from put
+                             nil))))
+          (prn :after-zip)
           (s/consume
            (fn [[suspense-id el]]
-             (prn suspense-id)
-             (binding [*suspended-results* (s/stream)] ; ignore for now
-               (s/put! stream (str "<template id=\"S:" suspense-id "\">"))
+             (binding [*suspended* (atom {})] ; ignore for now
+               (s/put! stream (str "<div id=\"S:" suspense-id "\">"))
                (put-el! stream (realize-elements el))
-               (s/put! stream (str "</template>"))))
-           *suspended-results*)
-          (s/close! *suspended-results*)
-          )
-        (s/close! stream)
-        (prn "closed"))
+               (s/put! stream (str "</div>"))
+               (if-not @loaded-boundary-script?
+                 (do (reset! loaded-boundary-script? true)
+                     (s/put! stream (str "<script>" complete-boundary-function "; "
+                                         "$RC(\"" suspense-id "\", \"S:" suspense-id "\")"
+                                         "</script>")))
+                 (s/put! stream (str "<script>"
+                                     "$RC(\"" suspense-id "\", \"S:" suspense-id "\")"
+                                     "</script>")))))
+           suspended-results)
+          (s/close! suspended-results)
+          (s/close! stream)
+          (prn "closed")))
       {:status 200
        :headers {"content-type" "text/html"}
        :body stream}))
