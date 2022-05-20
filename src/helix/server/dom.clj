@@ -143,8 +143,7 @@
 (def *cached? (atom false))
 
 
-(core/defnc item
-  [{:keys [i]}]
+(core/defnc item [{:keys [i]}]
   (if (zero? (mod i 10))
     (do (when-not @*cached?
           (throw (ex-info "dunno" {::core/deferred (d/future
@@ -175,22 +174,35 @@
                        (core/$ item {:i i :key i})))))))))
 
 
-@*cached?
+(core/defnc page [{:keys [count] :or {count 10}}]
+  (let [color (get ["red" "green" "blue" "black"] (rand-int 3))]
+    ($d "html"
+        ($d "head"
+            ($d "title" "Streaming test"))
+        ($d "body"
+            {:style {:color color}}
+            ($d "div"
+                ($d "div"
+                    ($d "input"))
+                (for [i (range 0 1000)]
+                  ($d "span" i))
+                ($d "div"
+                    {:style {:display "flex"
+                             :flex-direction "column-reverse"}}
+                    (for [i (range 0 count)]
+                      (core/suspense
+                       {:fallback ($d "div" "Loading..")}
+                       (core/$ item {:i i :key i})))))))))
 
-(reset! *cached? false)
 
-
-(comment
-  (require '[aleph.http :as http])
-
-  (defn handler [req]
+(defn handler [req]
     (let [stream (s/stream)
           loaded-boundary-script? (atom false)
           suspended-results (s/stream)]
       (s/put! stream "<!doctype html>")
       (d/future
         (binding [*suspended* (atom {})]
-          (->> (core/$ page)
+          (->> (core/$ page {:count 40})
                (realize-elements)
                (put-el! stream))
           ;; TODO figure out how to handle these one at a time, rather than waiting for all
@@ -225,7 +237,15 @@
        :headers {"content-type" "text/html"}
        :body stream}))
 
-  (def server (http/start-server #'handler {:port 8080}))
+(reset! *cached? false)
+
+
+(comment
+  (require '[aleph.http :as http])
+
+  
+
+  (def server (http/start-server #'handler {:port 9090}))
 
   (.close server))
 
