@@ -140,15 +140,15 @@
 ;; Example
 ;;
 
-(def *cached? (atom false))
+(def *cached? (atom #{}))
 
 
 (core/defnc item [{:keys [i]}]
   (if (zero? (mod i 10))
-    (do (when-not @*cached?
+    (do (when-not (get @*cached? i)
           (throw (ex-info "dunno" {::core/deferred (d/future
-                                                     (Thread/sleep 4000)
-                                                     (reset! *cached? true))})))
+                                                     (Thread/sleep (* 100 i))
+                                                     (swap! *cached? conj i))})))
         ($d "div" "hello" i))
     ($d "div" "hi" i)))
 
@@ -163,89 +163,70 @@
             ($d "div"
                 ($d "div"
                     ($d "input"))
-                (for [i (range 0 1000)]
-                  ($d "span" i))
                 ($d "div"
-                    {:style {:display "flex"
-                             :flex-direction "column-reverse"}}
                     (core/suspense
-                     {:fallback "Loading..."}
+                     {:fallback "Loading all..."}
                      (for [i (range 0 count)]
-                       (core/$ item {:i i :key i})))))))))
-
-
-(core/defnc page [{:keys [count] :or {count 10}}]
-  (let [color (get ["red" "green" "blue" "black"] (rand-int 3))]
-    ($d "html"
-        ($d "head"
-            ($d "title" "Streaming test"))
-        ($d "body"
-            {:style {:color color}}
-            ($d "div"
-                ($d "div"
-                    ($d "input"))
-                (for [i (range 0 1000)]
-                  ($d "span" i))
-                ($d "div"
-                    {:style {:display "flex"
-                             :flex-direction "column-reverse"}}
-                    (for [i (range 0 count)]
-                      (core/suspense
-                       {:fallback ($d "div" "Loading..")}
-                       (core/$ item {:i i :key i})))))))))
+                       (core/$ item {:i i :key i})
+                       #_(core/suspense
+                        {:fallback ($d "div" "Loading..")}
+                        (core/$ item {:i i :key i}))))))))))
 
 
 (defn handler [req]
-    (let [stream (s/stream)
-          loaded-boundary-script? (atom false)
-          suspended-results (s/stream)]
-      (s/put! stream "<!doctype html>")
-      (d/future
-        (binding [*suspended* (atom {})]
-          (->> (core/$ page {:count 40})
-               (realize-elements)
-               (put-el! stream))
-          ;; TODO figure out how to handle these one at a time, rather than waiting for all
-          @(apply d/zip (for [[suspense-id [d el]] @*suspended*]
-                          (d/chain
-                           d
-                           (fn [_]
-                             (s/put! suspended-results
-                                     [suspense-id el])
-                             ;; don't return deferred from put
-                             nil))))
-          (prn :after-zip)
-          (s/consume
-           (fn [[suspense-id el]]
-             (binding [*suspended* (atom {})] ; ignore for now
-               (s/put! stream (str "<div id=\"S:" suspense-id "\">"))
-               (put-el! stream (realize-elements el))
-               (s/put! stream (str "</div>"))
-               (if-not @loaded-boundary-script?
-                 (do (reset! loaded-boundary-script? true)
-                     (s/put! stream (str "<script>" complete-boundary-function "; "
-                                         "$RC(\"" suspense-id "\", \"S:" suspense-id "\")"
-                                         "</script>")))
-                 (s/put! stream (str "<script>"
-                                     "$RC(\"" suspense-id "\", \"S:" suspense-id "\")"
-                                     "</script>")))))
-           suspended-results)
-          (s/close! suspended-results)
-          (s/close! stream)
-          (prn "closed")))
-      {:status 200
-       :headers {"content-type" "text/html"}
-       :body stream}))
-
-(reset! *cached? false)
+  (let [html (s/stream)
+        loaded-boundary-script? (atom false)
+        suspended-results (s/stream)]
+    (s/put! html "<!doctype html>")
+    (d/future
+      (binding [*suspended* (atom {})]
+        (->> (core/$ page {:count 40})
+             (realize-elements)
+             (put-el! html))
+        ;; initial shell done. now handle suspensions
+        ;; TODO handle nested suspensions
+        (d/chain
+         (apply d/zip (for [[suspense-id [d el]] @*suspended*]
+                        (d/chain
+                         d
+                         (fn [_]
+                           (prn :results/put suspense-id)
+                           (s/put! suspended-results
+                                   [suspense-id el])))))
+         ;; once all puts done, close stream
+         (fn [_]
+           (prn :results/close)
+           (s/close! suspended-results)))
+        @(s/connect-via
+          suspended-results
+          (fn [[suspense-id el]]
+            (binding [*suspended* (atom {})] ; ignore for now
+              (s/put! html (str "<div id=\"S:" suspense-id "\">"))
+              (put-el! html (realize-elements el))
+              (s/put! html (str "</div>"))
+              (if-not @loaded-boundary-script?
+                (do (reset! loaded-boundary-script? true)
+                    (s/put! html (str "<script>" complete-boundary-function "; "
+                                      "$RC(\"" suspense-id "\", \"S:" suspense-id "\")"
+                                      "</script>")))
+                (s/put! html (str "<script>"
+                                  "$RC(\"" suspense-id "\", \"S:" suspense-id "\")"
+                                  "</script>")))))
+          html)
+        (s/close! html)
+        (prn :html/close)
+        ;; Reset state for next req :zany:
+        (reset! *cached? #{})))
+    {:status 200
+     :headers {"content-type" "text/html"}
+     :body html}))
 
 
 (comment
   (require '[aleph.http :as http])
 
-  
-
   (def server (http/start-server #'handler {:port 9090}))
 
-  (.close server))
+  (.close server)
+  )
 
