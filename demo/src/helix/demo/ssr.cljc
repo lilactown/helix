@@ -17,20 +17,29 @@
 
 (def *cached? (atom #{}))
 
+
 (defn fetch! [i]
-  #?(:clj (when-not (get @*cached? i)
-            (throw
-             (ex-info
+  (when-not (get @*cached? i)
+    (throw
+     #?(:clj (ex-info
               "dunno"
-              {::hx/deferred #?(:clj (md/future
-                                       (Thread/sleep (* 100 i))
-                                       (swap! *cached? conj i))
-                                :cljs nil)})))))
+              {::hx/deferred (md/future
+                               (Thread/sleep (* 100 i))
+                               (swap! *cached? conj i))})
+        :cljs (js/Promise.
+               (fn [res _]
+                 (prn :suspending)
+                 (js/setTimeout
+                  (fn []
+                    (swap! *cached? conj i)
+                    (res))
+                  (* 100 i))))))))
 
 
 (defnc item [{:keys [i]}]
   (if (zero? (mod i 10))
-    (do (fetch! i)
+    (do (prn :item/render)
+        (fetch! i)
         ($d "div" (str "hello" i)))
     ($d "div" (str "hi" i))))
 
