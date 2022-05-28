@@ -3,11 +3,13 @@
    #?@(:clj [[aleph.http :as http]
              [helix.server.core :as hx :refer [defnc $ <> suspense]]
              [helix.server.dom :as dom :refer [$d]]
+             [helix.server.hooks :as hooks]
              [manifold.deferred :as md]
              [manifold.stream :as s]
              [reitit.ring :as ring]]
        :cljs [[helix.core :as hx :refer [defnc $ <> suspense]]
               [helix.dom :as dom :refer [$d]]
+              [helix.hooks :as hooks]
               ["react-dom/client" :as rdom]]))
   ;; makes shadow-cljs reload our clj ns
   #?(:cljs (:require-macros [helix.demo.ssr])))
@@ -15,8 +17,7 @@
 
 (def *cached? (atom #{}))
 
-(defn fetch!
-  [i]
+(defn fetch! [i]
   #?(:clj (when-not (get @*cached? i)
             (throw
              (ex-info
@@ -34,9 +35,15 @@
     ($d "div" (str "hi" i))))
 
 
+(defnc counter [_]
+  (let [[counter set-counter] (hooks/use-state 0)]
+    (<> counter
+        ($d "button" {:on-click #(set-counter inc)} "+"))))
+
+
 (defnc app [{:keys [count] :or {count 10}}]
   ($d "div"
-      "ooo"
+      ($ counter)
       (for [i (range 0 count)]
         #_($ item {:i i :key i})
         (suspense
