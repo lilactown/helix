@@ -29,7 +29,7 @@
 
 (defnc item [{:keys [i]}]
   (if (zero? (mod i 10))
-    (do #_(fetch! i)
+    (do (fetch! i)
         ($d "div" (str "hello" i)))
     ($d "div" (str "hi" i))))
 
@@ -46,14 +46,14 @@
          #_"hi"))))
 
 
-(defnc page [{:keys [count] :or {count 10}}]
+(defnc page [_]
   (let [color "blue"]
     ($d "html"
         ($d "head"
             ($d "title" "Streaming test"))
         ($d "body"
             {:style {:color color}}
-            ($d "div" {:id "app"} ($ app {:count count}))
+            ($d "div" {:id "app"} ($ app {:count 30}))
             #?(:clj "<script src=\"/assets/js/main.js\"></script>"
                :cljs ($d "script" {:src "/assets/js/main.js"}))))))
 
