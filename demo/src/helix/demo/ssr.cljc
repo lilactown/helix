@@ -4,7 +4,7 @@
              [helix.server.core :as hx :refer [defnc $ <> suspense]]
              [helix.server.dom :as dom :refer [$d]]
              [helix.server.hooks :as hooks]
-             [manifold.deferred :as md]
+             [manifold.deferred :as d]
              [manifold.stream :as s]
              [reitit.ring :as ring]]
        :cljs [[helix.core :as hx :refer [defnc $ <> suspense]]
@@ -23,7 +23,7 @@
     (throw
      #?(:clj (ex-info
               "dunno"
-              {::hx/deferred (md/future
+              {::hx/deferred (d/future
                                (Thread/sleep (* 100 i))
                                (swap! *cached? conj i))})
         :cljs (js/Promise.
@@ -38,10 +38,9 @@
 
 (defnc item [{:keys [i]}]
   (if (zero? (mod i 10))
-    (do (prn :item/render)
-        (fetch! i)
+    (do (fetch! i)
         ($d "div" (str "hello" i)))
-    ($d "div" (str "hi" i))))
+    ($d "div" "hi" i)))
 
 
 (defnc counter [_]
@@ -56,8 +55,8 @@
       (suspense
        {:fallback ($d "div" "Loading all....")}
        (for [i (range 0 count)]
-         ($ item {:i i :key i})
-         #_(suspense
+         #_($ item {:i i :key i})
+         (suspense
           {:fallback ($d "div" "Loading..")
            :key i}
           ($ item {:i i}))))))
