@@ -92,7 +92,7 @@
     :else (to-str el)))
 
 
-(defn render!
+(defn -render!
   [el]
   (let [>results (s/stream)
         suspended (atom {})
@@ -101,8 +101,10 @@
     (s/put! >results [:root result])
 
     (d/loop [suspended @suspended]
-      (prn :loop)
       (let [suspended-results (s/stream)]
+        ;; as each deferred resolves, put the id and element onto
+        ;; suspended-results so we can process them in the order they
+        ;; complete
         (d/chain
          (apply d/zip (for [[suspense-id [d el]] suspended]
                         (d/chain
@@ -110,24 +112,18 @@
                          (fn [_]
                            (s/put! suspended-results [suspense-id el])))))
          (fn [_]
-           (prn :suspended/close)
            (s/close! suspended-results)))
         (let [suspended2 (atom {})]
-          (prn :connecing)
           (d/chain
            (s/consume-async
             (fn [[suspense-id el]]
-              (prn :connect/put)
-              (doto (s/put! >results [suspense-id (binding [*suspended* suspended2]
-                                                    (realize-elements el))])
-                (d/on-realized #(prn :success %) #(prn :error %))))
+              (s/put! >results [suspense-id (binding [*suspended* suspended2]
+                                              (realize-elements el))]))
             suspended-results)
            (fn [_]
-             (prn :connect/done)
              (if (seq @suspended2)
-               (do (prn :recur)
-                   (d/recur @suspended2))
-               (do (prn :close) (s/close! >results))))))))
+               (d/recur @suspended2)
+               (s/close! >results)))))))
     >results))
 
 
@@ -175,6 +171,32 @@
   (slurp (io/resource "helix/server/rc.js")))
 
 
+(defn render-to-stream
+  [el]
+  (let [html (s/stream)
+        loaded-boundary-script? (atom false)]
+    (s/put! html "<!doctype html>")
+    (s/connect-via
+     (-render! el)
+     (fn [[suspense-id el]]
+       (if (= :root suspense-id)
+         (put-el! html el)
+         (do
+           (s/put! html (str "<div id=\"S:" suspense-id "\">"))
+           (put-el! html el)
+           (s/put! html (str "</div>"))
+           (if-not @loaded-boundary-script?
+             (do (reset! loaded-boundary-script? true)
+                 (s/put! html (str "<script>" complete-boundary-function "; "
+                                   "$RC(\"" suspense-id "\", \"S:" suspense-id "\")"
+                                   "</script>")))
+             (s/put! html (str "<script>"
+                               "$RC(\"" suspense-id "\", \"S:" suspense-id "\")"
+                               "</script>"))))))
+     html)
+    html))
+
+
 ;;
 ;; Example
 ;;
@@ -206,44 +228,17 @@
                     (core/suspense
                      {:fallback "Loading all..."}
                      (for [i (range 0 count)]
-                       (core/$ item {:i i :key i})
-                       #_(core/suspense
+                       #_(core/$ item {:i i :key i})
+                       (core/suspense
                         {:fallback ($d "div" "Loading..")}
                         (core/$ item {:i i :key i}))))))))))
 
 
-#_(s/consume #(do (prn %) true) (s/map first (render! (core/$ page {:count 40}))))
-
-(reset! *cached? #{})
-
 
 (defn handler [req]
-  (let [html (s/stream)
-        loaded-boundary-script? (atom false)
-        suspended-results (s/stream)]
-    (s/put! html "<!doctype html>")
-    (d/future
-      @(s/connect-via
-        (render! (core/$ page {:count 40}))
-        (fn [[suspense-id el]]
-          (if (= :root suspense-id)
-            (put-el! html el)
-            (do
-              (s/put! html (str "<div id=\"S:" suspense-id "\">"))
-              (put-el! html el)
-              (s/put! html (str "</div>"))
-              (if-not @loaded-boundary-script?
-                (do (reset! loaded-boundary-script? true)
-                    (s/put! html (str "<script>" complete-boundary-function "; "
-                                      "$RC(\"" suspense-id "\", \"S:" suspense-id "\")"
-                                      "</script>")))
-                (s/put! html (str "<script>"
-                                  "$RC(\"" suspense-id "\", \"S:" suspense-id "\")"
-                                  "</script>"))))))
-        html))
-    {:status 200
-     :headers {"content-type" "text/html"}
-     :body html}))
+  {:status 200
+   :headers {"content-type" "text/html"}
+   :body (render-to-stream (core/$ page {:count 40}))})
 
 
 (comment
