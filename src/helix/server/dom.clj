@@ -130,12 +130,14 @@
           (d/chain
            (s/consume-async
             (fn [[suspense-id el]]
-              (s/put!
-               >results
-               [suspense-id
-                (binding [*suspended* suspended2
-                          *suspense-counter* suspense-counter]
-                  (realize-elements el))]))
+              (let [next-el (binding [*suspended* suspended2
+                                      *suspense-counter* suspense-counter]
+                              (realize-elements el))]
+                ;; in the case of a waterfall within a suspense boundary, we
+                ;; don't want to render the result until we're done suspending
+                (if (contains? @suspended2 suspense-id)
+                  (d/success-deferred true)
+                  (s/put! >results [suspense-id next-el]))))
             suspended-results)
            (fn [_]
              (if (seq @suspended2)

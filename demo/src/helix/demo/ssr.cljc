@@ -53,13 +53,14 @@
 (defnc app [{:keys [count] :or {count 10}}]
   ($d "div"
       ($ counter)
-      (for [i (range 0 count)]
-        #_($ item {:i i :key i})
-        (suspense
-         {:fallback ($d "div" "Loading..")
-          :key i}
-         ($ item {:i i})
-         #_"hi"))))
+      (suspense
+       {:fallback ($d "div" "Loading all....")}
+       (for [i (range 0 count)]
+         ($ item {:i i :key i})
+         #_(suspense
+          {:fallback ($d "div" "Loading..")
+           :key i}
+          ($ item {:i i}))))))
 
 
 (defnc page [_]
