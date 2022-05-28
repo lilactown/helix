@@ -92,6 +92,45 @@
     :else (to-str el)))
 
 
+(defn render!
+  [el]
+  (let [>results (s/stream)
+        suspended (atom {})
+        result (binding [*suspended* suspended]
+                 (realize-elements el))]
+    (s/put! >results [:root result])
+
+    (d/loop [suspended @suspended]
+      (prn :loop)
+      (let [suspended-results (s/stream)]
+        (d/chain
+         (apply d/zip (for [[suspense-id [d el]] suspended]
+                        (d/chain
+                         d
+                         (fn [_]
+                           (s/put! suspended-results [suspense-id el])))))
+         (fn [_]
+           (prn :suspended/close)
+           (s/close! suspended-results)))
+        (let [suspended2 (atom {})]
+          (prn :connecing)
+          (d/chain
+           (s/consume-async
+            (fn [[suspense-id el]]
+              (prn :connect/put)
+              (doto (s/put! >results [suspense-id (binding [*suspended* suspended2]
+                                                    (realize-elements el))])
+                (d/on-realized #(prn :success %) #(prn :error %))))
+            suspended-results)
+           (fn [_]
+             (prn :connect/done)
+             (if (seq @suspended2)
+               (do (prn :recur)
+                   (d/recur @suspended2))
+               (do (prn :close) (s/close! >results))))))))
+    >results))
+
+
 (defn put-el!
   [stream el]
   (cond
@@ -173,36 +212,25 @@
                         (core/$ item {:i i :key i}))))))))))
 
 
+#_(s/consume #(do (prn %) true) (s/map first (render! (core/$ page {:count 40}))))
+
+(reset! *cached? #{})
+
+
 (defn handler [req]
   (let [html (s/stream)
         loaded-boundary-script? (atom false)
         suspended-results (s/stream)]
     (s/put! html "<!doctype html>")
     (d/future
-      (binding [*suspended* (atom {})]
-        (->> (core/$ page {:count 40})
-             (realize-elements)
-             (put-el! html))
-        ;; initial shell done. now handle suspensions
-        ;; TODO handle nested suspensions
-        (d/chain
-         (apply d/zip (for [[suspense-id [d el]] @*suspended*]
-                        (d/chain
-                         d
-                         (fn [_]
-                           (prn :results/put suspense-id)
-                           (s/put! suspended-results
-                                   [suspense-id el])))))
-         ;; once all puts done, close stream
-         (fn [_]
-           (prn :results/close)
-           (s/close! suspended-results)))
-        @(s/connect-via
-          suspended-results
-          (fn [[suspense-id el]]
-            (binding [*suspended* (atom {})] ; ignore for now
+      @(s/connect-via
+        (render! (core/$ page {:count 40}))
+        (fn [[suspense-id el]]
+          (if (= :root suspense-id)
+            (put-el! html el)
+            (do
               (s/put! html (str "<div id=\"S:" suspense-id "\">"))
-              (put-el! html (realize-elements el))
+              (put-el! html el)
               (s/put! html (str "</div>"))
               (if-not @loaded-boundary-script?
                 (do (reset! loaded-boundary-script? true)
@@ -211,12 +239,8 @@
                                       "</script>")))
                 (s/put! html (str "<script>"
                                   "$RC(\"" suspense-id "\", \"S:" suspense-id "\")"
-                                  "</script>")))))
-          html)
-        (s/close! html)
-        (prn :html/close)
-        ;; Reset state for next req :zany:
-        (reset! *cached? #{})))
+                                  "</script>"))))))
+        html))
     {:status 200
      :headers {"content-type" "text/html"}
      :body html}))
