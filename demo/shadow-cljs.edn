@@ -3,5 +3,6 @@
  {:app {:target :browser
         :output-dir "resources/public/js"
         :asset-path "assets/js"
-        :modules {:main {:entries [helix.demo.ssr]}}
+        :modules {:main {:entries [helix.demo.ssr]
+                         :init-fn helix.demo.ssr/start-client!}}
         :dev {:compiler-options {:output-feature-set :es6}}}}}
