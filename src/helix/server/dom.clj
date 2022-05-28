@@ -62,46 +62,54 @@
 
 
 (def ^:dynamic *suspended*) ; atom
+(def ^:dynamic ^:private *suspense-counter*) ; atom
+
+
+(defn- gen-suspense-id
+  []
+  (dec (swap! *suspense-counter* inc)))
 
 
 (defn realize-elements
-  [el]
-  (cond
-    (and (instance? Element el)
-         (or (string? (:type el)) ; DOM element type
-             (= 'react/Fragment (:type el))))
-    (update-in el [:props :children] #(doall (map realize-elements %)))
+  ([el]
+   (cond
+     (and (instance? Element el)
+          (or (string? (:type el)) ; DOM element type
+              (= 'react/Fragment (:type el))))
+     (update-in el [:props :children] #(doall (map realize-elements %)))
 
-    (and (instance? Element el)
-         (= 'react/Suspense (:type el)))
-    (let [suspense-id (gensym "suspense")]
-      (try
-        (-> el
-            (assoc-in [:props ::core/suspense-id] suspense-id)
-            (update-in [:props :children]
-                       #(doall (map realize-elements %))))
-        (catch clojure.lang.ExceptionInfo e
-          (if-let [d (::core/deferred (ex-data e))]
-            (do (swap! *suspended* assoc suspense-id [d el])
-                (-> el
-                    (assoc-in [:props ::core/fallback?] true)
-                    (assoc-in [:props ::core/suspense-id] suspense-id)))
-            (throw e)))))
+     (and (instance? Element el)
+          (= 'react/Suspense (:type el)))
+     (try
+       (-> el
+           (update-in [:props :children] #(doall (map realize-elements %))))
+       (catch clojure.lang.ExceptionInfo e
+         (if-let [d (::core/deferred (ex-data e))]
+           (let [suspense-id (or (-> el :props ::core/suspense-id)
+                                 (gen-suspense-id))
+                 el (-> el
+                        (assoc-in [:props ::core/suspense-id] suspense-id)
+                        (assoc-in [:props ::core/suspended?] true))]
+             (swap! *suspended* assoc suspense-id [d el])
+             (assoc-in el [:props ::core/fallback?] true))
+           (throw e))))
 
-    (instance? Element el)
-    (realize-elements (core/-render (:type el) (:props el)))
+     (instance? Element el)
+     (realize-elements (core/-render (:type el) (:props el)))
 
-    (sequential? el)
-    (doall (map realize-elements el))
+     (sequential? el)
+     (doall (map realize-elements el))
 
-    :else (to-str el)))
+     :else (to-str el))))
 
 
 (defn -render!
   [el]
   (let [>results (s/stream)
         suspended (atom {})
-        result (binding [*suspended* suspended]
+        suspense-counter (atom 0)
+        result (binding [*suspended* suspended
+                         *suspense-counter* suspense-counter]
                  (realize-elements el))]
     (s/put! >results [:root result])
 
@@ -122,8 +130,12 @@
           (d/chain
            (s/consume-async
             (fn [[suspense-id el]]
-              (s/put! >results [suspense-id (binding [*suspended* suspended2]
-                                              (realize-elements el))]))
+              (s/put!
+               >results
+               [suspense-id
+                (binding [*suspended* suspended2
+                          *suspense-counter* suspense-counter]
+                  (realize-elements el))]))
             suspended-results)
            (fn [_]
              (if (seq @suspended2)
@@ -150,20 +162,22 @@
       (doseq [child (-> el :props :children)]
         (put-el! stream child))
 
-
       (= 'react/Suspense (:type el))
       (if (::core/fallback? (:props el))
         (do (s/put! stream "<!--$?-->")
-            (s/put! stream (str "<template id=\""
+            (s/put! stream (str "<template id=\"B:"
                                 (-> el :props ::core/suspense-id)
                                 "\"></template>"))
             (put-el! stream (-> el :props :fallback))
             (s/put! stream "<!--/$-->"))
         (do
-          (s/put! stream "<!--$-->")
+          (when-not (-> el :props ::core/suspended?)
+            ;; don't render boundary again if prev suspended
+            (s/put! stream "<!--$-->"))
           (doseq [child (-> el :props :children)]
             (put-el! stream child))
-          (s/put! stream "<!--/$-->"))))
+          (when-not (-> el :props ::core/suspended?)
+            (s/put! stream "<!--/$-->")))))
 
     (sequential? el)
     (doseq [x el]
@@ -193,10 +207,10 @@
            (if-not @loaded-boundary-script?
              (do (reset! loaded-boundary-script? true)
                  (s/put! html (str "<script>" complete-boundary-function "; "
-                                   "$RC(\"" suspense-id "\", \"S:" suspense-id "\")"
+                                   "$RC(\"B:" suspense-id "\", \"S:" suspense-id "\")"
                                    "</script>")))
              (s/put! html (str "<script>"
-                               "$RC(\"" suspense-id "\", \"S:" suspense-id "\")"
+                               "$RC(\"B:" suspense-id "\", \"S:" suspense-id "\")"
                                "</script>"))))))
      html)
     html))
