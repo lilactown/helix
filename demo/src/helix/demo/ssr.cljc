@@ -36,17 +36,18 @@
                   (* 100 i))))))))
 
 
+(defnc counter [_]
+  (let [[counter set-counter] (hooks/use-state 0)]
+    (<> ($d "button" {:on-click #(set-counter inc)} "+") counter)))
+
+
 (defnc item [{:keys [i]}]
   (if (zero? (mod i 10))
     (do (fetch! i)
-        ($d "div" (str "hello" i)))
+        ($d "div"
+            "hello" i
+            ($ counter)))
     ($d "div" "hi" i)))
-
-
-(defnc counter [_]
-  (let [[counter set-counter] (hooks/use-state 0)]
-    (<> counter
-        ($d "button" {:on-click #(set-counter inc)} "+"))))
 
 
 (defnc app [{:keys [count] :or {count 10}}]
