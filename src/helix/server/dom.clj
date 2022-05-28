@@ -145,6 +145,26 @@
                (s/close! >results)))))))
     >results))
 
+(declare put-el!)
+
+(defn- put-children!
+  "Calls put-el! on each child. Handles splitting sequential text nodes."
+  [html children]
+  (loop [prev (doto (first children)
+                (->> (put-el! html)))
+         cur (second children)
+         children (rest (rest children))]
+    (when (some? cur)
+      (cond
+        (or (instance? Element cur)
+            (instance? Element prev))
+        (put-el! html cur)
+
+        :else (do (s/put! html "<!-- -->")
+                  (put-el! html cur)))
+      (when (seq children)
+        (recur cur (first children) (rest children))))))
+
 
 (defn put-el!
   [stream el]
@@ -156,8 +176,7 @@
 
       (string? (:type el))
       (do (s/put! stream (str "<" (:type el) (props->attrs (:props el)) ">"))
-          (doseq [child (-> el :props :children)]
-            (put-el! stream child))
+          (put-children! stream (-> el :props :children))
           (s/put! stream (str "</" (:type el) ">")))
 
       (= 'react/Fragment (:type el))
@@ -176,14 +195,12 @@
           (when-not (-> el :props ::core/suspended?)
             ;; don't render boundary again if prev suspended
             (s/put! stream "<!--$-->"))
-          (doseq [child (-> el :props :children)]
-            (put-el! stream child))
+          (put-children! stream (-> el :props :children))
           (when-not (-> el :props ::core/suspended?)
             (s/put! stream "<!--/$-->")))))
 
     (sequential? el)
-    (doseq [x el]
-      (put-el! stream x))
+    (put-children! stream el)
 
     :else (s/put! stream (to-str el))))
 
