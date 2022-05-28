@@ -28,18 +28,22 @@
     "meta" "param" "source" "track" "wbr"})
 
 
+(defn- entry->style
+  [[k v]]
+  (str (if (string? k) k (name k)) ":" v))
+
 (defn style-str
   [styles]
-  (reduce-kv
-   (fn [s k v]
-     (str s (if (string? k) k (name k)) ": " v ";"))
-   ""
-   styles))
+  (reduce
+   (fn [s e]
+     (str s ";" (entry->style e)))
+   (entry->style (first styles))
+   (rest styles)))
 
 
 #_(style-str {:color "red"})
 
-#_(style-str {"color" "blue"})
+#_(style-str {"color" "blue" :flex "grow"})
 
 
 (defn props->attrs
@@ -48,6 +52,7 @@
    (fn [attrs k v]
      (case k
        :style (str attrs " style=\"" (style-str v) "\"")
+       :id (str attrs " id=\"" v "\"")
        attrs))
    ""
    props))
@@ -155,10 +160,10 @@
             (put-el! stream (-> el :props :fallback))
             (s/put! stream "<!--/$-->"))
         (do
-          #_(s/put! stream "<!--$-->")
+          (s/put! stream "<!--$-->")
           (doseq [child (-> el :props :children)]
             (put-el! stream child))
-          #_(s/put! stream "<!--/$-->"))))
+          (s/put! stream "<!--/$-->"))))
 
     (sequential? el)
     (doseq [x el]
