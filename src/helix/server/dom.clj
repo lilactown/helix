@@ -187,7 +187,7 @@
        (if (= :root suspense-id)
          (put-el! html el)
          (do
-           (s/put! html (str "<div id=\"S:" suspense-id "\">"))
+           (s/put! html (str "<div hidden id=\"S:" suspense-id "\">"))
            (put-el! html el)
            (s/put! html (str "</div>"))
            (if-not @loaded-boundary-script?
