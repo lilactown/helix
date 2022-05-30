@@ -1,7 +1,7 @@
 (ns helix.server.dom
+  {:clj-kondo/config '{:lint-as {dfor clojure.core/for}}}
   (:require
    [clojure.java.io :as io]
-   [clojure.string :as string]
    [helix.server.core :as core]
    [manifold.deferred :as d]
    [manifold.stream :as s])
@@ -103,46 +103,47 @@
      :else (to-str el))))
 
 
+(defn- all
+  [ds]
+  (apply d/zip (doall ds)))
+
+
+(defmacro dfor
+  {:style/indent 1}
+  [& body]
+  `(all (for ~@body)))
+
+
 (defn -render!
   [el]
   (let [>results (s/stream)
-        suspended (atom {})
-        suspense-counter (atom 0)
-        result (binding [*suspended* suspended
-                         *suspense-counter* suspense-counter]
+        *suspended (atom {})
+        *suspense-counter (atom 0)
+        result (binding [*suspended* *suspended
+                         *suspense-counter* *suspense-counter]
                  (realize-elements el))]
     (s/put! >results [:root result])
 
-    (d/loop [suspended @suspended]
-      (let [suspended-results (s/stream)]
-        ;; as each deferred resolves, put the id and element onto
-        ;; suspended-results so we can process them in the order they
-        ;; complete
-        (d/chain
-         (apply d/zip (for [[suspense-id [d el]] suspended]
-                        (d/chain
-                         d
-                         (fn [_]
-                           (s/put! suspended-results [suspense-id el])))))
-         (fn [_]
-           (s/close! suspended-results)))
-        (let [suspended2 (atom {})]
+    (d/loop [suspended @*suspended]
+      (if (seq suspended)
+        (let [*suspended2 (atom {})]
           (d/chain
-           (s/consume-async
-            (fn [[suspense-id el]]
-              (let [next-el (binding [*suspended* suspended2
-                                      *suspense-counter* suspense-counter]
-                              (realize-elements el))]
-                ;; in the case of a waterfall within a suspense boundary, we
-                ;; don't want to render the result until we're done suspending
-                (if (contains? @suspended2 suspense-id)
-                  (d/success-deferred true)
-                  (s/put! >results [suspense-id next-el]))))
-            suspended-results)
+           (dfor [[suspense-id [d el]] suspended]
+             (d/chain
+              d
+              (fn [_]
+                (let [next-el (binding [*suspended* *suspended2
+                                        *suspense-counter* *suspense-counter]
+                                (realize-elements el))]
+                  ;; in the case of a waterfall within a suspense boundary, we
+                  ;; don't want to render the result until we're done suspending
+                  (if (contains? @*suspended2 suspense-id)
+                    (d/success-deferred true)
+                    ;; back pressure
+                    (s/put! >results [suspense-id next-el]))))))
            (fn [_]
-             (if (seq @suspended2)
-               (d/recur @suspended2)
-               (s/close! >results)))))))
+             (d/recur @*suspended2))))
+        (s/close! >results)))
     >results))
 
 
@@ -162,7 +163,8 @@
             (instance? Element prev))
         (put-el! html cur)
 
-        :else (do (s/put! html "<!-- -->")
+        ;; prev and cur is a text node
+        :else (do (s/put! html "<!-- -->") ; split them using comment
                   (put-el! html cur)))
       (when (seq children)
         (recur cur (first children) (rest children))))))
