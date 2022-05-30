@@ -1,5 +1,4 @@
 (ns helix.server.dom
-  {:clj-kondo/config '{:lint-as {dfor clojure.core/for}}}
   (:require
    [clojure.java.io :as io]
    [helix.server.core :as core]
@@ -108,7 +107,7 @@
   (apply d/zip (doall ds)))
 
 
-(defmacro dfor
+(defmacro ^:private dfor
   {:style/indent 1}
   [& body]
   `(all (for ~@body)))
