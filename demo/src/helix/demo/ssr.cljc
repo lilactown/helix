@@ -64,15 +64,14 @@
 
 
 (defnc page [_]
-  (let [color "blue"]
-    ($d "html"
-        ($d "head"
-            ($d "title" "Streaming test"))
-        ($d "body"
-            {:style {:color color}}
-            ($d "div" {:id "app"} ($ app {:count 30}))
-            #?(:clj "<script src=\"/assets/js/main.js\"></script>"
-               :cljs ($d "script" {:src "/assets/js/main.js"}))))))
+  ($d "html"
+      ($d "head"
+          ($d "title" "Streaming test"))
+      ($d "body" {:style {:color "blue"}}
+          ($d "div" {:id "app"}
+              ($ app {:count 30}))
+          #?(:clj "<script src=\"/assets/js/main.js\"></script>"
+             :cljs ($d "script" {:src "/assets/js/main.js"})))))
 
 (def client-root)
 
