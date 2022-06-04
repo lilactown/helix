@@ -5,12 +5,14 @@
 ### Added
 
 * Added docstrings to many functions and macros
-* `helix.com/marker` DOM macro
+* `helix.dom/marker` DOM macro
 
 ### Fixed
 
 * `defcomponent` now adds the `displayName` property as a static, so should show up in devtools now
 * Mark `assoc-some` as private
+* Fixed an issue with fast-refresh where JS values in hooks would incorrectly
+  invalidate on every refresh
 
 ## 0.1.6
 
