@@ -347,13 +347,15 @@
                            [nil spec])
         {statics true spec false} (group-by static? spec)
         js-spec `(cljs.core/js-obj ~@(->> spec
-                                (map ->method)
-                                (apply concat (list "displayName" (str display-name)))))
-        js-statics `(cljs.core/js-obj ~@(->> statics
-                                   (map #(if (method? %)
-                                           (->method %)
-                                           (->value %)))
-                                   (apply concat)))]
+                                          (map ->method)
+                                          (apply concat)))
+        js-statics `(cljs.core/js-obj
+                     ~@(->> statics
+                            (map #(if (method? %)
+                                    (->method %)
+                                    (->value %)))
+                            (apply concat (list "displayName"
+                                                (str display-name)))))]
     ;; TODO handle render specially
     `(def ~display-name
        ~@(when docstring docstring)
