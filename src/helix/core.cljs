@@ -15,16 +15,22 @@
       (-write writer (str "\"" (.toString sym) "\"")))))
 
 
-(def Fragment react/Fragment)
+(def Fragment
+  "React.Fragment. See `helix.core/<>` for macro version."
+  react/Fragment)
 
 
-(def Suspense react/Suspense)
+(def Suspense
+  "React.Suspense. See `helix.core/suspense` for macro version."
+  react/Suspense)
 
 
 (def create-element react/createElement)
 
 
-(def create-context react/createContext)
+(def create-context
+  "React.createContext"
+  react/createContext)
 
 
 ;; this is to enable calling `(.createElement (get-react))` without doing
@@ -87,12 +93,17 @@
 
 
 (defn type
+  "Geven a factory function created by `helix.core/factory` or `cljs-factory`,
+  returns the original component that the factory creates elements of."
   [f]
   (-type f))
 
 
 (defn factory
-  "Creates a factory function for a React component"
+  "Creates a factory function for a React component, that when called returns an
+  element with the props and children passed to the factory.
+
+  Use `helix.core/type` to extract the original React component."
   [type]
   (-> (fn factory [& args]
         (apply $ type args))
@@ -101,6 +112,11 @@
 
 
 (defn cljs-factory
+  "Creates a factory function for a component defined via `defnc`, that when
+  called returns an element with the props and children passed to the factory.
+  Slightly more performant than `factory` when used with a helix component.
+
+  Use `helix.core/type` to extract the original component this was called with."
   [type]
   (-> (fn factory [& args]
         (if (map? (first args))
@@ -129,6 +145,10 @@
 
 
 (defn extract-cljs-props
+  "A helper function for turning a props object into a CLJS map. Works with both
+  factory functions (which stores a map in a single key, \"helix/props\") and
+  normal JS objects.
+  Mostly used internally by helix, but can be useful when writing HOC."
   [o]
   (when (and ^boolean goog/DEBUG (or (map? o) (nil? o)))
     (throw (ex-info "Props received were a map. This probably means you're calling your component as a function." {:props o})))
@@ -169,7 +189,9 @@
 
 
 
-(defn create-component [spec statics]
+(defn create-component
+  "Helper function for creating a class component. See `defcomponent`."
+  [spec statics]
   (let [render (.-render ^js spec)
         render' (fn [this]
                   (render

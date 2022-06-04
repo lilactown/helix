@@ -278,7 +278,11 @@
 ;;
 
 
-(defmacro defhook [sym & body]
+(defmacro defhook
+  "Defines a new custom hook function.
+  Checks for invalid usage of other hooks in the body, and other helix
+  features."
+  [sym & body]
   (let [[docstring params body] (if (string? (first body))
                                   [(first body) (second body) (drop 2 body)]
                                   [nil (first body) (rest body)])
@@ -314,30 +318,51 @@
 ;;
 
 
-(defn static? [form]
+(defn- static? [form]
   (boolean (:static (meta form))))
 
 
-(defn method? [form]
+(defn- method? [form]
   (and (list? form)
        (simple-symbol? (first form))
        (vector? (second form))))
 
 
-(defn ->method [[sym-name bindings & form]]
+(defn- ->method [[sym-name bindings & form]]
   {:assert [(simple-symbol? sym-name)]}
   (list (str sym-name)
         `(fn ~sym-name ~bindings
            ~@form)))
 
 
-(defn ->value [[sym-name value]]
+(defn- ->value [[sym-name value]]
   {:assert [(simple-symbol? sym-name)]}
   (list (str sym-name) value))
 
 
 (defmacro defcomponent
-  "Defines a React class component."
+  "Defines a React class component.
+  Like `class display-name extends React.Component { ... }` in JS.
+
+  Methods are defined using (method-name [this ,,,] ,,,) syntax.
+  Properties elide the arguments vector (property-name expr)
+
+  Static properties and methods can be added by annotating the method or
+  property with metadata containing the :static keyword.
+
+  Some assumptions:
+  - To use setState, you must store the state as a JS obj
+  - The render method receives three arguments: this, a CLJS map of props,
+    and the state object.
+  - displayName by default is the symbol passed in, but can be customized
+    by manually adding it as a static property
+
+  Example:
+
+  (defcomponent foo
+   (constructor
+    [this]
+    (set! (.-state this) #js {:counter 0})))"
   {:style/indent [1 :form [1]]}
   [display-name & spec]
   {:assert [(simple-symbol? display-name)
@@ -354,8 +379,10 @@
                             (map #(if (method? %)
                                     (->method %)
                                     (->value %)))
-                            (apply concat (list "displayName"
-                                                (str display-name)))))]
+                            (apply concat
+                                   (list "displayName"
+                                         ;; fully qualified name
+                                         (str *ns* "/" display-name)))))]
     ;; TODO handle render specially
     `(def ~display-name
        ~@(when docstring docstring)
