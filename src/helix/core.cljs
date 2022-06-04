@@ -122,7 +122,7 @@
         (-type [_] type))))
 
 
-(defn assoc-some [m k x]
+(defn- assoc-some [m k x]
   (if (some? x)
     (assoc m k x)
     m))
