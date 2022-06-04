@@ -43,3 +43,6 @@ jobs:
     
     - name: Run CLJS tests
       run: node target/ci.js
+
+    - name: Run CLJ tests
+      run: ./bin/kaocha
