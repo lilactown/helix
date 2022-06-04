@@ -5,6 +5,7 @@
 ### Added
 
 * Added docstrings to many functions and macros
+* `helix.com/marker` DOM macro
 
 ### Fixed
 
