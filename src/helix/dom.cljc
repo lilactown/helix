@@ -134,6 +134,7 @@
     ellipse
     g
     line
+    marker
     mask
     path
     pattern
