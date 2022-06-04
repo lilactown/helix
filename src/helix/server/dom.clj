@@ -131,15 +131,16 @@
              (d/chain
               d
               (fn [_]
-                (let [next-el (binding [*suspended* *suspended2
-                                        *suspense-counter* *suspense-counter]
-                                (realize-elements el))]
-                  ;; in the case of a waterfall within a suspense boundary, we
-                  ;; don't want to render the result until we're done suspending
-                  (if (contains? @*suspended2 suspense-id)
-                    (d/success-deferred true)
-                    ;; back pressure
-                    (s/put! >results [suspense-id next-el]))))))
+                (binding [*suspended* *suspended2
+                          *suspense-counter* *suspense-counter]
+                  (realize-elements el)))
+              (fn [next-el]
+                ;; in the case of a waterfall within a suspense boundary, we
+                ;; don't want to render the result until we're done suspending
+                (if (contains? @*suspended2 suspense-id)
+                  (d/success-deferred true)
+                  ;; back pressure
+                  (s/put! >results [suspense-id next-el])))))
            (fn [_]
              (d/recur @*suspended2))))
         (s/close! >results)))
