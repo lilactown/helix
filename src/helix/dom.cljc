@@ -150,6 +150,14 @@
 
 
 (defmacro $d
+  "Creates a new React DOM element. \"type\" ought to be a string like \"span\",
+  \"div\",etc.
+
+  When a map of props are passed as the second argument, will statically convert
+  to a JS object, specially handling things like converting kebab-case props to
+  camelCase and other transformations.
+
+  Use the special & or :& prop to merge dynamic props in."
   [type & args]
   (if (map? (first args))
     `^js/React.Element (.createElement
