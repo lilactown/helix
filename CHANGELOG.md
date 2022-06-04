@@ -1,5 +1,16 @@
 # Changelog
 
+## UNRELEASED
+
+### Added
+
+* Added docstrings to many functions and macros
+
+### Fixed
+
+* `defcomponent` now adds the `displayName` property as a static, so should show up in devtools now
+* Mark `assoc-some` as private
+
 ## 0.1.6
 
 ### Added
