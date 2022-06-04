@@ -74,6 +74,16 @@ Example: ($ %s %s ...)"
          vec)))
 
 
+(defn- unwrap-js-vals
+  [form]
+  (clojure.walk/prewalk
+   (fn unwrap [x]
+     (if (= JSValue (type x))
+       (.-val x)
+       x))
+   form))
+
+
 ;; TODO:
 ;; - Handle re-ordering
 ;;   - Detect hooks used in let-bindings and add left-hand side to signature
@@ -95,9 +105,7 @@ Example: ($ %s %s ...)"
 (defn find-hooks
   [body]
   (let [f (fn f [matches form]
-            (let [form (if (= (type form) JSValue)
-                         (.-val form)
-                         form)]
+            (let [form (unwrap-js-vals form)]
               (if (and (seqable? form)
                        (not
                         ;; Ignore quoted forms, e.g. '(use-foo)
