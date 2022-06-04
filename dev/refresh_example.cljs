@@ -4,20 +4,25 @@
     [helix.dom :as d]
     [helix.hooks :as hooks]
     [helix.experimental.refresh :as refresh]
-    ["react-dom" :as rdom]))
+    ["react-dom/client" :as rdom]))
 
 (defnc app
   []
   {:helix/features {:fast-refresh true}}
-  (let [[name set-name] (hooks/use-state "Lisa")]
+  (let [[o set-o] (hooks/use-state
+                   #js {:name "Lisa"})]
     (d/div
      {:style {:text-align "center"
               :padding "10px"
               :color "red"
               :font-family "sans-serif"}}
-     (d/div (str "hello, " name))
+     (d/div (str "hello, " (.-name o) "!"))
      (d/div
-      (d/input {:value name :on-change #(set-name (.. % -target -value))})))))
+      (d/input {:value (.-name o)
+                :on-change #(set-o #js {:name  (.. % -target -value)})})))))
+
+
+(defonce root nil)
 
 
 (defn ^:dev/after-load reload
@@ -28,6 +33,5 @@
 (defn ^:export start
   []
   (refresh/inject-hook!)
-  (rdom/render
-   ($ app)
-   (js/document.getElementById "app")))
+  (set! root (rdom/createRoot (js/document.getElementById "app")))
+  (.render root ($ app)))
