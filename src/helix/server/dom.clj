@@ -2,6 +2,7 @@
   (:require
    [clojure.java.io :as io]
    [helix.server.core :as core]
+   [helix.server.impl.props :as props]
    [manifold.deferred :as d]
    [manifold.stream :as s])
   (:import [helix.server.core Element]))
@@ -25,39 +26,6 @@
 (def no-close-tag?
   #{"area" "base" "br" "col" "command" "embed" "hr" "img" "input" "keygen" "link"
     "meta" "param" "source" "track" "wbr"})
-
-
-(defn- entry->style
-  [[k v]]
-  (str (if (string? k) k (name k)) ":" v))
-
-(defn style-str
-  [styles]
-  (reduce
-   (fn [s e]
-     (str s ";" (entry->style e)))
-   (entry->style (first styles))
-   (rest styles)))
-
-
-#_(style-str {:color "red"})
-
-#_(style-str {"color" "blue" :flex "grow"})
-
-
-(defn props->attrs
-  [props]
-  (reduce-kv
-   (fn [attrs k v]
-     (case k
-       :style (str attrs " style=\"" (style-str v) "\"")
-       :id (str attrs " id=\"" v "\"")
-       attrs))
-   ""
-   props))
-
-
-#_(props->attrs {:style {:color "red"}})
 
 
 (def ^:dynamic *suspended*) ; atom
@@ -176,10 +144,10 @@
     (instance? Element el)
     (cond
       (no-close-tag? (:type el))
-      (s/put! stream (str "<" (:type el) (props->attrs (:props el)) " />"))
+      (s/put! stream (str "<" (:type el) (props/props->attrs (:props el)) " />"))
 
       (string? (:type el))
-      (do (s/put! stream (str "<" (:type el) (props->attrs (:props el)) ">"))
+      (do (s/put! stream (str "<" (:type el) (props/props->attrs (:props el)) ">"))
           (put-children! stream (-> el :props :children))
           (s/put! stream (str "</" (:type el) ">")))
 

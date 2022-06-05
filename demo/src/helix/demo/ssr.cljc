@@ -2,7 +2,7 @@
   (:require
    #?@(:clj [[aleph.http :as http]
              [helix.server.core :as hx :refer [defnc $ <> suspense]]
-             [helix.server.dom :as dom :refer [$d]]
+             [helix.server.dom-test :as dom :refer [$d]]
              [helix.server.hooks :as hooks]
              [manifold.deferred :as d]
              [manifold.stream :as s]
