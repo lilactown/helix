@@ -40,7 +40,38 @@
            :suppress-hydration-warning true
            :content-editable true
            :spell-check false
-           :draggable true}))
+           :draggable true
+           :allow-fullScreen true
+           :async true
+           :auto-focus true
+           :auto-play true
+           :controls true
+           :default true
+           :defer true
+           :disabled true
+           :disable-picture-in-picture true
+           :disable-remote-playback true
+           :form-no-validate true
+           :hidden true
+           :loop true
+           :no-module true
+           :no-validate true
+           :open true
+           :plays-inline true
+           :read-only true
+           :required true
+           :reversed true
+           :scoped true
+           :seamless true
+           :item-scope true
+           :cols 5
+           :rows 5
+           :size 5
+           :span 5
+           :row-span 5
+           :start 5
+           :capture true
+           :download "asdf"}))
 
 
 (def el ($ div-props))
@@ -55,10 +86,13 @@
                :main 'fixtures.kitchen-sink
                :npm-deps {:react "18.1.0"
                           :react-dom "18.1.0"}})
-     [{:cljs (string/trim-newline (:out (shell/sh "node" "out/main.js")))
-       :clj (dom/render-to-string el)}]))
+     {:cljs (string/trim-newline (:out (shell/sh "node" "out/main.js")))
+      :clj (dom/render-to-string el)}))
 
 #_(make)
+
+#_(let [{:keys [cljs clj]} (make)]
+  (= (.length cljs) (.length clj)))
 
 (defn -main []
   #?(:clj (prn (make))

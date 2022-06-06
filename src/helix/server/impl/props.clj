@@ -37,24 +37,54 @@
                    (if (seqable? v)
                      (seq-to-class v)
                      v) "\"")
-       :value (when (some? v)
-                (str attrs " value=\"" v "\""))
-       (:default-checked :default-value) attrs
-       :checked (if (true? v)
-                  (str attrs " checked=\"\"")
-                  attrs)
-       :multiple (if (true? v)
-                   (str attrs " multiple=\"\"")
-                   attrs)
-       :selected (if (true? v)
-                   (str attrs " selected=\"\"")
-                   attrs)
-       :muted (if (true? v)
-                (str attrs " muted=\"\"")
+       :value (if (some? v)
+                (str attrs " value=\"" v "\"")
                 attrs)
+       (:async :checked :controls :default :defer :disabled :hidden :loop
+               :multiple :muted :open :required :reversed :selected :scoped
+               :seamless) (if (true? v) (str attrs " " (name k) "=\"\"") attrs)
        :content-editable (str attrs " contenteditable=\"" (boolean v) "\"")
        :spell-check (str attrs " spellcheck=\"" (boolean v) "\"")
        :draggable (str attrs " draggable=\"" (boolean v) "\"")
+       :allow-fullScreen (if (true? v)
+                           (str attrs " allowfullscreen=\"\"")
+                           attrs)
+       :auto-play (if (true? v)
+                    (str attrs " autoplay=\"\"")
+                    attrs)
+       :auto-focus (if (true? v)
+                     (str attrs " autofocus=\"\"")
+                     attrs)
+       :disable-picture-in-picture (if (true? v)
+                                     (str attrs " disablepictureinpicture=\"\"")
+                                     attrs)
+       :disable-remote-playback (if (true? v)
+                                  (str attrs " disableremoteplayback=\"\"")
+                                  attrs)
+       :form-no-validate (if (true? v)
+                           (str attrs " formnovalidate=\"\"")
+                           attrs)
+       :no-module (if (true? v)
+                    (str attrs " nomodule=\"\"")
+                    attrs)
+       :no-validate (if (true? v)
+                      (str attrs " novalidate=\"\"")
+                      attrs)
+       :plays-inline (if (true? v)
+                       (str attrs " playsinline=\"\"")
+                       attrs)
+       :read-only (if (true? v)
+                    (str attrs " readonly=\"\"")
+                    attrs)
+       :item-scope (if (true? v)
+                     (str attrs " itemscope=\"\"")
+                     attrs)
+       :row-span (str attrs " rowspan=\"" v "\"")
+       (:capture :download) (cond
+                              (true? v) (str attrs " " (name k) "=\"\"")
+                              (some? v) (str attrs " " (name k) "=\"" v "\"")
+                              :else attrs)
+
        (str attrs " " (name k) "=\"" v "\"")))
    ""
    (dissoc props
@@ -62,7 +92,8 @@
            :dangerously-set-inner-HTML
            :inner-html
            :suppress-content-editable-warning
-           :suppress-hydration-warning)))
+           :suppress-hydration-warning
+           :default-checked :default-value)))
 
 
 (comment
