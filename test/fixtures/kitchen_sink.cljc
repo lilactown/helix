@@ -54,11 +54,7 @@
                :npm-deps {:react "18.1.0"
                           :react-dom "18.1.0"}})
      [{:cljs (string/trim-newline (:out (shell/sh "node" "out/main.js")))
-       :clj (->> el
-                 (dom/render-to-stream)
-                 (s/stream->seq)
-                 (drop 1) ; doctype html
-                 (string/join))}]))
+       :clj (dom/render-to-string el)}]))
 
 #_(make)
 

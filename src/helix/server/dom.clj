@@ -1,6 +1,7 @@
 (ns helix.server.dom
   (:require
    [clojure.java.io :as io]
+   [clojure.string :as string]
    [helix.server.core :as core]
    [helix.server.impl.props :as props]
    [manifold.deferred :as d]
@@ -205,3 +206,16 @@
                                "</script>"))))))
      html)
     html))
+
+
+(defn render-to-string
+  [el]
+  (let [result (binding [*suspended* (atom {})
+                         *suspense-counter* (atom 0)]
+                 (realize-elements el))
+        html (s/stream)]
+    (put-el! html result)
+    (s/close! html)
+    (->> html
+         (s/stream->seq)
+         (string/join))))

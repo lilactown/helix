@@ -37,18 +37,20 @@
                    (if (seqable? v)
                      (seq-to-class v)
                      v) "\"")
-       (:value :default-value) (str attrs " value=\"" v "\"")
-       (:checked :default-checked) (if (true? v)
-                                     (str attrs " checked")
-                                     attrs)
+       :value (when (some? v)
+                (str attrs " value=\"" v "\""))
+       (:default-checked :default-value) attrs
+       :checked (if (true? v)
+                  (str attrs " checked=\"\"")
+                  attrs)
        :multiple (if (true? v)
-                   (str attrs " multiple")
+                   (str attrs " multiple=\"\"")
                    attrs)
        :selected (if (true? v)
-                   (str attrs " selected")
+                   (str attrs " selected=\"\"")
                    attrs)
        :muted (if (true? v)
-                (str attrs " muted")
+                (str attrs " muted=\"\"")
                 attrs)
        :content-editable (str attrs " contenteditable=\"" (boolean v) "\"")
        :spell-check (str attrs " spellcheck=\"" (boolean v) "\"")
@@ -57,7 +59,7 @@
    ""
    (dissoc props
            :children
-           :dangerousely-set-inner-html
+           :dangerously-set-inner-HTML
            :inner-html
            :suppress-content-editable-warning
            :suppress-hydration-warning)))
