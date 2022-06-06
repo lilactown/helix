@@ -23,8 +23,10 @@
            :for "baz"
            :accept-charset "utf8"
            :http-equiv "content-security-policy"
-           :default-value 7
-           :default-checked true
+           ;:default-value 7
+           ;:default-checked true
+           :checked true
+           :value 7
            :multiple true
            :muted true
            :selected true

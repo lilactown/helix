@@ -140,42 +140,44 @@
 
 
 (defn put-el!
-  [stream el]
+  [html el]
   (cond
     (instance? Element el)
     (cond
       (no-close-tag? (:type el))
-      (s/put! stream (str "<" (:type el) (props/props->attrs (:props el)) " />"))
+      (s/put! html (str "<" (:type el) (props/props->attrs (:props el)) " />"))
 
       (string? (:type el))
-      (do (s/put! stream (str "<" (:type el) (props/props->attrs (:props el)) ">"))
-          (put-children! stream (-> el :props :children))
-          (s/put! stream (str "</" (:type el) ">")))
+      (do (s/put! html (str "<" (:type el) (props/props->attrs (:props el)) ">"))
+          (if-let [{:keys [__html]} (-> el :props :dangerously-set-inner-HTML)]
+            (s/put! html __html)
+            (put-children! html (-> el :props :children)))
+          (s/put! html (str "</" (:type el) ">")))
 
       (= 'react/Fragment (:type el))
       (doseq [child (-> el :props :children)]
-        (put-el! stream child))
+        (put-el! html child))
 
       (= 'react/Suspense (:type el))
       (if (::core/fallback? (:props el))
-        (do (s/put! stream "<!--$?-->")
-            (s/put! stream (str "<template id=\"B:"
+        (do (s/put! html "<!--$?-->")
+            (s/put! html (str "<template id=\"B:"
                                 (-> el :props ::core/suspense-id)
                                 "\"></template>"))
-            (put-el! stream (-> el :props :fallback))
-            (s/put! stream "<!--/$-->"))
+            (put-el! html (-> el :props :fallback))
+            (s/put! html "<!--/$-->"))
         (do
           (when-not (-> el :props ::core/suspended?)
             ;; don't render boundary again if prev suspended
-            (s/put! stream "<!--$-->"))
-          (put-children! stream (-> el :props :children))
+            (s/put! html "<!--$-->"))
+          (put-children! html (-> el :props :children))
           (when-not (-> el :props ::core/suspended?)
-            (s/put! stream "<!--/$-->")))))
+            (s/put! html "<!--/$-->")))))
 
     (sequential? el)
-    (put-children! stream el)
+    (put-children! html el)
 
-    :else (s/put! stream (to-str el))))
+    :else (s/put! html (to-str el))))
 
 
 (def complete-boundary-function
