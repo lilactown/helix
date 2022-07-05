@@ -6,6 +6,7 @@
 
 * Added docstrings to many functions and macros
 * `helix.dom/marker` DOM macro
+* `defnc-` which defines a private functional component in the namespace it's called in
 
 ### Fixed
 
