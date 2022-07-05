@@ -2,7 +2,7 @@
   (:require
     [cljs.test :as t :include-macros true]
     [goog.object :as gobj]
-    [helix.core :as helix :refer (defnc $)]))
+    [helix.core :as helix :refer (defnc defnc- $)]))
 
 
 (t/deftest metadata-optimization-expansion
@@ -39,3 +39,15 @@
       (t/is (= key (gobj/get el "key")))
       (t/is (= (dissoc props :key :ref)
                (helix/extract-cljs-props (gobj/get el "props")))))))
+
+
+(defnc- private-comp
+  {:foo :bar}
+  []
+  "can't see me outside of this namespace!")
+
+(t/deftest private-component-definition
+  (let [metadata (meta #'private-comp)]
+    (t/is (:private metadata))
+    (t/is (= (:foo metadata) :bar))))
+
