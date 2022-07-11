@@ -51,15 +51,14 @@
      [initial]
      (let [[v u] (react/useState initial)
            updater (react/useCallback (fn updater
-                                        ([x] (u x))
-                                        ([f & xs]
-                                         (if (satisfies? IStateUpdater f)
-                                           (updater (fn spread-updater [x]
-                                                      (apply f x xs)))
+                                        ([x & xs]
+                                         (if (satisfies? IStateUpdater x)
+                                           (updater (fn spread-updater [y]
+                                                      (apply x y xs)))
                                            ;; if the first argument isn't valid
                                            ;; updater, then call `u` with it
                                            ;; ignoring other args
-                                           (u f))))
+                                           (u x))))
                                       ;; `u` is guaranteed to be stable so we elide it
                                       #js [])]
        [v updater])))
