@@ -14,6 +14,7 @@
 * Mark `assoc-some` as private
 * Fixed an issue with fast-refresh where JS values in hooks would incorrectly
   invalidate on every refresh
+* The setter function returned by `use-state`, when passed multiple arguments, will check whether the first argument is callable before calling `apply` on it.
 
 ## 0.1.6
 
