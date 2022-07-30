@@ -391,7 +391,7 @@
                                          (str *ns* "/" display-name)))))]
     ;; TODO handle render specially
     `(def ~display-name
-       ~@(when docstring docstring)
+       ~@(when docstring [docstring])
        (create-component ~js-spec ~js-statics))))
 
 (comment
