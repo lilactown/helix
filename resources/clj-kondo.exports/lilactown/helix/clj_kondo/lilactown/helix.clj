@@ -1,7 +1,8 @@
 (ns clj-kondo.lilactown.helix
-  (:require [clj-kondo.hooks-api :as api]))
+  (:require
+    [clj-kondo.hooks-api :as api]))
 
-#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
+
 (defn $
   "Macro analysis for `helix.core/$` & `helix.dom/*`."
   [{:keys [node]}]
@@ -24,7 +25,7 @@
                                (list* fn-sym component-sym new-props children))]
     {:node expanded}))
 
-#_{:clj-kondo/ignore [:clojure-lsp/unused-public-var]}
+
 (defn defnc
   "Macro analysis for `helix.core/defnc`."
   [{:keys [node]}]
@@ -42,30 +43,28 @@
                                     [nil the-rest])
         opts-node                 (when (api/map-node? (first the-rest))
                                     (first the-rest))
-        ;; wrap-opts                 (if opts-node  opts-node)
-        ;; new-wrap-opts             (if opts-node  wrap-opts)
         new-opts                  (if opts-node
                                     (-> opts-node
-                                      api/sexpr
-                                      (assoc :wrap
-                                        (api/sexpr
-                                          (api/list-node
-                                            (list* (api/token-node '->)
-                                                   (api/token-node
-                                                     '(helix.core/fnc [] ""))
-                                                   (-> opts-node
-                                                     api/sexpr
-                                                     :wrap
-                                                     api/coerce
-                                                     :children)))))
-                                      api/coerce)
+                                        api/sexpr
+                                        (assoc :wrap
+                                               (api/sexpr
+                                                 (api/list-node
+                                                   (list* (api/token-node '->)
+                                                          (api/token-node
+                                                            '(helix.core/fnc [] ""))
+                                                          (-> opts-node
+                                                              api/sexpr
+                                                              :wrap
+                                                              api/coerce
+                                                              :children)))))
+                                        api/coerce)
                                     opts-node)
         expanded                  (api/list-node
                                     (list* (api/token-node 'defn)
                                            component-name
                                            (filter some?
-                                             [docstring metadata-map argvec
-                                              new-opts render-children])))]
+                                                   [docstring metadata-map argvec
+                                                    new-opts render-children])))]
     (comment
       (-> node api/sexpr prn)
       (-> expanded api/sexpr prn))
