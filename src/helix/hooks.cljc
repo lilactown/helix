@@ -50,15 +50,14 @@
   ```"
      [initial]
      (let [[v u] (react/useState initial)
-           updater (react/useCallback (fn updater
-                                        ([x & xs]
-                                         (if (satisfies? IStateUpdater x)
-                                           (updater (fn spread-updater [y]
-                                                      (apply x y xs)))
-                                           ;; if the first argument isn't valid
-                                           ;; updater, then call `u` with it
-                                           ;; ignoring other args
-                                           (u x))))
+           updater (react/useCallback (fn [x & xs]
+                                        (if (satisfies? IStateUpdater x)
+                                          (u (fn spread-updater [y]
+                                               (apply x y xs)))
+                                          ;; if the first argument isn't valid
+                                          ;; updater, then call `u` with it
+                                          ;; ignoring other args
+                                          (u x)))
                                       ;; `u` is guaranteed to be stable so we elide it
                                       #js [])]
        [v updater])))
