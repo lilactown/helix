@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.8
+
+### Fixed
+
+* Passing a function to the setter returned by `use-state` caused an infinite loop
+
 ## 0.1.7
 
 ### Added
