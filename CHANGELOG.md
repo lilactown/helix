@@ -1,5 +1,11 @@
 # Changelog
 
+## UNRELEASED
+
+### Fixed
+
+* `defnc-` no longer requires one to refer `defnc` as well
+
 ## 0.1.8
 
 ### Fixed
