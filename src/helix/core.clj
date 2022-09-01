@@ -276,7 +276,7 @@
 (defmacro defnc-
   "Same as defnc, yielding a non-public def"
   [display-name & rest]
-  (list* 'defnc (vary-meta display-name assoc :private true) rest))
+  (list* `defnc (vary-meta display-name assoc :private true) rest))
 
 
 ;;
