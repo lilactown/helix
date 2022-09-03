@@ -37,8 +37,13 @@ ClojureScript optimized for modern React development.
 
 Install the latest version from clojars in your project.
 
-A version of "react" and "react-refresh" should be installed automatically;
-install the corresponding version of your favorite renderer (e.g. "react-dom").
+Install JS dependencies:
+
+```
+npm init # initiliaze NPM project if necessary
+npm i react react-refresh # install react, and react-refresh for hot reloading support (see docs)
+npm i react-dom # install renderer. alternatives could be react-native, react-three-fiber, etc.
+```
 
 ### shadow-cljs and react-native
 
