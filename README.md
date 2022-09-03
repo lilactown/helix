@@ -8,7 +8,7 @@ ClojureScript optimized for modern React development.
   (:require [helix.core :refer [defnc $]]
             [helix.hooks :as hooks]
             [helix.dom :as d]
-            ["react-dom" :as rdom]))
+            ["react-dom/client" :as rdom]))
 
 ;; define components using the `defnc` macro
 (defnc greeting
@@ -27,7 +27,8 @@ ClojureScript optimized for modern React development.
                 :on-change #(set-state assoc :name (.. % -target -value))}))))
 
 ;; start your app with your favorite React renderer
-(rdom/render ($ app) (js/document.getElementById "app"))
+(defonce root (rdom/createRoot (js/document.getElementById "app")))
+(.render root ($ app))
 ```
 
 ## Installation
@@ -38,23 +39,6 @@ Install the latest version from clojars in your project.
 
 A version of "react" and "react-refresh" should be installed automatically;
 install the corresponding version of your favorite renderer (e.g. "react-dom").
-
-### shadow-cljs and npm
-
-During development, you'll want to emit ES6 code until [polyfills are handled
-differently](https://github.com/thheller/shadow-cljs/issues/709). You can do
-this by passing in a dev compiler configuration:
-
-```clojure
-;; shadow-cljs.edn
-{,,,
- :builds 
- {:app
- {,,,
-  :dev {:compiler-options {:output-feature-set :es6}}}}}
-```
-
-Release builds should be able to emit all the way back to ES3.
 
 ### shadow-cljs and react-native
 
@@ -68,7 +52,6 @@ react yourself using webpack, ensuring it is provided as the name `"react"`.
 ## Documentation
 
 View formatted docs at [![cljdoc badge](https://cljdoc.org/badge/lilactown/helix)](https://cljdoc.org/d/lilactown/helix/CURRENT)
-
 
 - [Why Helix](./docs/motivation.md)
 - [Creating Components](./docs/creating-components.md)
