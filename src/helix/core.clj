@@ -72,7 +72,7 @@
 
     (provider {:context my-context :value my-value} child1 child2 ...childN)"
   [{:keys [context value] :as props} & children]
-  `^js/React.Element ($ (.-Provider ~context)
+  `^js/React.Element ($ (.-Provider ^js/React.Context ~context)
                         ;; use contains to guard against `nil`
                         ~@(when (contains? props :value)
                             `({:value ~value}))
