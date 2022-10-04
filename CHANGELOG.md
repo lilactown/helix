@@ -5,6 +5,7 @@
 ### Fixed
 
 * `defnc-` no longer requires one to refer `defnc` as well
+* `provider` no longer emits extern warnings
 
 ## 0.1.8
 
