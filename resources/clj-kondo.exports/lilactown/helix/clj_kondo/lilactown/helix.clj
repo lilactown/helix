@@ -1,6 +1,6 @@
 (ns clj-kondo.lilactown.helix
   (:require
-    [clj-kondo.hooks-api :as api]))
+   [clj-kondo.hooks-api :as api]))
 
 
 (defn $
