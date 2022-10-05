@@ -1,7 +1,8 @@
 (ns helix.core
-  (:require [helix.impl.analyzer :as hana]
-            [helix.impl.props :as impl.props]
-            [clojure.string :as string]))
+  (:require
+   [helix.impl.analyzer :as hana]
+   [helix.impl.props :as impl.props]
+   [clojure.string :as string]))
 
 
 (defmacro $
