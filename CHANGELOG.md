@@ -6,6 +6,7 @@
 
 * `defnc-` no longer requires one to refer `defnc` as well
 * `provider` no longer emits extern warnings
+* clj-kondo hooks no longer remove metadata like line numbers when analyzing
 
 ## 0.1.8
 
