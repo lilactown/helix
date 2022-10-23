@@ -26,9 +26,9 @@
     {:node (with-meta expanded (meta node))}))
 
 
-(defn defnc
-  "Macro analysis for `helix.core/defnc`."
-  [{:keys [node]}]
+(defn analyze-definition
+  "Macro analysis for `helix.core/defnc` and `helix.core/defnc-`."
+  [{:keys [node]} definer]
   (let [[_ component-name & body] (-> node :children)
         render-children (last body)
         the-rest (butlast body)
@@ -63,10 +63,18 @@
         expanded (with-meta
                    (api/list-node
                     (list*
-                     (api/token-node 'defn)
+                     (api/token-node definer)
                      component-name
                      (filter some?
                              [docstring metadata-map argvec
                               new-opts render-children])))
                    (meta node))]
     {:node expanded}))
+
+(defn defnc
+  [{:keys [node] :as form}]
+  (analyze-definition form 'defn))
+
+(defn defnc-
+  [{:keys [node] :as form}]
+  (analyze-definition form 'defn-))
