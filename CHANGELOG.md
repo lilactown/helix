@@ -6,6 +6,12 @@
 
 * Replace deprecated `goog.object/extend` with `js/Object.assign`
 
+### Added
+
+* `:wrap` can now be passed in the metadata map as well as the options map.
+A clj-kondo lint warning will occur when using `:wrap` in the options map.
+See #110
+
 ## 0.1.9
 
 ### Fixed
