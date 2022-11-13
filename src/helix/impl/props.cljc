@@ -24,7 +24,7 @@
                  (some? (.match name-str aria-data-css-custom-prop-special-case-re)) name-str
                  (= (.substring name-str 0 1) "'") (.substring name-str 1)
                  :else (.replace name-str camel-regexp #(.toUpperCase %2)))))
-      s))
+    s))
 
 (comment
   (camel-case "get-asdf-aw9e8f"))
