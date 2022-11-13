@@ -203,9 +203,10 @@
         props-bindings (first form-body)
         body (rest form-body)
         opts-map? (map? (first body))
-        opts (if opts-map?
-               (first body)
-               {})
+        opts (cond-> (if opts-map?
+                       (first body)
+                       {})
+               (:wrap fn-meta) (assoc :wrap (:wrap fn-meta)))
         sig-sym (gensym "sig")
         fully-qualified-name (str *ns* "/" display-name)
         feature-flags (:helix/features opts)

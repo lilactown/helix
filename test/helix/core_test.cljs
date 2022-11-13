@@ -41,6 +41,26 @@
                (helix/extract-cljs-props (gobj/get el "props")))))))
 
 
+(defn- tree-contains?
+  [tree x]
+  (->> tree
+       (tree-seq coll? seq)
+       (some #{x})))
+
+
+(t/deftest wrap
+  (let [o (macroexpand '(defnc comp
+                          [props]
+                          {:wrap [(helix/memo)]}
+                          "hi"))]
+    (t/is (tree-contains? o 'helix/memo)))
+  (let [o (macroexpand '(defnc comp
+                          {:wrap [(helix/memo)]}
+                          [props]
+                          "hi"))]
+    (t/is (tree-contains? o 'helix/memo))))
+
+
 (defnc- private-comp
   {:foo :bar}
   []
@@ -50,4 +70,3 @@
   (let [metadata (meta #'private-comp)]
     (t/is (:private metadata))
     (t/is (= (:foo metadata) :bar))))
-
