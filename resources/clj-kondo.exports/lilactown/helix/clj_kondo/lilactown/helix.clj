@@ -61,19 +61,29 @@
                             [nil the-rest])
         opts-node (when (api/map-node? (first the-rest))
                     (first the-rest))
+        metadata-map (if metadata-map
+                       (-> (api/sexpr metadata-map)
+                           (assoc :wrap
+                                  (api/sexpr
+                                   (api/list-node
+                                    (list*
+                                     (api/token-node '->)
+                                     (api/token-node '(helix.core/fnc [] ""))
+                                     (-> (api/sexpr metadata-map)
+                                         :wrap
+                                         (api/coerce)
+                                         :children)))))))
         new-opts (if opts-node
-                   (-> opts-node
-                       api/sexpr
+                   (-> (api/sexpr opts-node)
                        (assoc :wrap
                               (api/sexpr
                                (api/list-node
                                 (list* (api/token-node '->)
                                        (api/token-node
                                         '(helix.core/fnc [] ""))
-                                       (-> opts-node
-                                           api/sexpr
+                                       (-> (api/sexpr opts-node)
                                            :wrap
-                                           api/coerce
+                                           (api/coerce)
                                            :children)))))
                        api/coerce
                        (with-meta (meta opts-node)))
