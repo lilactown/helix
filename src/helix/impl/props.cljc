@@ -70,10 +70,7 @@
 
 #?(:cljs
    (defn merge-obj [o1 o2]
-     (if (nil? o2)
-       o1
-       (doto o1
-         (gobj/extend o2)))))
+     (js/Object.assign o1 o2)))
 
 (defn seq-to-class [class]
   (->> class
