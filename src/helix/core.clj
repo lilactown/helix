@@ -169,16 +169,19 @@
 
 
 (defmacro defnc
-  "Creates a new functional React component. Used like:
+  "Defines a new functional React component. Used like:
 
+  ```
   (defnc component-name
     \"Optional docstring\"
+    {,,,fn-meta}
     [props ?ref]
     {,,,opts-map}
     ,,,body)
+  ```
 
-  \"component-name\" will now be a React function component that returns a React
-  Element.
+  `component-name` will now be bound in the namespace a React function component
+  that returns a React Element.
 
 
   Your component should adhere to the following:
@@ -187,12 +190,15 @@
 
   Second parameter is optional and is used with `React.forwardRef`.
 
-  'opts-map' is optional and can be used to pass some configuration options to the
-  macro. Current options:
-   - ':wrap' - ordered sequence of higher-order components to wrap the component in
-   - ':helix/features' - a map of feature flags to enable. See \"Experimental\" docs.
+  `fn-meta` is optional and will be merged into the metadata of the `component-name`
+  symbol. A special `:wrap` key may contain an ordered sequence of higher-order
+  components to wrap the component in.
 
-  'body' should return a React Element."
+  `opts-map` is optional and can be used to pass some configuration options to the
+  macro. Current options:
+   - `:helix/features` - a map of feature flags to enable. See \"Experimental\" docs.
+
+  `body` should return a React Element."
   [display-name & form-body]
   (let [[docstring form-body] (if (string? (first form-body))
                                 [(first form-body) (rest form-body)]

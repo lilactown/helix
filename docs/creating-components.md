@@ -78,13 +78,14 @@ new component, wrapped with some new functionality. The most common one is
 also sometimes used in libraries or apps to provide an easy way to add new
 behavior to arbitrary components.
 
-Helix's `defnc` macro has a special option you can pass to it, `:wrap`, which
-takes a collection of calls to higher-order components and will ensure that the
-component is wrapped in them.
+Helix's `defnc` macro has a special metadata key you can pass to it, `:wrap`,
+which takes a collection of calls to higher-order components and will ensure
+that the component is wrapped in them.
 
 ```clojure
-(defnc memoized [props]
+(defnc memoized
   {:wrap [(helix.core/memo)]}
+  [props]
   "I am memoized!")
 ```
 

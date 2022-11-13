@@ -8,10 +8,10 @@
 
 (defnc my-comp-kitchen-sink
   "optional docstring"
-  {:meta 'data}
+  {:meta 'data
+   :wrap [(comp-printer) (react/forwardRef)]}
   [{:keys [children]} _ref]
-  {:helix/features {:fast-refresh true}
-   :wrap           [(comp-printer) (react/forwardRef)]}
+  {:helix/features {:fast-refresh true}}
   (d/div {:style {:display "flex"} & {:dynamic 'prop}} children))
 
 (defnc my-comp-no-doc
