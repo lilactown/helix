@@ -134,4 +134,5 @@
                           helix.dom/wbr            clj-kondo.lilactown.helix/dom}}
  :lint-as {helix.core/defhook clojure.core/defn
            helix.core/fnc     clojure.core/fn}
- :linters {:helix/invalid-children {:level :error}}}
+ :linters {:helix/invalid-children {:level :error}
+           :helix/wrap-after-args {:level :warning}}}

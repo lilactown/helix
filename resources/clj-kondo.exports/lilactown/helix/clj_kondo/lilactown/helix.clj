@@ -61,7 +61,7 @@
                             [nil the-rest])
         opts-node (when (api/map-node? (first the-rest))
                     (first the-rest))
-        metadata-map (if metadata-map
+        metadata-map (when metadata-map
                        (-> (api/sexpr metadata-map)
                            (assoc :wrap
                                   (api/sexpr
@@ -87,17 +87,21 @@
                                            :children)))))
                        api/coerce
                        (with-meta (meta opts-node)))
-                   opts-node)
-        expanded (with-meta
-                   (api/list-node
-                    (list*
-                     (api/token-node definer)
-                     component-name
-                     (filter some?
-                             [docstring metadata-map argvec
-                              new-opts render-children])))
-                   (meta node))]
-    {:node expanded}))
+                   opts-node)]
+    (when (and opts-node (contains? (api/sexpr opts-node) :wrap))
+      (prn :opts-node)
+      (api/reg-finding! (assoc (meta new-opts)
+                               :message ":wrap should be passed to metadata map before args"
+                               :type :helix/wrap-after-args)))
+    {:node (with-meta
+             (api/list-node
+              (list*
+               (api/token-node definer)
+               component-name
+               (filter some?
+                       [docstring metadata-map argvec
+                        new-opts render-children])))
+             (meta node))}))
 
 (defn defnc
   [{:keys [node] :as form}]
