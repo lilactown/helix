@@ -1,5 +1,11 @@
 # Changelog
 
+## UNRELEASED
+
+### Fixed
+
+* Replace deprecated `goog.object/extend` with `js/Object.assign`
+
 ## 0.1.9
 
 ### Fixed
