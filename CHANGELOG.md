@@ -10,7 +10,7 @@
 
 * `:wrap` can now be passed in the metadata map as well as the options map.
 A clj-kondo lint warning will occur when using `:wrap` in the options map.
-See #110
+See https://github.com/lilactown/helix/issues/110
 
 ## 0.1.9
 
