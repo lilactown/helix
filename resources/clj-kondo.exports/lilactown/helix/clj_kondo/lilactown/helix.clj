@@ -99,7 +99,13 @@
                (api/token-node definer)
                component-name
                (filter some?
-                       [docstring metadata-map argvec
+                       [docstring metadata-map
+                        (if (and opts-node (get-in (api/sexpr opts-node) [:helix/features :define-factory]))
+                          (api/vector-node
+                            (concat (:children argvec)
+                                    [(api/token-node '&)
+                                     (api/token-node '_children)]))
+                          argvec)
                         new-opts render-children])))
              (meta node))}))
 
