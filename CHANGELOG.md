@@ -11,6 +11,9 @@
 * `:wrap` can now be passed in the metadata map as well as the options map.
 A clj-kondo lint warning will occur when using `:wrap` in the options map.
 See https://github.com/lilactown/helix/issues/110
+* clj-kondo hooks are now included when using git deps
+* Add support for `:define-factory` in clj-kondo hooks
+* Add `hgroup` element to `helix.dom`
 
 ## 0.1.9
 
