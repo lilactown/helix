@@ -192,3 +192,26 @@ In your components, enable the `:fast-refresh` flag.
 If you want to do this for all components, it's suggested that you [create a
 custom macro](./pro-tips.md#create-a-custom-macro) that you can use throughout
 your project without needing to add all feature flags by hand.
+
+## Metadata Optimizations
+
+When the `:metadata-optimizations` key is set to `true`, metadata such as
+`^:memo` and `^:callback` may be used to optimize your components. The former,
+for instance, may be used as follows.
+
+```clojure
+(defnc example [{:keys [foo]}]
+  {:helix/features {:metadata-optimizations true}}
+  (let [foobar            ^:memo [foo "bar"]
+        first-foobar      (hooks/use-ref foobar)
+        [count set-count] (hooks/use-reducer inc 0)]
+    (d/div
+     (d/p (str (identical? foobar @first-foobar)))
+     (d/p "Count: " count)
+     (d/button {:on-click #(set-count inc)} "Re-render"))))
+```
+
+Then e.g. `($ example {:foo 123})` will render a component with a memoized
+`foobar` vector. Clicking the "Re-render" button will not cause `foobar` to
+change, which is evidenced by the `(identical? foobar @first-foobar)` form
+always evaluating to `true` despite re-renders being triggered.
