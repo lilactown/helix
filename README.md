@@ -86,6 +86,7 @@ View formatted docs at [![cljdoc badge](https://cljdoc.org/badge/lilactown/helix
   - [Define as factory function](./docs/experiments.md#define-as-factory-function)
   - [Detect invalid hooks usage](./docs/experiments.md#detect-invalid-hooks-usage)
   - [Fast Refresh](./docs/experiments.md#fast-refresh)
+  - [Metadata Optimizations](./docs/experiments.md#metadata-optimizations)
 - [Pro-tips](./docs/pro-tips.md)
   - [Memoizing components](./docs/pro-tips.md#memoizing-components)
   - [Don't use deep equals](./docs/pro-tips.md#dont-use-deep-equals)
