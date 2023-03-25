@@ -143,10 +143,10 @@ component. Here is how we could implement an error boundary with Helix.
   ^:static (getDerivedStateFromError [_this _error]
               #js {:hasError true})
 
-  (render [^js this]
-    (if (.. this -state -hasError)
+  (render [^js this props ^js state]
+    (if (.-hasError state)
       (d/pre
         (d/code
-          (pr-str (.. this -state -data))))
-      (.. this -props -children))))
+          (pr-str (.-data state))))
+      (:children props))))
 ```
