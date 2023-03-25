@@ -117,4 +117,36 @@ use the `fnc` macro.
 
 ## Class Components
 
-WIP
+**Note:** Consider class components as a "last resort" action for cases where a
+function component cannot be used.
+
+The `defcomponent` macro accepts a symbol together with a list of methods or
+properties. Methods are written with the syntax `(name [this args] body)`.
+Properties are written with the syntax `(name form)`. To mark a method as
+static, use the `^:static` metadata.
+
+### Error Boundary Example
+
+As of React 18, there is still no way to write an error boundary as a function
+component. Here is how we could implement an error boundary with Helix.
+
+```clj
+(defcomponent ErrorBoundary
+  ;; To avoid externs inference warnings, we annotate `this` with ^js whenever
+  ;; accessing a method or field of the object.
+  (constructor [^js this]
+    (set! (.-state this) #js {:hasError false}))
+
+  (componentDidCatch [^js this error _info]
+    (.setState this #js {:data error}))
+
+  ^:static (getDerivedStateFromError [_this _error]
+              #js {:hasError true})
+
+  (render [^js this]
+    (if (.. this -state -hasError)
+      (d/pre
+        (d/code
+          (pr-str (.. this -state -data))))
+      (.. this -props -children))))
+```
