@@ -4,7 +4,8 @@
             [helix.impl.props :as impl.props]
             [helix.impl.classes :as helix.class]
             [cljs-bean.core :as bean]
-            ["react" :as react])
+            ["react" :as react]
+            ["react/jsx-runtime" :as jsx-runtime])
   (:require-macros [helix.core]))
 
 
@@ -37,6 +38,8 @@
 ;; a dynamic arity dispatch. See https://github.com/Lokeh/helix/issues/20
 (defn ^js/React get-react [] react)
 
+(def jsx  jsx-runtime/jsx)
+(def jsxs jsx-runtime/jsxs)
 
 (defn $
   "Create a new React element from a valid React type.
@@ -55,20 +58,30 @@
         native? (or (keyword? type)
                     (string? type)
                     (:native (meta type)))
+        has-props? ^boolean (or (map? ?p)
+                                (nil? ?p))
+        children* ^seq (if has-props?
+                         ?c
+                         args)
+        children (if (and children* (next children*))
+                   (into-array children*)
+                   (first children*))
+        props* (cond-> {}
+                 has-props?       (conj ?p)
+                 (some? children) (assoc :children children))
+        props (if native?
+                (impl.props/-dom-props props*)
+                (impl.props/-props     props*))
+        key (:key props*)
+        emit-fn (if (and children* (next children*))
+                  jsxs
+                  jsx)
         type' (if (keyword? type)
                 (name type)
                 type)]
-    (if (map? ?p)
-      (apply create-element
-             type'
-             (if native?
-               (impl.props/-dom-props ?p)
-               (impl.props/-props ?p))
-             ?c)
-      (apply create-element
-             type'
-             nil
-             args))))
+    (if (some? key)
+      (emit-fn type' props key)
+      (emit-fn type' props))))
 
 
 (def ^:deprecated $$

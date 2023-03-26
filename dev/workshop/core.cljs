@@ -358,11 +358,11 @@
                       (simple-benchmark
                        []
                        (rds/renderToString
-                        (r/createElement
-                         react-children-benchmark
-                         #js {:foo "bar"}
-                         (r/createElement "div" #js {:style #js {:backgroundColor "green"}} "foo")
-                         (r/createElement "div" nil "bar")))
+                        (helix/jsxs react-children-benchmark
+                                    #js {:foo "bar"
+                                         :children #js [(helix/jsx "div" #js {:style #js {:backgroundColor "green"}
+                                                                              :children "foo"})
+                                                        (helix/jsx "div" #js {:children "bar"})]}))
                        iterations)))
 
         helix-time (hooks/use-memo
