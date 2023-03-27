@@ -159,6 +159,8 @@ a [React Context](https://reactjs.org/docs/context.html) value.
 ;;                     :children #js [ ... ]}}
 ```
 
+(Then, inside a child component, you would access it like this: `(= "overrides default value" (hooks/use-context my-context))`.)
+
 
 ### Suspense boundaries
 
