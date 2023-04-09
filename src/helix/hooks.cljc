@@ -414,3 +414,8 @@
 
          ;; If parameters haven't changed, return value stored in state
          (gobj/get state "value")))))
+
+#?(:cljs
+   (def use-id
+     "Equivalent to react/useId"
+     react/useId))
