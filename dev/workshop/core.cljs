@@ -1,10 +1,11 @@
 (ns workshop.core
-  (:require [helix.core :as helix :refer [$ <> defnc]]
-            [helix.dom :as d]
-            [helix.hooks :as hooks]
-            ["react" :as r]
-            ["react-dom/server" :as rds]
-            [devcards.core :as dc :include-macros true]))
+  (:require
+   [helix.core :as helix :refer [$ <> defnc]]
+   [helix.dom :as d]
+   [helix.hooks :as hooks]
+   ["react" :as r]
+   ["react-dom/server" :as rds]
+   [devcards.core :as dc :include-macros true]))
 
 
 (defnc props-test
@@ -28,8 +29,8 @@
 
 
 (defnc memoized
-  [{:keys [foo bar]}]
   {:wrap [(helix/memo)]}
+  [{:keys [foo bar]}]
   (let [count (hooks/use-ref 0)]
     (hooks/use-layout-effect
      :always
@@ -37,8 +38,8 @@
     (pr-str foo bar @count)))
 
 (defnc memoized-key
-  [{:keys [foo bar]}]
   {:wrap [(helix/memo :bar)]}
+  [{:keys [foo bar]}]
   (let [count (hooks/use-ref 0)]
     (hooks/use-layout-effect
      :always

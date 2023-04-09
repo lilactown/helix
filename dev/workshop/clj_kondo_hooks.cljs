@@ -1,6 +1,6 @@
 (ns workshop.clj-kondo-hooks
   (:require ["react" :as react]
-            [helix.core :refer-macros [defnc] :refer [$]]
+            [helix.core :refer [$ defnc defnc-]]
             [helix.dom :as d]))
 
 
@@ -8,10 +8,10 @@
 
 (defnc my-comp-kitchen-sink
   "optional docstring"
-  {:meta 'data}
+  {:meta 'data
+   :wrap [(comp-printer) (react/forwardRef)]}
   [{:keys [children]} _ref]
-  {:helix/features {:fast-refresh true}
-   :wrap           [(comp-printer) (react/forwardRef)]}
+  {:helix/features {:fast-refresh true}}
   (d/div {:style {:display "flex"} & {:dynamic 'prop}} children))
 
 (defnc my-comp-no-doc
@@ -35,6 +35,9 @@
   [{:keys [children]} _ref]
   (d/div children))
 
+(defnc- private-comp
+  [{:keys [children]}]
+  (d/div children))
 
 (d/div ($ my-comp
           {:some :prop
@@ -44,6 +47,7 @@
           ($ my-comp-no-doc "baa")
           ($ my-comp-no-opts "bab")
           ($ my-comp-no-wrap-in-opts "bac")
+          ($ private-comp "secret")
           "baz"
           {:bad :map-children}))
 

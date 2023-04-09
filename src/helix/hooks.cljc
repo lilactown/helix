@@ -26,10 +26,21 @@
        (def raw-use-imperative-handle react/useImperativeHandle)))
 
 
+(defprotocol IStateUpdater
+  "Protocol that marks a type as callable when passed to a use-state setter.")
+
+
+#?(:cljs
+   (extend-protocol IStateUpdater
+     MultiFn ;; multimethods
+     function))
+
+
 #?(:cljs
    (defn use-state
      "Like `react/useState`, but the update function returned can be used similar
-  to `swap!`.
+  to `swap!` if the first argument implements `IStateUpdater`.
+  By default, this includes functions and multimethods.
 
   Example:
   ```
@@ -39,11 +50,14 @@
   ```"
      [initial]
      (let [[v u] (react/useState initial)
-           updater (react/useCallback (fn updater
-                                        ([x] (u x))
-                                        ([f & xs]
-                                         (updater (fn spread-updater [x]
-                                                    (apply f x xs)))))
+           updater (react/useCallback (fn [x & xs]
+                                        (if (satisfies? IStateUpdater x)
+                                          (u (fn spread-updater [y]
+                                               (apply x y xs)))
+                                          ;; if the first argument isn't valid
+                                          ;; updater, then call `u` with it
+                                          ;; ignoring other args
+                                          (u x)))
                                       ;; `u` is guaranteed to be stable so we elide it
                                       #js [])]
        [v updater])))

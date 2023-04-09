@@ -1,11 +1,41 @@
 # Changelog
 
-## UNRELEASED
+## 0.1.10
+
+### Fixed
+
+* Replace deprecated `goog.object/extend` with `js/Object.assign`
+
+### Added
+
+* `:wrap` can now be passed in the metadata map as well as the options map.
+A clj-kondo lint warning will occur when using `:wrap` in the options map.
+See https://github.com/lilactown/helix/issues/110
+* clj-kondo hooks are now included when using git deps
+* Add support for `:define-factory` in clj-kondo hooks
+* Add `hgroup` element to `helix.dom`
+
+## 0.1.9
+
+### Fixed
+
+* `defnc-` no longer requires one to refer `defnc` as well
+* `provider` no longer emits extern warnings
+* clj-kondo hooks no longer remove metadata like line numbers when analyzing
+
+## 0.1.8
+
+### Fixed
+
+* Passing a function to the setter returned by `use-state` caused an infinite loop
+
+## 0.1.7
 
 ### Added
 
 * Added docstrings to many functions and macros
 * `helix.dom/marker` DOM macro
+* `defnc-` which defines a private functional component in the namespace it's called in
 
 ### Fixed
 
@@ -13,6 +43,8 @@
 * Mark `assoc-some` as private
 * Fixed an issue with fast-refresh where JS values in hooks would incorrectly
   invalidate on every refresh
+* The setter function returned by `use-state`, when passed multiple arguments, will check whether the first argument is callable before calling `apply` on it.
+* `defcomponent` now properly accepts docstring
 
 ## 0.1.6
 

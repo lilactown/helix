@@ -33,7 +33,7 @@ This is simple enough to translate to CLJS:
 ```clojure
 (defn my-component
   [props]
-  (react/createElement “div” nil “Hello, CLJS!”))
+  (react/createElement "div" nil "Hello, CLJS!"))
 
 (react/createElement my-component)
 ```
@@ -62,11 +62,11 @@ So an example of a component that determines whether it’s “on” or “off�
 ```clojure
 (defn my-component
   [props]
-  (let [on? (goog.object/get props “on?”)]
+  (let [on? (goog.object/get props "on?")]
     (react/createElement
-      “div”
-      #js {:style #js {:background (if on? “red” “black”)}}
-      “Hello, CLJS!”)))
+      "div"
+      #js {:style #js {:background (if on? "red" "black")}}
+      "Hello, CLJS!")))
 
 (react/createElement my-component #js {:on? true})
 ```
@@ -79,8 +79,8 @@ that component would look in helix:
 (defnc my-component
   [{:keys [on?]}]
   (d/div
-    {:style {:background (if on? “red” “black”)}}
-    “Hello, CLJS!”))
+    {:style {:background (if on? "red" "black")}}
+    "Hello, CLJS!"))
 
 ($ my-component {:on? true})
 ```

@@ -95,6 +95,16 @@ Props in the dynamic map will override props that are defined statically.
 ;; => #js {:type my-component :props #js {:a 1 :b 3}}
 ```
 
+This syntax is also useful when you want to pass a non-literal map to a component:
+
+```clojure
+(let [m {:foo "bar"}]
+  ;; This will not work; `m` will be treated as a child:
+  ($ my-component m)
+  ;; This will work; `my-component` will recieve `m` as props:
+  ($ my-component {& m}))
+```  
+
 You can use either the symbol `&` or the keyword `:&`, as some tools like
 Cursive, joker, etc. use static analysis to find unimported symbols, which
 `&` looks like. Try and be consistent with which you use, especiallly on a
@@ -148,6 +158,8 @@ a [React Context](https://reactjs.org/docs/context.html) value.
 ;;         :props #js {:value "overrides default value"
 ;;                     :children #js [ ... ]}}
 ```
+
+(Then, inside a child component, you would access it like this: `(= "overrides default value" (hooks/use-context my-context))`.)
 
 
 ### Suspense boundaries

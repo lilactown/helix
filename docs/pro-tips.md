@@ -40,8 +40,8 @@ comparison_ of objects. Here's an example:
 
 ```clojure
 (defnc my-component
-  [{:keys [data]}]
   {:wrap [(helix.core/memo =)]}
+  [{:keys [data]}]
   (d/div (pr-str data)))
 ```
 

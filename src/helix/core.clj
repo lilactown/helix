@@ -1,7 +1,8 @@
 (ns helix.core
-  (:require [helix.impl.analyzer :as hana]
-            [helix.impl.props :as impl.props]
-            [clojure.string :as string]))
+  (:require
+   [helix.impl.analyzer :as hana]
+   [helix.impl.props :as impl.props]
+   [clojure.string :as string]))
 
 
 (defmacro $
@@ -72,7 +73,7 @@
 
     (provider {:context my-context :value my-value} child1 child2 ...childN)"
   [{:keys [context value] :as props} & children]
-  `^js/React.Element ($ (.-Provider ~context)
+  `^js/React.Element ($ (.-Provider ^js/React.Context ~context)
                         ;; use contains to guard against `nil`
                         ~@(when (contains? props :value)
                             `({:value ~value}))
@@ -169,16 +170,19 @@
 
 
 (defmacro defnc
-  "Creates a new functional React component. Used like:
+  "Defines a new functional React component. Used like:
 
+  ```
   (defnc component-name
     \"Optional docstring\"
+    {,,,fn-meta}
     [props ?ref]
     {,,,opts-map}
     ,,,body)
+  ```
 
-  \"component-name\" will now be a React function component that returns a React
-  Element.
+  `component-name` will now be bound in the namespace a React function component
+  that returns a React Element.
 
 
   Your component should adhere to the following:
@@ -187,12 +191,15 @@
 
   Second parameter is optional and is used with `React.forwardRef`.
 
-  'opts-map' is optional and can be used to pass some configuration options to the
-  macro. Current options:
-   - ':wrap' - ordered sequence of higher-order components to wrap the component in
-   - ':helix/features' - a map of feature flags to enable. See \"Experimental\" docs.
+  `fn-meta` is optional and will be merged into the metadata of the `component-name`
+  symbol. A special `:wrap` key may contain an ordered sequence of higher-order
+  components to wrap the component in.
 
-  'body' should return a React Element."
+  `opts-map` is optional and can be used to pass some configuration options to the
+  macro. Current options:
+   - `:helix/features` - a map of feature flags to enable. See \"Experimental\" docs.
+
+  `body` should return a React Element."
   [display-name & form-body]
   (let [[docstring form-body] (if (string? (first form-body))
                                 [(first form-body) (rest form-body)]
@@ -203,9 +210,10 @@
         props-bindings (first form-body)
         body (rest form-body)
         opts-map? (map? (first body))
-        opts (if opts-map?
-               (first body)
-               {})
+        opts (cond-> (if opts-map?
+                       (first body)
+                       {})
+               (:wrap fn-meta) (assoc :wrap (:wrap fn-meta)))
         sig-sym (gensym "sig")
         fully-qualified-name (str *ns* "/" display-name)
         feature-flags (:helix/features opts)
@@ -272,6 +280,12 @@
                   nil)) ;; getCustomHooks
                (register! ~component-var-name ~fully-qualified-name)))
          ~display-name)))
+
+
+(defmacro defnc-
+  "Same as defnc, yielding a non-public def"
+  [display-name & rest]
+  (list* `defnc (vary-meta display-name assoc :private true) rest))
 
 
 ;;
@@ -386,7 +400,7 @@
                                          (str *ns* "/" display-name)))))]
     ;; TODO handle render specially
     `(def ~display-name
-       ~@(when docstring docstring)
+       ~@(when docstring [docstring])
        (create-component ~js-spec ~js-statics))))
 
 (comment
