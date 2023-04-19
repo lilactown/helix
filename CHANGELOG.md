@@ -1,5 +1,12 @@
 # Changelog
 
+## UNRELEASED
+
+## Added
+
+* String keys are now supported in props, which when given to a DOM element will
+  pass those verbatim (i.e. without camelCasing)
+
 ## 0.1.10
 
 ### Fixed
