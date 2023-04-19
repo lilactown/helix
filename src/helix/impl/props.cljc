@@ -155,7 +155,13 @@
                 :style (set-obj o "style" (dom-style v))
                 :value (set-obj o "value" #?(:clj `(or-undefined ~v)
                                              :cljs (or-undefined v)))
-                (set-obj o (camel-case (kw->str k)) v))))
+                (set-obj
+                 o
+                 (cond
+                   (or (keyword? k) (symbol? k)) (camel-case (kw->str k))
+                   (string? k) k
+                   :else (throw (ex-info "Invalid DOM prop key" {:key k :val v})))
+                 v))))
      #?(:clj (list* o)
         :cljs o))))
 
@@ -183,8 +189,15 @@
   ([m o]
    (if (seq m)
      (recur (rest m)
-            (let [entry (first m)]
-              (set-obj o (kw->str (key entry)) (val entry))))
+            (let [entry (first m)
+                  k (key entry)
+                  v (val entry)]
+              (set-obj
+               o
+               (cond (or (keyword? k) (symbol? k)) (kw->str k)
+                     (string? k) k
+                     :else (throw (ex-info "Invalid prop key" {:key k :val v})))
+               (val entry))))
      #?(:clj (list* o)
         :cljs o))))
 
