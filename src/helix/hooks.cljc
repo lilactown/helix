@@ -120,7 +120,7 @@
 
 ;; React `useEffect` expects either a function or undefined to be returned
 #?(:cljs
-   (defn wrap-fx [f]
+   (defn- wrap-fx [f]
      (fn wrap-fx-return []
        (let [x (f)]
          (if (fn? x)
