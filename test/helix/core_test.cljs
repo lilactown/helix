@@ -70,3 +70,23 @@
   (let [metadata (meta #'private-comp)]
     (t/is (:private metadata))
     (t/is (= (:foo metadata) :bar))))
+
+(t/deftest ref-test
+  (let [ref (helix/create-ref 4649)]
+    (t/testing "ref"
+      (t/testing "can be initialized with value"
+        (t/is (= 4649 (.-current ref))))
+      (t/testing "can be used with IDeref"
+        (t/is (= 4649 @ref)))
+      (t/testing "can be used with ISwap"
+        (swap! ref (constantly 0)) ; 0
+        (t/is (zero? @ref))
+        (swap! ref + 1)            ; (+ 0 1)
+        (t/is (= 1 @ref))
+        (swap! ref + 1 2)          ; (+ 0 1 1 2)
+        (t/is (= 4 @ref))
+        (swap! ref + 1 2 3)        ; (+ 0 1 1 2 1 2 3)
+        (t/is (= 10 @ref)))
+      (t/testing "can be used with IReset"
+        (reset! ref "well done")
+        (t/is (= "well done" @ref))))))

@@ -217,6 +217,39 @@
 
   (rds/renderToString ($$ MyComponent {:foo "baz"})))
 
+(defn create-ref
+  "Like react/createRef, but the ref can be swapped, reset, and dereferenced
+  like an atom.
+
+  Note: `helix.core/create-ref` is mostly used for class components. Function
+  components typically rely on `helix.hooks/use-ref` instead."
+
+  ([]
+   (create-ref nil))
+
+  ([initial-value]
+   (let [^js ref (react/createRef)]
+     (set! (.-current ref)
+           (specify! #js {:current initial-value}
+             IDeref
+             (-deref [^js this]
+               (.-current this))
+
+             IReset
+             (-reset! [^js this x]
+               (set! (.-current this) x))
+
+             ISwap
+             (-swap!
+               ([^js this f]
+                (set! (.-current this) (f (.-current this))))
+               ([^js this f a]
+                (set! (.-current this) (f (.-current this) a)))
+               ([^js this f a b]
+                (set! (.-current this) (f (.-current this) a b)))
+               ([^js this f a b xs]
+                (set! (.-current this) (apply f (.-current this) a b xs))))))
+     (.-current ref))))
 
 ;;
 ;; -- React Fast Refresh
