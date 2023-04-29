@@ -235,6 +235,17 @@
   (<> ($ class-component {:foo "bar"})
       ($ ClassComponent {:foo "baz"})))
 
+(helix/defcomponent RefTest
+  (constructor [^js this]
+    (set! (.-myRef this) (helix/create-ref)))
+  (focusInput [^js this]
+    (.focus @(.-myRef this)))
+  (render [^js this props state]
+    (d/div
+     (d/input {:type "text" :ref (.-myRef this)})
+     (d/input {:type "button" :value "Focus" :onClick (.-focusInput this)}))))
+
+(dc/defcard ref ($ RefTest))
 
 (helix/defhook use-custom-effect
   [deps f]
