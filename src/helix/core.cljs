@@ -261,11 +261,11 @@
   `type` is the component function, and `id` is the unique ID assigned to it
   (e.g. component name) for cache invalidation."
   [type id]
-  (when (exists? (.-$$Register$$ js/window))
-    (.$$Register$$ js/window type id)))
+  (when (exists? js/window.$$Register$$)
+    (js/window.$$Register$$ type id)))
 
 
 (defn signature! []
   ;; grrr `maybe` bug strikes again
-  (and (exists? (.-$$Signature$$ js/window))
-       (.$$Signature$$ js/window)))
+  (and (exists? js/window.$$Register$$)
+       (js/window.$$Signature$$)))
