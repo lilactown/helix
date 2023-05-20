@@ -2,10 +2,22 @@
 
 ## UNRELEASED
 
-## Added
+### Added
 
-* String keys are now supported in props, which when given to a DOM element will
-  pass those verbatim (i.e. without camelCasing)
+* #130 String keys are now supported in props, which when given to a DOM element
+  will pass those verbatim (i.e. without camelCasing)
+* `helix.hooks/use-id` that wraps new base React hook `useId` (@rome-user)
+* #131 `helix.core/creat-ref` that wraps `React.createRef` similar to use-ref
+  (@rome-user)
+
+### Fixed
+
+* #136 Fix issue with loading helix in Node.js due to depending on `window` being
+  available (@rome-user)
+
+### Breaking
+
+* #127 `helix.hooks/wrap-fx` is now private (@rome-user)
 
 ## 0.1.10
 
