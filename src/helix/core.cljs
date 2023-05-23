@@ -63,7 +63,7 @@
         children* ^seq (if has-props?
                          ?c
                          args)
-        children (if (and children* (next children*))
+        children (if (next children*)
                    (into-array children*)
                    (first children*))
         props* (cond-> {}
