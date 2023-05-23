@@ -67,8 +67,7 @@
                    (contains? (first args) :key))
         the-key (when has-key?
                   (:key (first args)))
-        emit-fn (if (and (seq? children)
-                         (next children))
+        emit-fn (if (next children)
                   `jsxs
                   `jsx)]
     (if has-key?
