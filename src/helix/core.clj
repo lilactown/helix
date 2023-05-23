@@ -2,8 +2,14 @@
   (:require
    [helix.impl.analyzer :as hana]
    [helix.impl.props :as impl.props]
+   [cljs.tagged-literals :as tl]
    [clojure.string :as string]))
 
+(defn- jsx-children [coll]
+  (let [s (seq coll)]
+    (if (and s (next s))
+      (tl/->JSValue coll)
+      (first coll))))
 
 (defmacro $
   "Create a new React element from a valid React type.
@@ -44,19 +50,29 @@
                     (:native (meta type)))
         type (if (keyword? type)
                (name type)
-               type)]
-    (cond
-      (map? (first args))
-      `^js/React.Element (.createElement
-                          (get-react)
-                          ~type
-                          ~(if native?
-                             `(impl.props/dom-props ~(first args))
-                             `(impl.props/props ~(first args)))
-                          ~@(rest args))
-
-      :else `^js/React.Element (.createElement (get-react) ~type nil ~@args))))
-
+               type)
+        has-props? (or (map? (first args))
+                       (nil? (first args)))
+        children (if has-props?
+                   (rest args)
+                   args)
+        props (if (map? (first args))
+                (if native?
+                  `(impl.props/dom-props ~(first args) ~(jsx-children children))
+                  `(impl.props/props     ~(first args) ~(jsx-children children)))
+                (tl/->JSValue (cond-> {}
+                                (not-empty children)
+                                (assoc :children (jsx-children children)))))
+        has-key? (when has-props?
+                   (contains? (first args) :key))
+        the-key (when has-key?
+                  (:key (first args)))
+        emit-fn (if (next children)
+                  `jsxs
+                  `jsx)]
+    (if has-key?
+      `^js/React.Element (~emit-fn ~type ~props ~the-key)
+      `^js/React.Element (~emit-fn ~type ~props))))
 
 (defmacro <>
   "Creates a new React Fragment Element"

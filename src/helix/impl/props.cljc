@@ -172,8 +172,11 @@
   (-dom-props {:style ["fs1"]})
   )
 
-(defmacro dom-props [m]
-  (-dom-props m))
+(defmacro dom-props
+  ([m] `(dom-props ~m nil))
+  ([m c] (-dom-props (cond-> m
+                       c    (assoc :children c)
+                       true (dissoc :key)))))
 
 
 (defn -props
@@ -205,5 +208,8 @@
   (-props {:foo-bar "baz"})
   )
 
-(defmacro props [m]
-  (-props m))
+(defmacro props
+  ([m] `(props ~m nil))
+  ([m c] (-props (cond-> m
+                   (some? c) (assoc :children c)
+                   true      (dissoc :key)))))

@@ -90,3 +90,60 @@
       (t/testing "can be used with IReset"
         (reset! ref "well done")
         (t/is (= "well done" @ref))))))
+
+(t/deftest jsx-test
+  (t/testing "jsx transform"
+    ;; In this test, you will see comments of the equivalent JSX. You can
+    ;; compare the output of the JSX transform by copy-pasting the provided JSX
+    ;; and running it through @babel/plugin-transform-react-jsx
+    (t/testing "with no props or children"
+      (let [component-1 (macroexpand '($ :div))          ; <div></div>
+            component-2 (macroexpand '($ "div"))
+            component-3 (macroexpand '($ "div" nil))
+            component-4 (macroexpand '($ "div" nil nil)) ; <div>{null}</div>
+            expected-1 '(helix.core/jsx "div" {})
+            expected-2 '(helix.core/jsx "div" {"children" nil})]
+        (t/are [x y] (= x (js->clj y))
+          expected-1 component-1
+          expected-1 component-2
+          expected-1 component-3
+          ;; This ensures we are matching the behavior of react/createElement,
+          ;; which is also reflected in the modern JSX transform.
+          expected-2 component-4)))
+    (t/testing "with no props and a single child"
+      (let [component-1 (macroexpand '($ :div "Hello"))      ; <div>Hello</div>
+            component-2 (macroexpand '($ "div" nil "Hello"))
+            component-3 (macroexpand '($ "div" "Hello"))
+            expected '(helix.core/jsx "div" {"children" "Hello"})]
+        (t/are [x] (= expected (js->clj x))
+          component-1
+          component-2
+          component-3)))
+    (t/testing "with props and children"
+      (let [component (macroexpand
+                       ;; <Stack direction={row}>
+                       ;;   <Item />
+                       ;;   <Item />
+                       ;; </Stack>
+                       '($ Stack {:direction "row"}
+                           ($ Item)
+                           ($ Item)))
+            ;; Ideally, we'd check the full macroexpansion, but this suffices.
+            expected '(helix.core/jsxs Stack
+                                       (helix.impl.props/props {:direction "row"}
+                                                               [($ Item)
+                                                                ($ Item)]))]
+        (t/is (= expected (js->clj component)))))
+    (t/testing "provides keys as expected"
+      (let [props {:key "key"}
+            component (macroexpand
+                       ;; <div key={kee} {...props}></div>
+                       '($ :div {:key "kee" :& props}))
+            expected '(helix.core/jsx "div"
+                                      (helix.impl.props/dom-props {:key "kee"
+                                                                   :& props}
+                                                                  nil)
+                                      "kee")
+            element ($ :div {:key "kee" :& props})]
+        (t/is (= expected (js->clj component)))
+        (t/is (= "key" (gobj/get element "key")))))))

@@ -143,7 +143,18 @@
                #js {:foo "bar"}))
 
      (t/is (eq (impl/dom-props {:style ["bar"]})
-               #js {:style #js ["bar"]}))))
+               #js {:style #js ["bar"]}))
+
+     (t/testing "children are added to props"
+       (t/is (eq (impl/dom-props nil "are the best")
+                 #js {:children "are the best"}))
+       (t/is (eq (impl/dom-props {} "are the best")
+                 #js {:children "are the best"}))
+       ;; Should we convert to JS???
+       (t/is (eq (impl/dom-props nil ["one" "two"])
+                 #js {:children ["one" "two"]}))
+       (t/is (eq (impl/dom-props {} ["one" "two"])
+                 #js {:children ["one" "two"]})))))
 
 
 #?(:cljs
@@ -183,7 +194,18 @@
 
      (t/is (eq (impl/props {:foo "bar"
                                    & nil})
-               #js {:foo "bar"}))))
+               #js {:foo "bar"}))
+
+     (t/testing "children are added to props"
+       (t/is (eq (impl/props nil "are the best")
+                 #js {:children "are the best"}))
+       (t/is (eq (impl/props {} "are the best")
+                 #js {:children "are the best"}))
+       ;; Should we convert to JS???
+       (t/is (eq (impl/props nil ["one" "two"])
+                 #js {:children ["one" "two"]}))
+       (t/is (eq (impl/props {} ["one" "two"])
+                 #js {:children ["one" "two"]})))))
 
 
 (t/deftest test-normalize-class
