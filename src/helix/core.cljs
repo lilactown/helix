@@ -73,7 +73,7 @@
                 (impl.props/-dom-props props*)
                 (impl.props/-props     props*))
         key (:key props*)
-        emit-fn (if (and children* (next children*))
+        emit-fn (if (next children*)
                   jsxs
                   jsx)
         type' (if (keyword? type)
