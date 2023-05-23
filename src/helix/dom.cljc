@@ -167,7 +167,7 @@
         children* (if has-props?
                     (rest args)
                     args)
-        multiple-children (and children* (next children*))
+        multiple-children (next children*)
         children (if multiple-children
                    (tl/->JSValue children*)
                    (first children*))
