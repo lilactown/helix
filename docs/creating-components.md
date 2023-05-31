@@ -112,7 +112,7 @@ use the `fnc` macro.
 ```clojure
 (let [my-button (fnc [{:keys [class on-click] :as props}]
                   (d/button {:class class :on-click on-click}))]
-  ($ my-button {:class ["foo" "bar] :on-click #(js/alert "hi")})
+  ($ my-button {:class ["foo" "bar"] :on-click #(js/alert "hi")})
 ```
 
 ## Class Components
