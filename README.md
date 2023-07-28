@@ -40,7 +40,7 @@ Install the latest version from clojars in your project.
 Install JS dependencies:
 
 ```
-npm init # initiliaze NPM project if necessary
+npm init # initialize NPM project if necessary
 npm i react react-refresh # install react, and react-refresh for hot reloading support (see docs)
 npm i react-dom # install renderer. alternatives could be react-native, react-three-fiber, etc.
 ```
