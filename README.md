@@ -102,6 +102,10 @@ Other resources:
 - [#helix Slack channel](https://clojurians.slack.com/archives/CRRJBCX7S) ([Sign up for Slack here](http://clojurians.net))
 - [Example TodoMVC](https://github.com/Lokeh/helix-todo-mvc)
 
+## Companies using it
+
+[<img src="https://github.com/lilactown/helix/assets/2687140/76097c17-0458-4f2d-a3ec-dc64445d3771" alt="amperity_logo" style="width: 50px;">](https://amperity.com/)
+
 
 ## License
 
