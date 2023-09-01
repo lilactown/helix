@@ -100,7 +100,11 @@ View formatted docs at [![cljdoc badge](https://cljdoc.org/badge/lilactown/helix
 Other resources:
 
 - [#helix Slack channel](https://clojurians.slack.com/archives/CRRJBCX7S) ([Sign up for Slack here](http://clojurians.net))
+
+## Related projects and repos
 - [Example TodoMVC](https://github.com/Lokeh/helix-todo-mvc)
+- [Example repo running tests using testing-library and jsdom](https://github.com/vloth/helix-jsdom)
+- [Examples from the React docs site rewritten in helix](https://github.com/iwrotesomecode/react-docs-helix)
 
 ## Companies using it
 
@@ -109,6 +113,6 @@ Other resources:
 
 ## License
 
-Copyright © 2020 Will Acton
+Copyright © 2023 Will Acton
 
 Distributed under the EPL 2.0
