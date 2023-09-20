@@ -18,9 +18,11 @@ with that same information, like [React.createElement](https://reactjs.org/docs/
 ($ my-component {:data {:foo "bar"}} "red text in a div")
 ;; => #js {:type my-component :props #js {:data {:foo "bar"}}}
 
-($ my-component ($ "div" "first")
-               ($ "div" "second"
-                        ($ "span" "last")))
+($ my-component
+   ($ "div" "first")
+   ($ "div"
+      "second"
+      ($ "span" "last")))
 ;; => #js {:type my-component
 ;;         :props #js {:children #js [#js {:type "div"
 ;;                                         :props #js {:children "first"}}
