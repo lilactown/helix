@@ -35,6 +35,7 @@
         & dynamic-props}))
   "
   [type & args]
+  {:style/indent 0}
   (when (and (symbol? (first args))
              (= (hana/inferred-type &env (first args))
                 'cljs.core/IMap))
@@ -150,6 +151,7 @@
   Some feature flags only pertain to named components, i.e. Fast Refresh and
   factory functions, and thus can not be used with `fnc`."
   [& body]
+  {:style/indent :fn}
   (let [[display-name props-bindings body] (if (symbol? (first body))
                                              [(first body) (second body)
                                               (rest (rest body))]
@@ -217,6 +219,7 @@
 
   `body` should return a React Element."
   [display-name & form-body]
+  {:style/indent :defn}
   (let [[docstring form-body] (if (string? (first form-body))
                                 [(first form-body) (rest form-body)]
                                 [nil form-body])
@@ -434,4 +437,9 @@
   ;;      "bar"
   ;;      (clojure.core/fn bar [this] asdf))
   ;;     (cljs.core/js-obj "greeting" "asdf" "baz" (clojure.core/fn baz [] 123)))
+
+  ($ "arst"
+     ($ "oieno")
+     ($ "fqfw")
+     ($ "123"))
   )

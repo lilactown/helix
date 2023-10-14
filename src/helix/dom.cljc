@@ -183,7 +183,7 @@
 ;; #?(:clj (defn gen-tag
 ;;           [tag]
 ;;           `(defmacro ~tag [& args]
-;;              {:style/indent :defn}
+;;              {:style/indent 0}
 ;;              `($d ~(str '~tag) ~@args))))
 
 ;; #?(:clj (defmacro gen-tags

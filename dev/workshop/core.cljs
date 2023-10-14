@@ -412,4 +412,70 @@
        helix-interpret-props-time)))))
 
 #_(dc/defcard simple-benchmark
-  ($ simple-benchmark-component))
+    ($ simple-benchmark-component))
+
+
+
+(helix/fnc []
+           "bar")
+
+;; desired:
+;;
+;; (helix/fnc []
+;;   "bar")
+
+
+(defnc foo []
+       "bar")
+
+;; desired:
+;;
+;; (defnc foo []
+;;   "bar")
+
+
+(helix/defhook use-foo []
+  "bar")
+
+;; desired:
+;;
+;; (helix/defhook foo []
+;;   "bar")
+
+
+($ "div"
+  ($ "div"))
+
+;; desired:
+;;
+;; ($ "div"
+;;    ($ "div"))
+
+
+($ "div" {}
+   ($ "div")
+   ($ "div"))
+
+;; desired:
+;;
+;; ($ "div" {}
+;;   ($ "div")
+;;   ($ "div"))
+
+
+(d/div
+ (d/div))
+
+;; desired:
+;;
+;; (d/div
+;;   (d/div))
+
+
+(d/div {}
+       (d/div))
+
+;; desired:
+;;
+;; (d/div {}
+;;   (d/div))

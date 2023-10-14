@@ -53,6 +53,7 @@
      \"child2\" ))
   ```"
   [type & args]
+  {:style/indent 0}
   (let [?p (first args)
         ?c (rest args)
         native? (or (keyword? type)
