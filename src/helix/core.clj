@@ -34,8 +34,8 @@
        {:static \"prop\"
         & dynamic-props}))
   "
-  [type & args]
   {:style/indent 0}
+  [type & args]
   (when (and (symbol? (first args))
              (= (hana/inferred-type &env (first args))
                 'cljs.core/IMap))
