@@ -303,6 +303,7 @@
 
 (defmacro defnc-
   "Same as defnc, yielding a non-public def"
+  {:style/indent :defn}
   [display-name & rest]
   (list* `defnc (vary-meta display-name assoc :private true) rest))
 
