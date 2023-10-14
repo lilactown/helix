@@ -150,8 +150,8 @@
 
   Some feature flags only pertain to named components, i.e. Fast Refresh and
   factory functions, and thus can not be used with `fnc`."
+  {:style/indent :defn}
   [& body]
-  {:style/indent :fn}
   (let [[display-name props-bindings body] (if (symbol? (first body))
                                              [(first body) (second body)
                                               (rest (rest body))]
@@ -218,8 +218,8 @@
    - `:helix/features` - a map of feature flags to enable. See \"Experimental\" docs.
 
   `body` should return a React Element."
-  [display-name & form-body]
   {:style/indent :defn}
+  [display-name & form-body]
   (let [[docstring form-body] (if (string? (first form-body))
                                 [(first form-body) (rest form-body)]
                                 [nil form-body])
@@ -316,6 +316,7 @@
   "Defines a new custom hook function.
   Checks for invalid usage of other hooks in the body, and other helix
   features."
+  {:style/indent :defn}
   [sym & body]
   (let [[docstring params body] (if (string? (first body))
                                   [(first body) (second body) (drop 2 body)]

@@ -426,7 +426,7 @@
 
 
 (defnc foo []
-       "bar")
+  "bar")
 
 ;; desired:
 ;;
@@ -459,8 +459,8 @@
 ;; desired:
 ;;
 ;; ($ "div" {}
-;;   ($ "div")
-;;   ($ "div"))
+;;    ($ "div")
+;;    ($ "div"))
 
 
 (d/div

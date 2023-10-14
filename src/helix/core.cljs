@@ -52,8 +52,8 @@
      {:style {:color \"green\"}}
      \"child2\" ))
   ```"
-  [type & args]
   {:style/indent 0}
+  [type & args]
   (let [?p (first args)
         ?c (rest args)
         native? (or (keyword? type)
