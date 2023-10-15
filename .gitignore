@@ -9,6 +9,7 @@ node_modules
 .clj-kondo/.cache
 .lsp/.cache
 .cpcache
+.make_npm
 
 # clojure-lsp will automatically copy the following from resources to here at runtime
 .clj-kondo/lilactown/helix/*

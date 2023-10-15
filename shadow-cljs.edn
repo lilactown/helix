@@ -7,7 +7,12 @@
  :dependencies
  [[binaryage/devtools "0.9.7"]
   [devcards "0.2.5"]
+  [cider/cider-nrepl "0.40.0"]
+  [refactor-nrepl/refactor-nrepl "3.9.0"]
   [cljs-bean "1.5.0"]]
+
+ :middleware [cider.nrepl/cider-middleware
+              refactor-nrepl.middleware/wrap-refactor]
 
  :builds
  {:dev {:target :browser

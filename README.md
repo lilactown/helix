@@ -110,6 +110,9 @@ Other resources:
 
 [<img src="https://github.com/lilactown/helix/assets/2687140/76097c17-0458-4f2d-a3ec-dc64445d3771" alt="amperity_logo" style="width: 50px;">](https://amperity.com/)
 
+## Hacking on Helix
+
+By running `make run` you'll run a shadow-cljs development server that you can, for instance, `cider-connect-clj&cljs` to. 
 
 ## License
 
