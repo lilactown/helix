@@ -9,6 +9,8 @@
 * `helix.hooks/use-id` that wraps new base React hook `useId` (@rome-user)
 * #131 `helix.core/creat-ref` that wraps `React.createRef` similar to use-ref
   (@rome-user)
+* #146 / #142 `:style/indent` metadata on `$`, `defnc`, `defnc-`, `defhook`, and all DOM macros
+* DOM macros are now written literally; this helps move towards self hosted CLJS support
 
 ### Fixed
 
