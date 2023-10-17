@@ -49,6 +49,7 @@
      {:style {:color \"green\"}}
      \"child2\" ))
   ```"
+  {:style/indent 0}
   [type & args]
   (let [?p (first args)
         ?c (rest args)
