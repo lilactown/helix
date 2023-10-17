@@ -34,6 +34,7 @@
        {:static \"prop\"
         & dynamic-props}))
   "
+  {:style/indent 0}
   [type & args]
   (when (and (symbol? (first args))
              (= (hana/inferred-type &env (first args))
@@ -149,6 +150,7 @@
 
   Some feature flags only pertain to named components, i.e. Fast Refresh and
   factory functions, and thus can not be used with `fnc`."
+  {:style/indent :defn}
   [& body]
   (let [[display-name props-bindings body] (if (symbol? (first body))
                                              [(first body) (second body)
@@ -216,6 +218,7 @@
    - `:helix/features` - a map of feature flags to enable. See \"Experimental\" docs.
 
   `body` should return a React Element."
+  {:style/indent :defn}
   [display-name & form-body]
   (let [[docstring form-body] (if (string? (first form-body))
                                 [(first form-body) (rest form-body)]
@@ -300,6 +303,7 @@
 
 (defmacro defnc-
   "Same as defnc, yielding a non-public def"
+  {:style/indent :defn}
   [display-name & rest]
   (list* `defnc (vary-meta display-name assoc :private true) rest))
 
@@ -313,6 +317,7 @@
   "Defines a new custom hook function.
   Checks for invalid usage of other hooks in the body, and other helix
   features."
+  {:style/indent :defn}
   [sym & body]
   (let [[docstring params body] (if (string? (first body))
                                   [(first body) (second body) (drop 2 body)]
@@ -434,4 +439,9 @@
   ;;      "bar"
   ;;      (clojure.core/fn bar [this] asdf))
   ;;     (cljs.core/js-obj "greeting" "asdf" "baz" (clojure.core/fn baz [] 123)))
+
+  ($ "arst"
+     ($ "oieno")
+     ($ "fqfw")
+     ($ "123"))
   )
