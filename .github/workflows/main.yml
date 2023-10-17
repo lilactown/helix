@@ -27,7 +27,7 @@ jobs:
       with:
         cli: '1.10.1.727'
     - name: Setup Node.js environment
-      uses: actions/setup-node@v1.4.4
+      uses: actions/setup-node@v3.8.1
       #with:
         # Set always-auth in npmrc
         #always-auth: # optional, default is false
