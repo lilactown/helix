@@ -269,14 +269,38 @@
 ;;
 
 
+(defprotocol IStateUpdater
+  "Protocol that marks a type as callable when passed to a use-state setter.")
+
+
+(extend-protocol IStateUpdater
+     MultiFn ;; multimethods
+     function)
+
+
 (core/defhook use-state
+  "Like `react/useState`, but the update function returned can be used similar
+  to `swap!` if the first argument implements `IStateUpdater`.
+  By default, this includes functions and multimethods.
+
+  Example:
+  ```
+  (let [[state set-state] (use-state {:count 0})]
+   ;; ...
+   (set-state update :count inc))
+  ```
+
+  See https://react.dev/reference/react/useState"
   [initial]
   (let [[v u] (react/useState initial)
-        updater (react/useCallback (fn updater
-                                     ([x] (u x))
-                                     ([f & xs]
-                                      (updater (fn spread-updater [x]
-                                                 (apply f x xs)))))
+        updater (react/useCallback (fn [x & xs]
+                                     (if (satisfies? IStateUpdater x)
+                                       (u (fn spread-updater [y]
+                                            (apply x y xs)))
+                                       ;; if the first argument isn't valid
+                                       ;; updater, then call `u` with it
+                                       ;; ignoring other args
+                                       (u x)))
                                    ;; `u` is guaranteed to be stable so we elide it
                                    #js [])]
     [v updater]))
@@ -284,8 +308,10 @@
 
 (core/defhook use-ref
   "Like react/useRef. Supports accessing the \"current\" property via
-   dereference (@) and updating the \"current\" property via `reset!` and
-   `swap!`"
+  dereference (@) and updating the \"current\" property via `reset!` and
+  `swap!`
+
+  See https://react.dev/reference/react/useRef"
   [x]
   (let [ref (react/useRef nil)]
     (when (nil? (.-current ^js ref))
@@ -313,7 +339,8 @@
 
 
 (core/defhook use-reducer
-  "Just react/useReducer."
+  "Supports functions and IFns (e.g. multimethods).
+  See https://react.dev/reference/react/useReducer"
   ([reducer init-state]
    (use-reducer reducer init-state js/undefined))
   ([reducer init-state init]
@@ -330,11 +357,18 @@
 
 
 (def use-context
-  "Just react/useContext"
+  "See https://react.dev/reference/react/useContext"
   react/useContext)
 
 
 (core/defhook use-effect
+  "Like react/useEffect, but accepts dependencies as the _first_ argument and
+  accepts the following keywords as deps:
+
+  * `:always` - run `f` after every render (equivalent to passing no deps)
+  * `:once` - run `f` after mounting, then never again (equivalent to [])
+
+  See https://react.dev/reference/react/useEffect"
   [deps f]
   (react/useEffect
    (fn wrap-effect-undefined []
@@ -346,6 +380,13 @@
 
 
 (core/defhook use-layout-effect
+  "Like react/useLayoutEffect, but accepts dependencies as the _first_ argument
+  and accepts the following keywords as deps:
+
+  * `:always` - run `f` after every render (equivalent to passing no deps)
+  * `:once` - run `f` after mounting, then never again (equivalent to [])
+
+  See https://react.dev/reference/react/useLayoutEffect"
   [deps f]
   (react/useLayoutEffect
    (fn wrap-effect-undefined []
@@ -357,6 +398,13 @@
 
 
 (core/defhook use-memo
+  "Like react/useMemo, but accepts dependencies as the _first_ argument and
+  accepts the following keywords as deps:
+
+  * `:always` - run `f` after every render (equivalent to passing no deps)
+  * `:once` - run `f` after mounting, then never again (equivalent to [])
+
+  See https://react.dev/reference/react/useMemo"
   [deps f]
   (react/useMemo
    f
@@ -367,6 +415,13 @@
 
 
 (core/defhook use-callback
+  "Like react/useCallback, but accepts dependencies as the _first_ argument and
+  accepts the following keywords as deps:
+
+  * `:always` - run `f` after every render (equivalent to passing no deps)
+  * `:once` - run `f` after mounting, then never again (equivalent to [])
+
+  See https://react.dev/reference/react/useCallback"
   [deps f]
   (react/useCallback
    f
@@ -377,6 +432,13 @@
 
 
 (core/defhook use-imperative-handle
+  "Like react/useImperativeHandle, but accepts dependencies as the _first_
+  argument and accepts the following keywords as deps:
+
+  * `:always` - run `f` after every render (equivalent to passing no deps)
+  * `:once` - run `f` after mounting, then never again (equivalent to [])
+
+  See https://react.dev/reference/react/useImperativeHandle"
   [deps ref f]
   (react/useImperativeHandle
    ref f
@@ -386,4 +448,37 @@
      (to-array deps))))
 
 
-(def use-debug-value react/useDebugValue)
+(core/defhook use-insertion-effect
+  "See https://react.dev/reference/react/useInsertionEffect"
+  [deps f]
+  (react/useInsertionEffect
+   f
+   (case deps
+     :once #js []
+     :always js/undefined
+     (to-array deps))))
+
+
+(def use-debug-value
+  "See https://react.dev/reference/react/useDebugValue"
+  react/useDebugValue)
+
+
+(def use-id
+  "See https://react.dev/reference/react/useId"
+  react/useId)
+
+
+(def use-deferred-value
+  "See https://react.dev/reference/react/useDeferredValue"
+  react/useDeferredValue)
+
+
+(def use-transition
+  "See https://react.dev/reference/react/useTransition"
+  react/useTransition)
+
+
+(def use-sync-external-store
+  "See https://react.dev/reference/react/useSyncExternalStore"
+  react/useSyncExternalStore)
