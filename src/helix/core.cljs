@@ -56,9 +56,6 @@
   [type & args]
   (let [?p (first args)
         ?c (rest args)
-        native? (or (keyword? type)
-                    (string? type)
-                    (:native (meta type)))
         has-props? ^boolean (or (map? ?p)
                                 (nil? ?p))
         children* ^seq (if has-props?
@@ -70,9 +67,7 @@
         props* (cond-> {}
                  has-props?       (conj ?p)
                  (some? children) (assoc :children children))
-        props (if native?
-                (impl.props/-dom-props props*)
-                (impl.props/-props     props*))
+        props (impl.props/-props props*)
         key (:key props*)
         emit-fn (if (next children*)
                   jsxs
@@ -83,23 +78,6 @@
     (if (some? key)
       (emit-fn type' props key)
       (emit-fn type' props))))
-
-
-(def ^:deprecated $$
-  "Dynamically create a new React element from a valid React type.
-
-  `$` can typically be faster, because it will statically process the arguments
-  at macro-time if possible.
-
-  Example:
-  ```
-  ($$ MyComponent
-   \"child1\"
-   ($$ \"span\"
-     {:style {:color \"green\"}}
-     \"child2\" ))
-  ```"
- $)
 
 
 (defprotocol IExtractType
