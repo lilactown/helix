@@ -1,5 +1,7 @@
 (ns helix.hooks
-  "Wrapper around react hooks.
+  "DEPRECATED
+
+  Wrapper around react hooks.
 
   Many functions take a `deps` argument, corresponding to their React
   equivalent.  This is an argument which can either be a a vector of
