@@ -8,9 +8,9 @@
   (:require-macros [helix.core]))
 
 
-(when (exists? js/Symbol)
+(when (exists? symbol)
   (extend-protocol IPrintWithWriter
-    js/Symbol
+    symbol
     (-pr-writer [sym writer _]
       (-write writer (str "\"" (.toString sym) "\"")))))
 
