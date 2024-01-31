@@ -1,6 +1,8 @@
 {:paths ["src" "resources"]
- :deps {cljs-bean/cljs-bean {:mvn/version "1.5.0"}}
+ :deps {cljs-bean/cljs-bean {:mvn/version "1.5.0"}
+        manifold/manifold {:mvn/version "0.2.3"}
+        aleph/aleph {:mvn/version "0.4.7"}}
  :aliases {:test {:extra-paths ["test"]
-                  :extra-deps {lambdaisland/kaocha {:mvn/version "1.66.1034"}
-                               org.clojure/clojurescript {:mvn/version "LATEST"}}
-                  :main-opts ["-m" "kaocha.runner"]}}}
+                  :extra-deps {org.clojure/clojurescript {:mvn/version "1.11.51"}}}
+           :ci {:extra-deps {lambdaisland/kaocha {:mvn/version "1.66.1034"}}
+                :main-opts ["-m" "kaocha.runner"]}}}
