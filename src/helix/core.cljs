@@ -9,7 +9,7 @@
   (:require-macros [helix.core]))
 
 
-(when (exists? symbol)
+(when (exists? js/Symbol)
   (extend-protocol IPrintWithWriter
     symbol
     (-pr-writer [sym writer _]
