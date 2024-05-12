@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1
+
+### Fixed
+
+* Extend JS Symbol using the primitive `symbol`
+
 ## 0.2.0
 
 ### Added
