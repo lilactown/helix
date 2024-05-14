@@ -100,10 +100,11 @@
 
 (defmacro suspense
   "Creates a React Suspense boundary."
-  [{:keys [fallback]} & children]
+  [{:keys [fallback key]} & children]
   `^js/React.Element ($ Suspense
                         ~@(when fallback
-                            `({:fallback ~fallback}))
+                            `({:fallback ~fallback
+                               :key ~key}))
                         ~@children))
 
 

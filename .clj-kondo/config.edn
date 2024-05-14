@@ -1,2 +1,4 @@
 {:config-paths ["../resources/clj-kondo.exports/lilactown/helix"]
- :lint-as {devcards.core/defcard clojure.core/def}}
+ :lint-as {devcards.core/defcard clojure.core/def
+           manifold.deferred/loop clojure.core/doseq
+           helix.server.dom/dfor clojure.core/for}}
