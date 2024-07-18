@@ -129,3 +129,14 @@ use it.
 Components would then use `my-app.lib/defnc` instead of `helix.core/defnc` to
 define components. It has the same API as helix, but with the `:fast-refresh`
 feature enabled by default. Nice!
+
+### clj-kondo configuration
+
+If you're using clj-kondo, you might need to add a configuration to ignore the
+fact that `my-app.lib/defnc` is not a known macro. You can do this by adding a
+`.clj-kondo/config.edn` file to your project with the following contents:
+
+```clojure
+{:hooks {:analyze-call {my-app.lib/defnc clj-kondo.lilactown.helix/defnc}}}
+```
+> Don't forget to update `my-app.lib` to the actual namespace you're using!
