@@ -4,6 +4,34 @@
 
 ### Fixed
 
+* clj-kondo hooks for DOM macros lint `&` correctly
+
+## 0.1.11
+
+### Added
+
+* #130 String keys are now supported in props, which when given to a DOM element
+  will pass those verbatim (i.e. without camelCasing)
+* `helix.hooks/use-id` that wraps new base React hook `useId` (@rome-user)
+* #131 `helix.core/creat-ref` that wraps `React.createRef` similar to use-ref
+  (@rome-user)
+* #146 / #142 `:style/indent` metadata on `$`, `defnc`, `defnc-`, `defhook`, and all DOM macros
+* DOM macros are now written literally; this helps move towards self hosted CLJS support
+
+### Fixed
+
+* #136 Fix issue with loading helix in Node.js due to depending on `window` being
+  available (@rome-user)
+* Extend JS Symbol using the primitive `symbol`
+
+### Breaking
+
+* #127 `helix.hooks/wrap-fx` is now private (@rome-user)
+
+## 0.1.10
+
+### Fixed
+
 * Replace deprecated `goog.object/extend` with `js/Object.assign`
 
 ### Added
