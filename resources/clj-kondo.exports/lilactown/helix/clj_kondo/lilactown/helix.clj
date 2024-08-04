@@ -26,22 +26,8 @@
 
 (defn dom
   "Macro analysis for `helix.dom/*`."
-  [{:keys [node]}]
-  (let [[fn-sym & body] (-> node :children)
-        [old-props body] (if (api/map-node? (first body))
-                           [(-> body first :children) (next body)]
-                           [nil body])
-        children body
-        new-props (when old-props
-                    (->> old-props
-                         (map
-                          #(if (cond-> (api/sexpr %) symbol? (= '&))
-                             (api/keyword-node :&)
-                             %))
-                         api/map-node))
-        expanded (api/list-node
-                  (list* fn-sym new-props children))]
-    {:node (with-meta expanded (meta node))}))
+  [m]
+  ($ m))
 
 
 (defn analyze-definition
