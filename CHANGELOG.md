@@ -1,5 +1,11 @@
 # Changelog
 
+## UNRELEASED
+
+### Fixed
+
+- clj-kondo hooks for DOM macros lint `&` correctly
+
 ## 0.2.1
 
 ### Fixed
