@@ -1,0 +1,6 @@
+{:paths ["src" "resources"] ; include resources so that we have resources on classpath
+ :deps {lilactown/helix {:local/root "../"}
+        manifold/manifold {:mvn/version "0.2.3"}
+        aleph/aleph {:mvn/version "0.4.7"}
+        thheller/shadow-cljs {:mvn/version "2.19.0"}
+        metosin/reitit-ring {:mvn/version "0.5.5"}}}

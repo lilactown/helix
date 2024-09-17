@@ -2,8 +2,8 @@
 /public/benchmark/js
 /public/test/js
 node_modules
-/.shadow-cljs
-/package-lock.json
+.shadow-cljs
+package-lock.json
 /pom.xml
 /target
 .clj-kondo/.cache
