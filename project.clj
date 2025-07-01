@@ -4,5 +4,5 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v20.html"}
   :source-paths ["src" "resources"]
-  :dependencies [[cljs-bean "1.5.0"]]
+  :dependencies [[cljs-bean "1.9.0"]]
   :deploy-repositories [["snapshots" {:sign-releases false :url "https://clojars.org"}]])
