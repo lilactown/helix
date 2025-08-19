@@ -60,7 +60,7 @@
         props (if (map? (first args))
                 (if native?
                   `(impl.props/dom-props ~(first args) ~(jsx-children children))
-                  `(impl.props/props     ~(first args) ~(jsx-children children)))
+                  `(impl.props/props ~(first args) ~(jsx-children children)))
                 (tl/->JSValue (cond-> {}
                                 (not-empty children)
                                 (assoc :children (jsx-children children)))))

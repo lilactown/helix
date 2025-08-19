@@ -205,7 +205,9 @@
        (t/is (eq (impl/props nil ["one" "two"])
                  #js {:children ["one" "two"]}))
        (t/is (eq (impl/props {} ["one" "two"])
-                 #js {:children ["one" "two"]})))))
+                 #js {:children ["one" "two"]}))
+       (t/is (eq (impl/props {& {:children "foo"}} ["bar"])
+                 #js {:children ["bar"]})))))
 
 
 (t/deftest test-normalize-class

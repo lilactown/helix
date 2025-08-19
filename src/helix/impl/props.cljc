@@ -70,7 +70,12 @@
 
 #?(:cljs
    (defn merge-obj [o1 o2]
-     (js/Object.assign o1 o2)))
+     (let [children (gobj/get o1 "children")]
+       (js/Object.assign o1 o2)
+       ;; preserve children if they exist
+       (when (some? children)
+         (gobj/set o1 "children" children))
+       o1)))
 
 (defn seq-to-class [class]
   (->> class
@@ -137,7 +142,8 @@
                                      (contains? m '&) '&
                                      (contains? m :&) :&)]
                  `(merge-obj ~(-dom-props (dissoc m spread-sym) (primitive-obj))
-                             (-dom-props ~(get m spread-sym)))
+                             (-dom-props
+                              ~(get m spread-sym)))
                  (-dom-props m (primitive-obj)))
           :cljs (if (map? m)
                   (-dom-props m (primitive-obj))
