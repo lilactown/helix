@@ -5,6 +5,9 @@
 ### Fixed
 
 - clj-kondo hooks for DOM macros lint `&` correctly
+- Fixed a regression in 0.2.0 where the new JSX transform broke components that
+  spread all props and accepted children. It caused the spread to override any
+  static children passed in.
 
 ## 0.2.1
 
