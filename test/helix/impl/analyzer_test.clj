@@ -189,4 +189,19 @@
          '[(use-foo)] '(use-foo)
          '[(use-foo)] '{:foo (use-foo)}
          '[(use-foo)] '{:foo #{use-bar (use-foo)}}
-         '[] '('use-foo bar)))
+         '[] '('use-foo bar)
+         '[(use-callback (fn* [p1__#] (identity p1__#)))] '(use-callback (fn* [p1__20354#] (identity p1__20354#))))
+  (t/testing "normalises bindings"
+    (t/are [form1 form2]
+           (= (hana/find-hooks (list 'use-callback form1))
+              (hana/find-hooks (list 'use-callback form2)))
+           '(fn* [p1__20354#] (identity p1__20354#))
+           '(fn* [p1__20364#] (identity p1__20364#))
+
+           '(fn* [p1__20356# & rest__20357#] (identity p1__20356# rest__20357#))
+           '(fn* [p1__20366# & rest__20367#] (identity p1__20366# rest__20367#))
+
+           '(fn* [p1__20359# p2__20360# p3__20361# & rest__20362#]
+                 (identity p1__20359# p2__20360# p3__20361# rest__20362#))
+           '(fn* [p1__20369# p2__20370# p3__20371# & rest__20372#]
+                 (identity p1__20369# p2__20370# p3__20371# rest__20372#)))))
