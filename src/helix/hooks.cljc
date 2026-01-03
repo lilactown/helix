@@ -11,8 +11,10 @@
   :once           Equivalent to using [] as the deps.
   :auto-deps      Infer the dependencies automatically from the code by finding
                   local vars.  Not available for the function form of a hook."
-  #?(:clj (:require [helix.impl.analyzer :as hana])
+  #?(:clj (:require [helix.impl.analyzer :as hana]
+                    [helix.impl.hooks :as-alias impl.hooks])
      :cljs (:require
+            [helix.impl.hooks :as impl.hooks]
             ["react" :as react]
             [goog.object :as gobj]))
   #?(:cljs (:require-macros [helix.hooks])))
@@ -117,16 +119,6 @@
      "Just react/useContext"
      react/useContext))
 
-
-;; React `useEffect` expects either a function or undefined to be returned
-#?(:cljs
-   (defn- wrap-fx [f]
-     (fn wrap-fx-return []
-       (let [x (f)]
-         (if (fn? x)
-           x
-           js/undefined)))))
-
 #?(:clj
    (defn deps-macro-body [env deps body simple-body-ok? deps->hook-body]
      (cond
@@ -182,9 +174,9 @@
      (deps-macro-body
       &env deps body false
       (fn
-        ([fn-body] `^clj-nil (raw-use-effect (wrap-fx (fn [] ~@fn-body))))
+        ([fn-body] `^clj-nil (raw-use-effect (impl.hooks/wrap-fx (fn [] ~@fn-body))))
         ([deps fn-body]
-         `^clj-nil (raw-use-effect (wrap-fx (fn [] ~@fn-body)) ~deps))))))
+         `^clj-nil (raw-use-effect (impl.hooks/wrap-fx (fn [] ~@fn-body)) ~deps))))))
 
 
 #?(:cljs
@@ -193,12 +185,12 @@
    ;; be harder to read
    (defn use-effect*
      "Like react/useEffect.  See `use-effect` for details on what `f`'s return values.  See namespace doc for `deps`."
-     ([f] (react/useEffect (wrap-fx f)))
+     ([f] (react/useEffect (impl.hooks/wrap-fx f)))
      ([f deps]
       (when goog/DEBUG
         (when (= deps :auto-deps)
           (throw (js/Error. "Can't use `:auto-deps` with `use-effect*`; use `use-effect` macro for that"))))
-      (react/useEffect (wrap-fx f) (to-array deps)))))
+      (react/useEffect (impl.hooks/wrap-fx f) (to-array deps)))))
 
 
 (defmacro use-layout-effect
@@ -209,20 +201,20 @@
      (deps-macro-body
       &env deps body false
       (fn
-        ([fn-body] `^clj-nil (raw-use-layout-effect (wrap-fx (fn [] ~@fn-body))))
+        ([fn-body] `^clj-nil (raw-use-layout-effect (impl.hooks/wrap-fx (fn [] ~@fn-body))))
         ([deps fn-body]
-         `^clj-nil (raw-use-layout-effect (wrap-fx (fn [] ~@fn-body)) ~deps))))))
+         `^clj-nil (raw-use-layout-effect (impl.hooks/wrap-fx (fn [] ~@fn-body)) ~deps))))))
 
 
 #?(:cljs
    (defn use-layout-effect*
      "Like `use-effect*` but instead calls react/useLayoutEffect."
-     ([f] (react/useLayoutEffect (wrap-fx f)))
+     ([f] (react/useLayoutEffect (impl.hooks/wrap-fx f)))
      ([f deps]
       (when goog/DEBUG
         (when (= deps :auto-deps)
           (throw (js/Error. "Can't use `:auto-deps` with `use-layout-effect*`; use `use-layout-effect` macro for that"))))
-      (react/useLayoutEffect (wrap-fx f) (to-array deps)))))
+      (react/useLayoutEffect (impl.hooks/wrap-fx f) (to-array deps)))))
 
 
 (defmacro use-memo
