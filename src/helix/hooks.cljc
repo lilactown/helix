@@ -127,11 +127,6 @@
            x
            js/undefined)))))
 
-
-(defn simple-body? [body]
-  (and (= (count body) 1) (symbol? (first body))))
-
-
 #?(:clj
    (defn deps-macro-body [env deps body simple-body-ok? deps->hook-body]
      (cond
