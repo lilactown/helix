@@ -19,10 +19,12 @@
                   :refresh {:entries [refresh-example]
                             :depends-on #{:shared}}}
         :compiler-options {:devcards true}
-        :dev {:compiler-options {:output-feature-set :es6}}
+        :dev {:compiler-options {:output-feature-set :es2018}}
         :devtools {:http-root    "public/dev"
                    :http-port    8700
-                   :preloads     [devtools.preload]}}
+                   :preloads     [devtools.preload]}
+        :js-options {:resolve {"devcards-marked" {:target :npm :require "marked"}
+                               "devcards-syntax-highlighter" {:target :npm :require "highlight.js"}}}}
 
   :test     {:target    :browser-test
              :test-dir  "public/test"

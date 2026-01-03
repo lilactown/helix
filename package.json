@@ -9,6 +9,7 @@
   "author": "",
   "license": "EPL-2.0",
   "dependencies": {
+    "create-react-class": "15.6.3",
     "karma": "^6.4.4",
     "karma-chrome-launcher": "^3.2.0",
     "karma-cljs-test": "^0.1.0",
@@ -17,5 +18,9 @@
     "react-refresh": "^0.17.0",
     "shadow-cljs": "^3.1.7",
     "showdown": "^2.1.0"
+  },
+  "devDependencies": {
+    "highlight.js": "^11.11.1",
+    "marked": "^17.0.1"
   }
 }
