@@ -9,7 +9,8 @@
 (defnc app
   []
   {:helix/features {:fast-refresh true}}
-  (let [[o set-o] (hooks/use-state
+  (let [_ (hooks/use-callback :auto-deps #(apply str %1 %&))
+        [o set-o] (hooks/use-state
                    #js {:name "Lisa"})]
     (d/div
      {:style {:text-align "center"

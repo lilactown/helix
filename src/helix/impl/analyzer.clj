@@ -73,14 +73,23 @@ Example: ($ %s %s ...)"
          (map :name)
          vec)))
 
+(defn- normalise-jsval
+  [x]
+  (if (= JSValue (type x))
+    (.-val x)
+    x))
 
-(defn- unwrap-js-vals
+(defn- normalise-sym
+  [x]
+  (if (symbol? x)
+    (symbol (string/replace (str x) #"^((p\d+|rest))(__\d+)#$" "$1__#"))
+    x))
+
+(defn- normalise-vals
   [form]
   (clojure.walk/prewalk
    (fn unwrap [x]
-     (if (= JSValue (type x))
-       (.-val x)
-       x))
+     (-> x normalise-jsval normalise-sym))
    form))
 
 
@@ -105,7 +114,7 @@ Example: ($ %s %s ...)"
 (defn find-hooks
   [body]
   (let [f (fn f [matches form]
-            (let [form (unwrap-js-vals form)]
+            (let [form (normalise-vals form)]
               (if (and (seqable? form)
                        (not
                         ;; Ignore quoted forms, e.g. '(use-foo)
