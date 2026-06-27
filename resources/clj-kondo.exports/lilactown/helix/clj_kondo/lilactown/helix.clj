@@ -75,7 +75,6 @@
                        (with-meta (meta opts-node)))
                    opts-node)]
     (when (and opts-node (contains? (api/sexpr opts-node) :wrap))
-      (prn :opts-node)
       (api/reg-finding! (assoc (meta new-opts)
                                :message ":wrap should be passed to metadata map before args"
                                :type :helix/wrap-after-args)))
