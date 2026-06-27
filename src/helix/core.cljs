@@ -70,10 +70,13 @@
         props* (cond-> {}
                  has-props?       (conj ?p)
                  (some? children) (assoc :children children))
-        props (if native?
-                (impl.props/-dom-props props*)
-                (impl.props/-props     props*))
         key (:key props*)
+        ;; `key` is passed to the runtime as a separate argument, so strip it
+        ;; from props to match the `$` macro's behavior
+        props-map (dissoc props* :key)
+        props (if native?
+                (impl.props/-dom-props props-map)
+                (impl.props/-props     props-map))
         emit-fn (if (next children*)
                   jsxs
                   jsx)
