@@ -292,7 +292,7 @@
                (cljs-factory ~component-var-name)))
 
          ~(when flag-fast-refresh?
-            `(when (with-meta 'goog/DEBUG {:tag 'boolean})
+            `(when ~(with-meta 'goog/DEBUG {:tag 'boolean})
                (when ~sig-sym
                  (~sig-sym ~component-var-name ~(string/join hooks)
                   nil ;; forceReset
