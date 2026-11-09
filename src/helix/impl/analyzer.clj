@@ -52,7 +52,8 @@ Example: ($ %s %s ...)"
   "Returns a set of symbols found in `body` that also exist in `env`."
   [env body]
   (let [sym-list (atom #{})]
-    (clojure.walk/postwalk
+    ;; prewalk so that the contents of an unwrapped JSValue get walked too
+    (clojure.walk/prewalk
       (fn w [x]
         (cond
           (symbol? x)

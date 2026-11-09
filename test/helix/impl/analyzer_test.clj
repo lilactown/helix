@@ -1,5 +1,6 @@
 (ns helix.impl.analyzer-test
   (:require
+   [cljs.tagged-literals :as tl]
    [clojure.test :as t]
    [helix.impl.analyzer :as hana]))
 
@@ -183,6 +184,19 @@
       'user
       'foo/use
       'foo/user)))
+
+(t/deftest resolve-local-vars
+  (let [env {:locals {'a {:name 'a} 'b {:name 'b}}}
+        resolved #(set (hana/resolve-local-vars env %))]
+    (t/testing "only symbols bound as locals are found"
+      (t/is (= #{'a 'b} (resolved '(foo a [b c])))))
+    (t/testing "locals inside #js [] are found"
+      (t/is (= #{'a 'b} (resolved (list (tl/->JSValue ['a]) 'b)))))
+    (t/testing "locals inside #js {} are found"
+      (t/is (= #{'a} (resolved (list (tl/->JSValue {:x 'a}))))))
+    (t/testing "locals inside nested #js literals are found"
+      (t/is (= #{'a 'b}
+               (resolved (list (tl/->JSValue {:x (tl/->JSValue ['a 'b])}))))))))
 
 (t/deftest find-hooks
   (t/are [hooks body] (= hooks (hana/find-hooks body))
