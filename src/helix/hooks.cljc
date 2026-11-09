@@ -185,7 +185,7 @@
       (when goog/DEBUG
         (when (= deps :auto-deps)
           (throw (js/Error. "Can't use `:auto-deps` with `use-effect*`; use `use-effect` macro for that"))))
-      (react/useEffect (impl.hooks/wrap-fx f) (to-array deps)))))
+      (react/useEffect (impl.hooks/wrap-fx f) (determine-deps deps)))))
 
 (defmacro use-layout-effect
   "Like `use-effect` but instead calls react/useLayoutEffect."
@@ -207,7 +207,7 @@
       (when goog/DEBUG
         (when (= deps :auto-deps)
           (throw (js/Error. "Can't use `:auto-deps` with `use-layout-effect*`; use `use-layout-effect` macro for that"))))
-      (react/useLayoutEffect (impl.hooks/wrap-fx f) (to-array deps)))))
+      (react/useLayoutEffect (impl.hooks/wrap-fx f) (determine-deps deps)))))
 
 (defmacro use-memo
   "Like react/useMemo.  See namespace doc for `deps`.  `body` should be a
@@ -239,7 +239,7 @@
       (when goog/DEBUG
         (when (= deps :auto-deps)
           (throw (js/Error. "Can't use `:auto-deps` with `use-memo*`; use `use-memo` macro for that"))))
-      (react/useMemo f (to-array deps)))))
+      (react/useMemo f (determine-deps deps)))))
 
 (defmacro use-callback
   "Like react/useCallback.  See namespace doc for `deps`.  `fn-body` should
@@ -263,7 +263,7 @@
       (when goog/DEBUG
         (when (= deps :auto-deps)
           (throw (js/Error. "Can't use `:auto-deps` with `use-callback*`; use `use-callback` macro for that"))))
-      (react/useCallback f (to-array deps)))))
+      (react/useCallback f (determine-deps deps)))))
 
 (defmacro use-imperative-handle
   "Like react/useImperativeHandle.  `ref` is unchanged in meaning.  See
@@ -290,7 +290,7 @@
       (when goog/DEBUG
         (when (= deps :auto-deps)
           (throw (js/Error. "Can't use `:auto-deps` with `use-imperative-handle*`; use `use-imperative-handle` macro for that"))))
-      (react/useImperativeHandle ref f (to-array deps)))))
+      (react/useImperativeHandle ref f (determine-deps deps)))))
 
 #?(:cljs
    (def use-debug-value

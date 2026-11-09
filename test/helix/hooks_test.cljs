@@ -17,6 +17,24 @@
     (t/is (= "Generated identifier: :R0:"
              (rds/renderToString ($ use-id-example))))))
 
+;;; function variants of hooks
+
+(defnc star-hooks-example [{:keys [deps]}]
+  (hooks/use-effect* (fn []) deps)
+  (hooks/use-layout-effect* (fn []) deps)
+  (hooks/use-imperative-handle* nil (fn [] #js {}) deps)
+  (let [memoized (hooks/use-memo* (fn [] "memo") deps)
+        callback (hooks/use-callback* (fn [] "callback") deps)]
+    ($ "div" (str memoized " " (callback)))))
+
+(t/deftest star-hooks-deps
+  (t/are [deps] (= "<div>memo callback</div>"
+                   (rds/renderToString ($ star-hooks-example {:deps deps})))
+    :once
+    :always
+    []
+    ["a"]))
+
 ;;; use-memo
 
 (defnc use-memo-symbol-example [{:keys [value]}]

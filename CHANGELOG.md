@@ -13,6 +13,8 @@
   :once cleanup)`. This will still emit a warning- to silence, you can wrap it
   in an anonymous function, e.g. `(use-effect :once #(cleanup))`.
 - Helix analyzer warnings now show up figwheel and cljsbuild projects
+- Runtime variants of hooks (`use-effect*`, `use-memo*`, etc.) now accept
+  `:once`, `:always` and will thrown an error if passed `:auto-deps`.
 
 ### Breaking
 
