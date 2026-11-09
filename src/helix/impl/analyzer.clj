@@ -5,8 +5,7 @@
    [cljs.env]
    [cljs.tagged-literals]
    [clojure.string :as string]
-   [clojure.walk]
-   [clojure.zip :as zip])
+   [clojure.walk])
   (:import
    (cljs.tagged_literals JSValue)))
 
@@ -280,55 +279,19 @@ Example: ($ %s %s ...)"
             ;; return nil if empty
             (seq))))))
 
-(defn make-seqable
-  [node children]
-  ;; ????
-  (with-meta
-    ;; preserve type of node
-    (cond
-      (vector? node) (vec children)
-      :else children)
-    ;; preserve meta
-    (meta node)))
-
-(defn seqable-zip
-  [root]
-  (zip/zipper
-    #(and (seqable? %)
-          (not (string? %)))
-    identity
-    make-seqable
-    root))
-
 (defn map-forms-with-meta
   [body meta-table]
-  (let [meta-keys (set (keys meta-table))
-        body-zip (seqable-zip body)]
-    (loop [cur-loc body-zip
-           ;; this max-loop count is here because I accidentally blew this up
-           ;; too many times w/ an infinite loop
-           max-loop 10000]
-      (let [node (zip/node cur-loc)
-            node-meta (meta node)
-            mapped-meta-value (some
-                                #(when-some [meta-v (get node-meta %)]
-                                   ((get meta-table %)
-                                    ;; strip the metadata that triggered this to
-                                    ;; avoid an infinite loop!
-                                    (vary-meta node dissoc %)
-                                    meta-v))
-                                meta-keys)
-            cur-loc' (if mapped-meta-value
-                       (zip/replace cur-loc mapped-meta-value)
-                       cur-loc)]
-        (cond
-          (zip/end? cur-loc') (zip/root cur-loc')
-
-          (= 0 max-loop) (throw (ex-info
-                                  "Infinite loop detected!"
-                                  {:zipper cur-loc'
-                                   :body (zip/root cur-loc')}))
-
-          :else
-          (recur (zip/next cur-loc')
-                 (dec max-loop)))))))
+  (let [meta-keys (set (keys meta-table))]
+    (clojure.walk/prewalk
+      (fn [form]
+        (let [form-meta (meta form)]
+          (or (some
+                #(when-some [meta-v (get form-meta %)]
+                   ((get meta-table %)
+                    ;; strip the metadata that triggered this to avoid an
+                    ;; infinite loop, since prewalk walks what we return
+                    (vary-meta form dissoc %)
+                    meta-v))
+                meta-keys)
+              form)))
+      body)))

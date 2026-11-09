@@ -4,7 +4,60 @@
    [cljs.tagged-literals :as tl]
    [clojure.string :as str]
    [clojure.test :as t]
+   [helix.core]
    [helix.impl.analyzer :as hana]))
+
+(defn- map-meta [body]
+  (hana/map-forms-with-meta body helix.core/meta->form))
+
+(t/deftest map-forms-with-meta
+  (t/testing "rewrites let binding"
+    (t/is (= '(let [x (helix.hooks/use-memo :auto-deps (+ 1 1))]
+                x)
+             (map-meta '(let [x ^:memo (+ 1 1)] x))))
+    (t/is (= '(let [f (helix.hooks/use-callback
+                        :auto-deps
+                        (fn [ev] f))])
+             (map-meta '(let [f ^:callback (fn [ev] f)])))))
+  (t/testing "a map containing a ^:callback value stays a map"
+    (let [[m] (map-meta '[{:on-click ^:callback (fn [] 1)}])]
+      (t/is (map? m))
+      (t/is (= '(helix.hooks/use-callback :auto-deps (fn [] 1))
+               (:on-click m)))))
+  (t/testing "props map passed to $ stays a map"
+    (let [[[_ _ props]] (map-meta '[($ "button" {:on-click ^:callback (fn [] 1)})])]
+      (t/is (map? props))))
+  (t/testing "a map key can be rewritten"
+    (let [[m] (map-meta '[{^:memo (foo) 1}])]
+      (t/is (= {'(helix.hooks/use-memo :auto-deps (foo)) 1} m))))
+  (t/testing "a set containing a ^:memo value stays a set"
+    (let [[s] (map-meta '[#{^:memo (foo)}])]
+      (t/is (set? s))
+      (t/is (contains? s '(helix.hooks/use-memo :auto-deps (foo))))))
+  (t/testing "a vector containing a ^:memo value stays a vector"
+    (let [[v] (map-meta '[[^:memo (foo)]])]
+      (t/is (vector? v))
+      (t/is (= '[(helix.hooks/use-memo :auto-deps (foo))] v))))
+  (t/testing "a list whose child was rewritten stays a list"
+    (let [[l] (map-meta '[(let [a ^:memo (foo)] a)])]
+      (t/is (list? l))))
+  (t/testing "explicit deps are used"
+    (t/is (= '[(helix.hooks/use-memo [a] (foo a))]
+             (map-meta '[^{:memo [a]} (foo a)]))))
+  (t/testing "forms nested inside of a rewritten form are rewritten"
+    (t/is (= '[(helix.hooks/use-memo
+                 :auto-deps
+                 (foo (helix.hooks/use-callback :auto-deps (fn [] 1))))]
+             (map-meta '[^:memo (foo ^:callback (fn [] 1))]))))
+  (t/testing "other metadata is kept"
+    (let [[form] (map-meta [(with-meta '(foo ^:memo (bar)) {:line 3})])]
+      (t/is (= {:line 3} (meta form)))))
+  (t/testing "forms without metadata are unchanged"
+    (let [body '[(foo {:a [1 #{2}]}) () [] {} #{}]]
+      (t/is (= body (map-meta body)))))
+  (t/testing "bodies with more than 10k nodes don't throw"
+    (let [body [(vec (range 20000))]]
+      (t/is (= body (map-meta body))))))
 
 (defn- printed-warning
   "Returns what the default handler prints for a helix warning when
