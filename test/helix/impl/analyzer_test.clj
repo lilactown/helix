@@ -1,8 +1,34 @@
 (ns helix.impl.analyzer-test
   (:require
+   [cljs.analyzer :as ana]
    [cljs.tagged-literals :as tl]
+   [clojure.string :as str]
    [clojure.test :as t]
    [helix.impl.analyzer :as hana]))
+
+(defn- printed-warning
+  "Returns what the default handler prints for a helix warning when
+  *cljs-warnings* is bound to `warnings`."
+  [warnings]
+  (let [w (java.io.StringWriter.)]
+    (binding [*err* w
+              ana/*cljs-warnings* warnings
+              ana/*cljs-warning-handlers* [ana/default-warning-handler]]
+      (hana/warn hana/warning-simple-body {} {:form '(foo)}))
+    (str w)))
+
+(t/deftest warnings-visible-with-default-handler
+  (t/testing "printed by default"
+    (t/is (str/includes? (printed-warning ana/*cljs-warnings*)
+                         "Got a single symbol")))
+  (t/testing "printed when *cljs-warnings* doesn't include helix's types"
+    (t/is (str/includes? (printed-warning {:undeclared-var true})
+                         "Got a single symbol")))
+  (t/testing "silent inside no-warn, which only knows the cljs warning types"
+    (t/is (= "" (printed-warning {:undeclared-var false}))))
+  (t/testing "silent when the type is disabled"
+    (t/is (= "" (printed-warning {:undeclared-var true
+                                  hana/warning-simple-body false})))))
 
 (t/deftest invalid-hooks-usage
   (t/testing "correct usage"

@@ -19,7 +19,16 @@
 (def warning-invalid-hook-name ::invalid-hook-name)
 
 (defn warn [warning-type env extras]
-  (ana/warning warning-type env extras))
+  ;; cljs.analyzer's default handler only prints types enabled in
+  ;; *cljs-warnings*, which doesn't include ours unless the user configured
+  ;; them. enable them here, unless everything has been silenced, e.g. by
+  ;; `no-warn`
+  (let [warnings ana/*cljs-warnings*]
+    (binding [ana/*cljs-warnings* (if (contains? warnings warning-type)
+                                    warnings
+                                    (assoc warnings warning-type
+                                           (boolean (some true? (vals warnings)))))]
+      (ana/warning warning-type env extras))))
 
 (defmethod ana/error-message warning-simple-body
   [warning-type {:keys [form] :as info}]
