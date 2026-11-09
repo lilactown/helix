@@ -1,6 +1,7 @@
 (ns helix.impl.analyzer-test
-  (:require [helix.impl.analyzer :as hana]
-            [clojure.test :as t]))
+  (:require
+   [clojure.test :as t]
+   [helix.impl.analyzer :as hana]))
 
 (t/deftest invalid-hooks-usage
   (t/testing "correct usage"

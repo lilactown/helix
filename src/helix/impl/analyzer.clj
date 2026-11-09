@@ -1,13 +1,14 @@
 (ns helix.impl.analyzer
-  (:require [clojure.walk]
-            [clojure.zip :as zip]
-            [clojure.string :as string]
-            [cljs.env]
-            [cljs.analyzer.api :as ana-api]
-            [cljs.analyzer :as ana]
-            [cljs.tagged-literals])
-  (:import [cljs.tagged_literals JSValue]))
-
+  (:require
+   [cljs.analyzer :as ana]
+   [cljs.analyzer.api :as ana-api]
+   [cljs.env]
+   [cljs.tagged-literals]
+   [clojure.string :as string]
+   [clojure.walk]
+   [clojure.zip :as zip])
+  (:import
+   (cljs.tagged_literals JSValue)))
 
 (def warning-simple-body ::simple-body)
 
@@ -41,31 +42,28 @@ Example: ($ %s %s ...)"
   [warning-type {:keys [form] :as info}]
   (format "Invalid hook name defined in %s" form))
 
-
 (def resolve-var ana/resolve-var)
-
 
 ;;
 ;; -- Hooks
 ;;
-
 
 (defn resolve-local-vars
   "Returns a set of symbols found in `body` that also exist in `env`."
   [env body]
   (let [sym-list (atom #{})]
     (clojure.walk/postwalk
-     (fn w [x]
-       (cond
-         (symbol? x)
-         (do (swap! sym-list conj x)
-             x)
+      (fn w [x]
+        (cond
+          (symbol? x)
+          (do (swap! sym-list conj x)
+              x)
 
-         (= (type x) JSValue)
-         (.-val x)
+          (= (type x) JSValue)
+          (.-val x)
 
-         :else x))
-     body)
+          :else x))
+      body)
 
     (->> @sym-list
          (map (:locals env))
@@ -88,10 +86,9 @@ Example: ($ %s %s ...)"
 (defn- normalise-vals
   [form]
   (clojure.walk/prewalk
-   (fn unwrap [x]
-     (-> x normalise-jsval normalise-sym))
-   form))
-
+    (fn unwrap [x]
+      (-> x normalise-jsval normalise-sym))
+    form))
 
 ;; TODO:
 ;; - Handle re-ordering
@@ -99,17 +96,15 @@ Example: ($ %s %s ...)"
 
 (defn hook? [x]
   (boolean
-   (and (symbol? x)
-        (some #(re-find % (name x))
-              [#"^use\-"
-               #"^use[A-Z]"]))))
-
+    (and (symbol? x)
+         (some #(re-find % (name x))
+               [#"^use\-"
+                #"^use[A-Z]"]))))
 
 (defn hook-expr?
   [x]
   (when (list? x)
     (hook? (first x))))
-
 
 (defn find-hooks
   [body]
@@ -117,35 +112,32 @@ Example: ($ %s %s ...)"
             (let [form (normalise-vals form)]
               (if (and (seqable? form)
                        (not
-                        ;; Ignore quoted forms, e.g. '(use-foo)
-                        (and
-                         (list? form)
-                         (= 'quote (first form)))))
+                         ;; Ignore quoted forms, e.g. '(use-foo)
+                         (and
+                           (list? form)
+                           (= 'quote (first form)))))
                 (cond-> (reduce
-                         (fn [acc x]
-                           (f acc x))
-                         matches
-                         form)
+                          (fn [acc x]
+                            (f acc x))
+                          matches
+                          form)
                   (hook-expr? form)
                   (conj form))
                 matches)))]
     (f
-     []
-     body)))
-
+      []
+      body)))
 
 (defn inferred-type [env x]
   (cljs.analyzer/infer-tag env (ana-api/no-warn (ana-api/analyze env x))))
 
-
 (defn ensure-seq [x]
   (if (seqable? x) x (list x)))
 
-
 (defn invalid-hooks-usage
   ([form] (invalid-hooks-usage
-           {:state nil}
-           form))
+            {:state nil}
+            form))
   ([ctx form]
    (cond
      ;; hook symbol passed in as a value
@@ -162,8 +154,8 @@ Example: ($ %s %s ...)"
 
      (map? form)
      (concat
-      (map #(invalid-hooks-usage ctx %) (keys form))
-      (map #(invalid-hooks-usage ctx %) (vals form)))
+       (map #(invalid-hooks-usage ctx %) (keys form))
+       (map #(invalid-hooks-usage ctx %) (vals form)))
 
      :else
      (let [hd (first form)]
@@ -182,8 +174,8 @@ Example: ($ %s %s ...)"
                 (->> body
                      ;; check body
                      (map #(invalid-hooks-usage
-                            (assoc ctx :state :loop)
-                            %))
+                             (assoc ctx :state :loop)
+                             %))
                      ;; handle bindings-expr
                      (concat (map #(invalid-hooks-usage ctx %) bindings-expr))))
 
@@ -215,9 +207,9 @@ Example: ($ %s %s ...)"
                     children-form (ensure-seq children-form)
                     root-form (ensure-seq root-form)]
                 (concat
-                 (map #(invalid-hooks-usage (assoc ctx :state :loop) %) branch?-form)
-                 (map #(invalid-hooks-usage (assoc ctx :state :loop) %) children-form)
-                 (map #(invalid-hooks-usage ctx %) root-form)))
+                  (map #(invalid-hooks-usage (assoc ctx :state :loop) %) branch?-form)
+                  (map #(invalid-hooks-usage (assoc ctx :state :loop) %) children-form)
+                  (map #(invalid-hooks-usage ctx %) root-form)))
               ;; ('#{juxt})
               ;; ('#{sort-by})
               ;; ('#{repeatedly})
@@ -235,8 +227,8 @@ Example: ($ %s %s ...)"
                 (->> body
                      ;; handle branches
                      (map #(invalid-hooks-usage
-                            (assoc ctx :state :conditional)
-                            %))
+                             (assoc ctx :state :conditional)
+                             %))
                      ;; handle pred/expr
                      (cons (invalid-hooks-usage ctx pred-expr))))
 
@@ -246,8 +238,8 @@ Example: ($ %s %s ...)"
                 (->> body
                      ;; handle branches
                      (map #(invalid-hooks-usage
-                            (assoc ctx :state :conditional)
-                            %))
+                             (assoc ctx :state :conditional)
+                             %))
                      ;; handleexpr
                      (cons (invalid-hooks-usage ctx expr))
                      ;; the first pred is always run, so we can use hooks in it
@@ -259,8 +251,8 @@ Example: ($ %s %s ...)"
                 (->> body
                      ;; handle branches
                      (map #(invalid-hooks-usage
-                            (assoc ctx :state :conditional)
-                            %))
+                             (assoc ctx :state :conditional)
+                             %))
                      ;; hook should NOT be in `pred` as it could be called multiple times
                      (cons (invalid-hooks-usage (assoc ctx :state :conditional) pred))
                      (cons (invalid-hooks-usage ctx expr))
@@ -278,8 +270,6 @@ Example: ($ %s %s ...)"
             ;; return nil if empty
             (seq))))))
 
-
-
 (defn make-seqable
   [node children]
   ;; ????
@@ -291,19 +281,17 @@ Example: ($ %s %s ...)"
     ;; preserve meta
     (meta node)))
 
-
 (defn seqable-zip
   [root]
   (zip/zipper
-   #(and (seqable? %)
-         (not (string? %)))
-   identity
-   make-seqable
-   root))
-
+    #(and (seqable? %)
+          (not (string? %)))
+    identity
+    make-seqable
+    root))
 
 (defn map-forms-with-meta
-  [body meta-table ]
+  [body meta-table]
   (let [meta-keys (set (keys meta-table))
         body-zip (seqable-zip body)]
     (loop [cur-loc body-zip
@@ -313,13 +301,13 @@ Example: ($ %s %s ...)"
       (let [node (zip/node cur-loc)
             node-meta (meta node)
             mapped-meta-value (some
-                               #(when-some [meta-v (get node-meta %)]
-                                  ((get meta-table %)
-                                   ;; strip the metadata that triggered this to
-                                   ;; avoid an infinite loop!
-                                   (vary-meta node dissoc %)
-                                   meta-v))
-                               meta-keys)
+                                #(when-some [meta-v (get node-meta %)]
+                                   ((get meta-table %)
+                                    ;; strip the metadata that triggered this to
+                                    ;; avoid an infinite loop!
+                                    (vary-meta node dissoc %)
+                                    meta-v))
+                                meta-keys)
             cur-loc' (if mapped-meta-value
                        (zip/replace cur-loc mapped-meta-value)
                        cur-loc)]
@@ -327,9 +315,9 @@ Example: ($ %s %s ...)"
           (zip/end? cur-loc') (zip/root cur-loc')
 
           (= 0 max-loop) (throw (ex-info
-                                 "Infinite loop detected!"
-                                 {:zipper cur-loc'
-                                  :body (zip/root cur-loc')}))
+                                  "Infinite loop detected!"
+                                  {:zipper cur-loc'
+                                   :body (zip/root cur-loc')}))
 
           :else
           (recur (zip/next cur-loc')

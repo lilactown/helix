@@ -1,8 +1,12 @@
 (ns helix.impl.props
-  (:require [clojure.string :as string]
-            #?@(:cljs [[cljs-bean.core :as b]
-                       [goog.object :as gobj]]))
-  #?(:cljs (:require-macros [helix.impl.props])))
+  #?(:cljs
+     (:require-macros
+      [helix.impl.props]))
+  (:require
+   [clojure.string :as string]
+   #?@(:cljs
+       [[cljs-bean.core :as b]
+        [goog.object :as gobj]])))
 
 (def aria-data-css-custom-prop-special-case-re #"^(aria-|data-|--).*")
 
@@ -35,7 +39,6 @@
     (if (nil? kw-ns)
       kw-name
       (str kw-ns "/" kw-name))))
-
 
 (defn set-obj [o k v]
   #?(:clj (conj o k v)
@@ -115,14 +118,12 @@
        ;; not a string or sequential, stringify it
        true (str class))))
 
-
 #?(:cljs
    (defn or-undefined
      [v]
      (if (nil? v)
        js/undefined
        v)))
-
 
 (defn dom-style
   [style]
@@ -136,14 +137,13 @@
     true #?(:clj `(dom-style ~style)
             :cljs style)))
 
-
 (defn -dom-props
   ([m] #?(:clj (if-let [spread-sym (cond
                                      (contains? m '&) '&
                                      (contains? m :&) :&)]
                  `(merge-obj ~(-dom-props (dissoc m spread-sym) (primitive-obj))
                              (-dom-props
-                              ~(get m spread-sym)))
+                               ~(get m spread-sym)))
                  (-dom-props m (primitive-obj)))
           :cljs (if (map? m)
                   (-dom-props m (primitive-obj))
@@ -162,28 +162,25 @@
                 :value (set-obj o "value" #?(:clj `(or-undefined ~v)
                                              :cljs (or-undefined v)))
                 (set-obj
-                 o
-                 (cond
-                   (or (keyword? k) (symbol? k)) (camel-case (kw->str k))
-                   (string? k) k
-                   :else (throw (ex-info "Invalid DOM prop key" {:key k :val v})))
-                 v))))
+                  o
+                  (cond
+                    (or (keyword? k) (symbol? k)) (camel-case (kw->str k))
+                    (string? k) k
+                    :else (throw (ex-info "Invalid DOM prop key" {:key k :val v})))
+                  v))))
      #?(:clj (list* o)
         :cljs o))))
-
 
 (comment
   (-dom-props {:asdf "jkl" :style 'foo})
 
-  (-dom-props {:style ["fs1"]})
-  )
+  (-dom-props {:style ["fs1"]}))
 
 (defmacro dom-props
   ([m] `(dom-props ~m nil))
   ([m c] (-dom-props (cond-> m
                        c    (assoc :children c)
                        true (dissoc :key)))))
-
 
 (defn -props
   ([m] #?(:clj (if-let [spread-sym (cond
@@ -202,17 +199,16 @@
                   k (key entry)
                   v (val entry)]
               (set-obj
-               o
-               (cond (or (keyword? k) (symbol? k)) (kw->str k)
-                     (string? k) k
-                     :else (throw (ex-info "Invalid prop key" {:key k :val v})))
-               (val entry))))
+                o
+                (cond (or (keyword? k) (symbol? k)) (kw->str k)
+                      (string? k) k
+                      :else (throw (ex-info "Invalid prop key" {:key k :val v})))
+                (val entry))))
      #?(:clj (list* o)
         :cljs o))))
 
 (comment
-  (-props {:foo-bar "baz"})
-  )
+  (-props {:foo-bar "baz"}))
 
 (defmacro props
   ([m] `(props ~m nil))

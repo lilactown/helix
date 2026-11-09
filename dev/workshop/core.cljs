@@ -1,12 +1,11 @@
 (ns workshop.core
   (:require
-   [helix.core :as helix :refer [$ <> defnc]]
-   [helix.dom :as d]
-   [helix.hooks :as hooks]
    ["react" :as r]
    ["react-dom/server" :as rds]
-   [devcards.core :as dc :include-macros true]))
-
+   [devcards.core :as dc :include-macros true]
+   [helix.core :as helix :refer [$ <> defnc]]
+   [helix.dom :as d]
+   [helix.hooks :as hooks]))
 
 (defnc props-test
   [props]
@@ -20,13 +19,11 @@
           "key: " (str k))
         (d/div "val: " (pr-str v))))))
 
-
 (dc/defcard props ($ props-test {:class :class
                                  :style :style
                                  :for :for
                                  :kebab-case :kebab-case
                                  :camelCase :camelCase}))
-
 
 (defnc memoized
   {:wrap [(helix/memo)]}
@@ -46,7 +43,6 @@
       (swap! count inc))
     (pr-str foo bar @count)))
 
-
 (defnc memoized-test
   []
   (let [[render-count force-render] (hooks/use-state 0)]
@@ -64,15 +60,12 @@
           ($ memoized-key
              {:foo (str "foo" (quot render-count 5)) :bar "bar"}))))))
 
-
 (dc/defcard memoized-props
   ($ memoized-test))
-
 
 (defnc subcomponent
   [{:keys [name] :as props}]
   (d/div name))
-
 
 (defnc state-test
   []
@@ -82,10 +75,8 @@
                 :on-change #(set-state assoc :name (.. % -target -value))})
       ($ subcomponent {:name name}))))
 
-
 (dc/defcard use-state
   ($ state-test))
-
 
 (defnc display-range
   [{:keys [end color] :as props}]
@@ -93,7 +84,6 @@
     (d/div {:key n
             :style {:width "10px" :height "10px" :display "inline-block"
                     :background (or color "green") :margin "auto 2px"}})))
-
 
 (defnc effect-test
   []
@@ -131,7 +121,6 @@
           (d/div (str k))
           ($ display-range {:end v}))))))
 
-
 (helix/defcomponent error-boundary
   (constructor [this]
     (set! (.-state this) #js {:error nil}))
@@ -145,11 +134,9 @@
       (.. this -props -children)
       (d/pre (d/code (pr-str (.. this -state -error)))))))
 
-
 (dc/defcard use-effect
   ($ error-boundary
      ($ effect-test)))
-
 
 (defnc lazy-test
   [{:keys [begin end]
@@ -161,10 +148,8 @@
         (d/li {:key n} n)))
     (d/div "ur welcome")))
 
-
 (dc/defcard lazy
   ($ lazy-test {:end 6}))
-
 
 (defnc dynamic-test
   []
@@ -177,7 +162,6 @@
 (dc/defcard dynamic
   ($ dynamic-test))
 
-
 (defnc children-test
   [{:keys [children] :as props}]
   (d/div {:style {:display "flex"
@@ -187,17 +171,14 @@
 (dc/defcard children
   ($ children-test (d/div "foo") (d/div "bar")))
 
-
 (defnc use-memo-component
   [{:keys [qworp]}]
   (let [bar "bar"
         foobar (macroexpand '(hooks/use-memo :auto-deps (str qworp bar goog/DEBUG)))]
     (pr-str foobar)))
 
-
 (dc/defcard use-memo
   ($ use-memo-component {:qworp "foo"}))
-
 
 (def class-component
   (helix/create-component #js {:displayName "Foo"
@@ -208,7 +189,6 @@
                                (fn [this props state]
                                  (d/div (.-count (.-state this))))}
                           nil))
-
 
 (defnc use-memo-metadata
   [{:keys [foo]}]
@@ -222,10 +202,8 @@
       count
       (d/button {:on-click #(set-count inc)} "render"))))
 
-
 (dc/defcard use-memo-metadata-card
   ($ use-memo-metadata {:foo "foo"}))
-
 
 (helix/defcomponent ClassComponent
   (render [this props state]
@@ -257,10 +235,10 @@
   (let [[state set-state] (hooks/use-state nil)
         mounted? (hooks/use-ref false)]
     (use-custom-effect
-     deps
-     #(do (when-not @mounted? ;; avoid infinite render in `:always`
-            (set-state deps))
-          (reset! mounted? true)))
+      deps
+      #(do (when-not @mounted? ;; avoid infinite render in `:always`
+             (set-state deps))
+           (reset! mounted? true)))
     (prn :render)
     (d/div "deps: " (when state
                       (pr-str state)))))
@@ -268,23 +246,18 @@
 (dc/defcard custom-effect-test-card
   (<> ($ custom-effect-test {:deps :always})))
 
-
 (defnc factory-fn-component
   [{:keys [foo bar]}]
   {:helix/features {:define-factory true}}
   (d/div "hello " foo bar))
 
-
 (dc/defcard define-factory
   (<> (factory-fn-component {:foo "baz" :bar 42})
       ($ (helix/type factory-fn-component) {:foo "asdf" :bar "jkl"})))
 
-
 (def sub-atom (atom {:foo 0}))
 
-
 (add-watch sub-atom :global prn)
-
 
 (defn subscribe-atom
   [f]
@@ -292,11 +265,9 @@
     (add-watch sub-atom k f)
     #(remove-watch sub-atom k)))
 
-
 (defn get-atom-value
   []
   @sub-atom)
-
 
 (defnc use-subscription-test
   []
@@ -314,10 +285,8 @@
       (d/div
         "Changes: " changes))))
 
-
 (dc/defcard use-subscription
   ($ use-subscription-test))
-
 
 ;;
 ;; -- Benchmarking
@@ -336,16 +305,14 @@
     (d/div {& props}
       children)))
 
-
 (defn react-children-benchmark
   [props]
   (r/createElement
-   "div"
-   #js {:style
-        #js {:display "flex"
-             :justifyContent "space-between"}}
-   (.-children ^js props)))
-
+    "div"
+    #js {:style
+         #js {:display "flex"
+              :justifyContent "space-between"}}
+    (.-children ^js props)))
 
 #_(defnc simple-benchmark-component []
     (let [[re-render set-state] (hooks/use-state 0)
@@ -356,46 +323,46 @@
                        [re-render]
                        (with-out-str
                          (simple-benchmark
-                          []
-                          (rds/renderToString
-                           (helix/jsxs react-children-benchmark
-                                       #js {:foo "bar"
-                                            :children #js [(helix/jsx "div" #js {:style #js {:backgroundColor "green"}
-                                                                                 :children "foo"})
-                                                           (helix/jsx "div" #js {:children "bar"})]}))
-                          iterations)))
+                           []
+                           (rds/renderToString
+                             (helix/jsxs react-children-benchmark
+                                         #js {:foo "bar"
+                                              :children #js [(helix/jsx "div" #js {:style #js {:backgroundColor "green"}
+                                                                                   :children "foo"})
+                                                             (helix/jsx "div" #js {:children "bar"})]}))
+                           iterations)))
 
           helix-time (hooks/use-memo
                        [re-render]
                        (with-out-str
                          (simple-benchmark
-                          []
-                          (rds/renderToString
-                           ($ helix-children-benchmark
-                              {:foo "bar"}
-                              (d/div {:style {:background-color "green"}} "foo")
-                              (d/div "bar")))
-                          iterations)))
+                           []
+                           (rds/renderToString
+                             ($ helix-children-benchmark
+                                {:foo "bar"}
+                                (d/div {:style {:background-color "green"}} "foo")
+                                (d/div "bar")))
+                           iterations)))
 
           helix-interpret-props-time (hooks/use-memo
                                        [re-render]
                                        (with-out-str
                                          (simple-benchmark
-                                          []
-                                          (rds/renderToString
-                                           ($ helix-children-interpret-props-benchmark
-                                              {:foo "bar"}
-                                              (d/div {:style {:background-color "green"}} "foo")
-                                              (d/div "bar")))
-                                          iterations)))]
+                                           []
+                                           (rds/renderToString
+                                             ($ helix-children-interpret-props-benchmark
+                                                {:foo "bar"}
+                                                (d/div {:style {:background-color "green"}} "foo")
+                                                (d/div "bar")))
+                                           iterations)))]
       (<>
         (d/div
           (d/input {:value iterations
                     :on-change #(set-iterations
-                                 (-> %
-                                     .-target
-                                     .-value
-                                     (js/parseInt 10)))
+                                  (-> %
+                                      .-target
+                                      .-value
+                                      (js/parseInt 10)))
                     :type "number"})
           (d/button {:on-click force-render} "Re-run"))
         (d/div
@@ -414,8 +381,6 @@
 #_(dc/defcard simple-benchmark
     ($ simple-benchmark-component))
 
-
-
 (helix/fnc []
   "bar")
 
@@ -423,7 +388,6 @@
 ;;
 ;; (helix/fnc []
 ;;   "bar")
-
 
 (defnc foo []
   "bar")
@@ -433,7 +397,6 @@
 ;; (defnc foo []
 ;;   "bar")
 
-
 (helix/defhook use-foo []
   "bar")
 
@@ -442,7 +405,6 @@
 ;; (helix/defhook foo []
 ;;   "bar")
 
-
 ($ "div"
    ($ "div"))
 
@@ -450,7 +412,6 @@
 ;;
 ;; ($ "div"
 ;;    ($ "div"))
-
 
 ($ "div" {}
    ($ "div")
@@ -462,7 +423,6 @@
 ;;    ($ "div")
 ;;    ($ "div"))
 
-
 (d/div
   (d/div))
 
@@ -470,7 +430,6 @@
 ;;
 ;; (d/div
 ;;   (d/div))
-
 
 (d/div {}
   (d/div))

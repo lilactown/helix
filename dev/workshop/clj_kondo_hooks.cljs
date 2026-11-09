@@ -1,8 +1,8 @@
 (ns workshop.clj-kondo-hooks
-  (:require ["react" :as react]
-            [helix.core :refer [$ defnc defnc-]]
-            [helix.dom :as d]))
-
+  (:require
+   ["react" :as react]
+   [helix.core :refer [$ defnc defnc-]]
+   [helix.dom :as d]))
 
 (defn comp-printer [comp] (println (str comp)))
 

@@ -1,13 +1,14 @@
 (ns helix.core
   (:refer-clojure :exclude [type])
-  (:require [goog.object :as gobj]
-            [helix.impl.props :as impl.props]
-            [helix.impl.classes :as helix.class]
-            [cljs-bean.core :as bean]
-            ["react" :as react]
-            ["react/jsx-runtime" :as jsx-runtime])
-  (:require-macros [helix.core]))
-
+  (:require-macros
+   [helix.core])
+  (:require
+   ["react" :as react]
+   ["react/jsx-runtime" :as jsx-runtime]
+   [cljs-bean.core :as bean]
+   [goog.object :as gobj]
+   [helix.impl.classes :as helix.class]
+   [helix.impl.props :as impl.props]))
 
 (when (exists? js/Symbol)
   (extend-protocol IPrintWithWriter
@@ -15,24 +16,19 @@
     (-pr-writer [sym writer _]
       (-write writer (str "\"" (.toString sym) "\"")))))
 
-
 (def Fragment
   "React.Fragment. See `helix.core/<>` for macro version."
   react/Fragment)
-
 
 (def Suspense
   "React.Suspense. See `helix.core/suspense` for macro version."
   react/Suspense)
 
-
 (def create-element react/createElement)
-
 
 (def create-context
   "React.createContext"
   react/createContext)
-
 
 ;; this is to enable calling `(.createElement (get-react))` without doing
 ;; a dynamic arity dispatch. See https://github.com/Lokeh/helix/issues/20
@@ -87,7 +83,6 @@
       (emit-fn type' props key)
       (emit-fn type' props))))
 
-
 (def ^:deprecated $$
   "Dynamically create a new React element from a valid React type.
 
@@ -102,19 +97,16 @@
      {:style {:color \"green\"}}
      \"child2\" ))
   ```"
- $)
-
+  $)
 
 (defprotocol IExtractType
   (-type [factory] "Extracts the underlying type from the factory function."))
-
 
 (defn type
   "Geven a factory function created by `helix.core/factory` or `cljs-factory`,
   returns the original component that the factory creates elements of."
   [f]
   (-type f))
-
 
 (defn factory
   "Creates a factory function for a React component, that when called returns an
@@ -126,7 +118,6 @@
         (apply $ type args))
       (specify! IExtractType
         (-type [_] type))))
-
 
 (defn cljs-factory
   "Creates a factory function for a component defined via `defnc`, that when
@@ -154,12 +145,10 @@
       (specify! IExtractType
         (-type [_] type))))
 
-
 (defn- assoc-some [m k x]
   (if (some? x)
     (assoc m k x)
     m))
-
 
 (defn extract-cljs-props
   "A helper function for turning a props object into a CLJS map. Works with both
@@ -173,16 +162,14 @@
     (assoc-some props :children (gobj/get o "children"))
     (bean/bean o)))
 
-
 (defn- props-kvs-identical?
   [prev cur]
   (let [prev-props (extract-cljs-props prev)
         cur-props (extract-cljs-props cur)]
     (and (= (count prev-props) (count cur-props))
          (every?
-          #(identical? (get prev-props %) (get cur-props %))
-          (keys cur-props)))))
-
+           #(identical? (get prev-props %) (get cur-props %))
+           (keys cur-props)))))
 
 (defn memo
   "Like React.memo, but passes props to `compare` as CLJS map-likes instead of
@@ -191,20 +178,16 @@
   ([component] (react/memo component props-kvs-identical?))
   ([component compare]
    (react/memo
-    component
-    (fn memo-compare
-      [o o']
-      (compare
-       (extract-cljs-props o)
-       (extract-cljs-props o'))))))
-
-
+     component
+     (fn memo-compare
+       [o o']
+       (compare
+         (extract-cljs-props o)
+         (extract-cljs-props o'))))))
 
 ;;
 ;; -- class components
 ;;
-
-
 
 (defn create-component
   "Helper function for creating a class component. See `defcomponent`."
@@ -212,9 +195,9 @@
   (let [render (.-render ^js spec)
         render' (fn [this]
                   (render
-                   this
-                   (extract-cljs-props (.-props ^js this))
-                   (.-state ^js this)))]
+                    this
+                    (extract-cljs-props (.-props ^js this))
+                    (.-state ^js this)))]
     (gobj/set spec "render" render')
     (helix.class/createComponent react/Component spec statics)))
 
@@ -272,7 +255,6 @@
 ;; -- React Fast Refresh
 ;;
 
-
 (defn register!
   "Registers a component with the React Fresh runtime.
   `type` is the component function, and `id` is the unique ID assigned to it
@@ -280,7 +262,6 @@
   [type id]
   (when (exists? js/window.$$Register$$)
     (js/window.$$Register$$ type id)))
-
 
 (defn signature! []
   ;; grrr `maybe` bug strikes again

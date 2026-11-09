@@ -1,9 +1,8 @@
 (ns helix.core-test
   (:require
-    [cljs.test :as t :include-macros true]
-    [goog.object :as gobj]
-    [helix.core :as helix :refer (defhook defnc defnc- $)]))
-
+   [cljs.test :as t :include-macros true]
+   [goog.object :as gobj]
+   [helix.core :as helix :refer [$ defhook defnc defnc-]]))
 
 (defhook use-returns-map [] {:a 1})
 
@@ -30,21 +29,19 @@
     (t/is (= :body (use-with-options)))
     (t/is (= {:a 1} (use-returns-map-with-options)))))
 
-
 (t/deftest metadata-optimization-expansion
   (t/is (->> (macroexpand
-              '(helix/defnc metadata-optimization
-                 []
-                 {:helix/features {:metadata-optimizations true}}
-                 (let [foo "foo"
-                       bar ^{:memo [foo]} (str foo "bar")]
-                   ^:memo ($ "div" "asdf"))))
+               '(helix/defnc metadata-optimization
+                  []
+                  {:helix/features {:metadata-optimizations true}}
+                  (let [foo "foo"
+                        bar ^{:memo [foo]} (str foo "bar")]
+                    ^:memo ($ "div" "asdf"))))
              (tree-seq #(and (seqable? %) (not (string? %))) seq)
              ;; this take is here because I accidentally blew this up too many
              ;; times with an infinite loop
              (take 100)
              (some #(= % '(helix.hooks/use-memo [foo] (str foo "bar")))))))
-
 
 (defnc factory-component
   [{:keys [foo bar]}]
@@ -66,13 +63,11 @@
       (t/is (= (dissoc props :key :ref)
                (helix/extract-cljs-props (gobj/get el "props")))))))
 
-
 (defn- tree-contains?
   [tree x]
   (->> tree
        (tree-seq coll? seq)
        (some #{x})))
-
 
 (t/deftest wrap
   (let [o (macroexpand '(defnc comp
@@ -85,7 +80,6 @@
                           [props]
                           "hi"))]
     (t/is (tree-contains? o 'helix/memo))))
-
 
 (defnc- private-comp
   {:foo :bar}
@@ -147,13 +141,13 @@
           component-3)))
     (t/testing "with props and children"
       (let [component (macroexpand
-                       ;; <Stack direction={row}>
-                       ;;   <Item />
-                       ;;   <Item />
-                       ;; </Stack>
-                       '($ Stack {:direction "row"}
-                           ($ Item)
-                           ($ Item)))
+                        ;; <Stack direction={row}>
+                        ;;   <Item />
+                        ;;   <Item />
+                        ;; </Stack>
+                        '($ Stack {:direction "row"}
+                            ($ Item)
+                            ($ Item)))
             ;; Ideally, we'd check the full macroexpansion, but this suffices.
             expected '(helix.core/jsxs Stack
                                        (helix.impl.props/props {:direction "row"}
@@ -163,8 +157,8 @@
     (t/testing "provides keys as expected"
       (let [props {:key "key"}
             component (macroexpand
-                       ;; <div key={kee} {...props}></div>
-                       '($ :div {:key "kee" :& props}))
+                        ;; <div key={kee} {...props}></div>
+                        '($ :div {:key "kee" :& props}))
             expected '(helix.core/jsx "div"
                                       (helix.impl.props/dom-props {:key "kee"
                                                                    :& props}

@@ -1,8 +1,12 @@
 (ns helix.impl.props-test
-  (:require [helix.impl.props :as impl]
-            #?@(:clj [[clojure.test :as t]]
-                :cljs [[cljs.test :as t :include-macros true]
-                       [goog.object :as gobj]])))
+  (:require
+   [helix.impl.props :as impl]
+   #?@(:clj
+       [[clojure.test :as t]]
+
+       :cljs
+       [[cljs.test :as t :include-macros true]
+        [goog.object :as gobj]])))
 
 (defn eq
   "Deep equality (works for JS objects in CLJS)"
@@ -52,12 +56,12 @@
                                           :--custom-property "1px"}
                                   :on-click handler})
                 #?(:clj `(cljs.core/js-obj
-                          "fooBar" "baz"
-                          "baz-qux" 42
-                          "style" (cljs.core/js-obj
-                                   "color" (helix.impl.props/->js "blue")
-                                   "--custom-property" (helix.impl.props/->js "1px"))
-                          "onClick" ~handler)
+                           "fooBar" "baz"
+                           "baz-qux" 42
+                           "style" (cljs.core/js-obj
+                                     "color" (helix.impl.props/->js "blue")
+                                     "--custom-property" (helix.impl.props/->js "1px"))
+                           "onClick" ~handler)
                    :cljs #js {:fooBar "baz"
                               :baz-qux 42
                               :style #js {:color "blue"
@@ -66,13 +70,13 @@
             "Dom props with nested literal style"))
     (t/is (eq (impl/-dom-props {:style [{:color "blue"} {:asdf 'jkl} {:--custom-property "1px"}]})
               #?(:clj `(cljs.core/js-obj
-                        "style" (cljs.core/array
-                                 (cljs.core/js-obj
-                                  "color" (helix.impl.props/->js "blue"))
-                                 (cljs.core/js-obj
-                                  "asdf" (helix.impl.props/->js ~'jkl))
-                                 (cljs.core/js-obj
-                                  "--custom-property" (helix.impl.props/->js "1px"))))
+                         "style" (cljs.core/array
+                                   (cljs.core/js-obj
+                                     "color" (helix.impl.props/->js "blue"))
+                                   (cljs.core/js-obj
+                                     "asdf" (helix.impl.props/->js ~'jkl))
+                                   (cljs.core/js-obj
+                                     "--custom-property" (helix.impl.props/->js "1px"))))
                  :cljs #js {:style #js [#js {:color "blue"} #js {:asdf "jkl"}
                                         #js {:--custom-property "1px"}]}))
           "Dom props with nested literal vector style"))
@@ -126,7 +130,7 @@
                #js {:style #js {:backgroundColor "blue"
                                 :--custom-property "1px"}}))
      (t/is (eq (impl/dom-props {:style #js {:backgroundColor "blue"
-                                               :--custom-property "1px"}})
+                                            :--custom-property "1px"}})
                #js {:style #js {:backgroundColor "blue"
                                 :--custom-property "1px"}}))
      (t/is (eq (let [dynamic-js-style #js {:backgroundColor "blue"
@@ -135,11 +139,11 @@
                #js {:style #js {:backgroundColor "blue"
                                 :--custom-property "1px"}}))
      (t/is (eq (impl/dom-props {:foo "bar"
-                                   & #js {:baz "asdf"}})
+                                & #js {:baz "asdf"}})
                #js {:foo "bar" :baz "asdf"}))
 
      (t/is (eq (impl/dom-props {:foo "bar"
-                                   & nil})
+                                & nil})
                #js {:foo "bar"}))
 
      (t/is (eq (impl/dom-props {:style ["bar"]})
@@ -155,7 +159,6 @@
                  #js {:children ["one" "two"]}))
        (t/is (eq (impl/dom-props {} ["one" "two"])
                  #js {:children ["one" "two"]})))))
-
 
 #?(:cljs
    (t/deftest props
@@ -189,11 +192,11 @@
                  (impl/props {:foo-bar :a :b :b :c :c :d :d & extra-props}))
                #js {:foo-bar :extra-foo-bar :b :extra-b :c :c :d :d}))
      (t/is (eq (impl/props {:foo "bar"
-                                   & #js {:baz "asdf"}})
+                            & #js {:baz "asdf"}})
                #js {:foo "bar" :baz "asdf"}))
 
      (t/is (eq (impl/props {:foo "bar"
-                                   & nil})
+                            & nil})
                #js {:foo "bar"}))
 
      (t/testing "children are added to props"
@@ -208,7 +211,6 @@
                  #js {:children ["one" "two"]}))
        (t/is (eq (impl/props {& {:children "foo"}} ["bar"])
                  #js {:children ["bar"]})))))
-
 
 (t/deftest test-normalize-class
   #?(:clj

@@ -1,9 +1,9 @@
 (ns helix.core
   (:require
-   [helix.impl.analyzer :as hana]
-   [helix.impl.props :as impl.props]
    [cljs.tagged-literals :as tl]
-   [clojure.string :as string]))
+   [clojure.string :as string]
+   [helix.impl.analyzer :as hana]
+   [helix.impl.props :as impl.props]))
 
 (defn- jsx-children [coll]
   (let [s (seq coll)]
@@ -80,7 +80,6 @@
   [& children]
   `^js/React.Element ($ Fragment ~@children))
 
-
 (defmacro provider
   "Creates a Provider for a React Context value.
 
@@ -97,7 +96,6 @@
                               `({:value ~value}))
                           ~@children)))
 
-
 (defmacro suspense
   "Creates a React Suspense boundary."
   [{:keys [fallback]} & children]
@@ -105,7 +103,6 @@
                         ~@(when fallback
                             `({:fallback ~fallback}))
                         ~@children))
-
 
 (defn- fnc*
   [display-name props-bindings body]
@@ -115,21 +112,19 @@
      (let [~props-bindings [(extract-cljs-props props#) maybe-ref#]]
        ~@body)))
 
-
 (def meta->form
   {:memo (fn [form deps]
            `(helix.hooks/use-memo
-             ~(if (coll? deps)
-                deps
-                :auto-deps)
-             ~form))
+              ~(if (coll? deps)
+                 deps
+                 :auto-deps)
+              ~form))
    :callback (fn [form deps]
                `(helix.hooks/use-callback
-                 ~(if (coll? deps)
-                    deps
-                    :auto-deps)
-                 ~form))})
-
+                  ~(if (coll? deps)
+                     deps
+                     :auto-deps)
+                  ~form))})
 
 (defmacro fnc
   "Creates a new anonymous function React component. Used like:
@@ -166,7 +161,6 @@
         flag-check-invalid-hooks-usage? (:check-invalid-hooks-usage feature-flags true)
         flag-metadata-optimizations (:metadata-optimizations feature-flags)
 
-
         body (cond-> body
                opts-map? (rest)
                flag-metadata-optimizations (hana/map-forms-with-meta meta->form))
@@ -185,7 +179,6 @@
     `(-> ~(fnc* nil props-bindings
                 body)
          ~@(-> opts :wrap))))
-
 
 (defmacro defnc
   "Defines a new functional React component. Used like:
@@ -243,7 +236,6 @@
         flag-define-factory? (:define-factory feature-flags)
         flag-metadata-optimizations (:metadata-optimizations feature-flags)
 
-
         body (cond-> body
                opts-map? (rest)
                flag-metadata-optimizations (hana/map-forms-with-meta meta->form))
@@ -270,10 +262,10 @@
             `(if  ~(with-meta 'goog/DEBUG {:tag 'boolean})
                (def ~sig-sym (signature!))))
          (def ~(vary-meta
-                component-var-name
-                merge
-                {:helix/component? true}
-                fn-meta)
+                 component-var-name
+                 merge
+                 {:helix/component? true}
+                 fn-meta)
            ~@(when-not (nil? docstring)
                (list docstring))
            (-> ~(fnc* component-fn-name props-bindings
@@ -295,11 +287,10 @@
             `(when ~(with-meta 'goog/DEBUG {:tag 'boolean})
                (when ~sig-sym
                  (~sig-sym ~component-var-name ~(string/join hooks)
-                  nil ;; forceReset
-                  nil)) ;; getCustomHooks
+                   nil ;; forceReset
+                   nil)) ;; getCustomHooks
                (register! ~component-var-name ~fully-qualified-name)))
          ~display-name)))
-
 
 (defmacro defnc-
   "Same as defnc, yielding a non-public def"
@@ -307,11 +298,9 @@
   [display-name & rest]
   (list* `defnc (vary-meta display-name assoc :private true) rest))
 
-
 ;;
 ;; Custom hooks
 ;;
-
 
 (defmacro defhook
   "Defines a new custom hook function.
@@ -342,27 +331,22 @@
     (when-not (string/starts-with? (str sym) "use-")
       (hana/warn hana/warning-invalid-hook-name &env {:form &form}))
     `(defn ~(vary-meta sym merge {:helix/hook? true})
-      ;; use ~@ here so that we don't emit `nil`
-      ~@(when-not (nil? docstring) (list docstring))
-      ~params
-      ~@body)))
-
-
+       ;; use ~@ here so that we don't emit `nil`
+       ~@(when-not (nil? docstring) (list docstring))
+       ~params
+       ~@body)))
 
 ;;
 ;; Class components
 ;;
 
-
 (defn- static? [form]
   (boolean (:static (meta form))))
-
 
 (defn- method? [form]
   (and (list? form)
        (simple-symbol? (first form))
        (vector? (second form))))
-
 
 (defn- ->method [[sym-name bindings & form]]
   {:assert [(simple-symbol? sym-name)]}
@@ -370,11 +354,9 @@
         `(fn ~sym-name ~bindings
            ~@form)))
 
-
 (defn- ->value [[sym-name value]]
   {:assert [(simple-symbol? sym-name)]}
   (list (str sym-name) value))
-
 
 (defmacro defcomponent
   "Defines a React class component.
@@ -411,14 +393,14 @@
                                           (map ->method)
                                           (apply concat)))
         js-statics `(cljs.core/js-obj
-                     ~@(->> statics
-                            (map #(if (method? %)
-                                    (->method %)
-                                    (->value %)))
-                            (apply concat
-                                   (list "displayName"
-                                         ;; fully qualified name
-                                         (str *ns* "/" display-name)))))]
+                      ~@(->> statics
+                             (map #(if (method? %)
+                                     (->method %)
+                                     (->value %)))
+                             (apply concat
+                                    (list "displayName"
+                                          ;; fully qualified name
+                                          (str *ns* "/" display-name)))))]
     ;; TODO handle render specially
     `(def ~display-name
        ~@(when docstring [docstring])
@@ -426,11 +408,11 @@
 
 (comment
   (macroexpand
-   '(defcomponent asdf
-      (foo [] "bar")
-      ^:static (greeting "asdf")
-      (bar [this] asdf)
-      ^:static (baz [] 123)))
+    '(defcomponent asdf
+       (foo [] "bar")
+       ^:static (greeting "asdf")
+       (bar [this] asdf)
+       ^:static (baz [] 123)))
 
   ;; => (helix.core/create-component
   ;;     (cljs.core/js-obj
@@ -443,5 +425,4 @@
   ($ "arst"
      ($ "oieno")
      ($ "fqfw")
-     ($ "123"))
-  )
+     ($ "123")))
