@@ -20,6 +20,7 @@
     "showdown": "^2.1.0"
   },
   "devDependencies": {
+    "@chrisoakman/standard-clojure-style": "0.29.0",
     "highlight.js": "^11.11.1",
     "marked": "^17.0.1"
   }

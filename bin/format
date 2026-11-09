@@ -1,0 +1,28 @@
+#!/usr/bin/env sh
+# Format code with standard-clj (https://github.com/oakmac/standard-clojure-style-js).
+# Uses the version pinned in package.json; run `npm install` first.
+#
+#   bin/format                 format src, test and dev
+#   bin/format src/helix       format specific paths
+#   bin/format --check [paths] report unformatted files without changing them
+
+root="$(cd "$(dirname "$0")/.." && pwd)"
+standard_clj="$root/node_modules/.bin/standard-clj"
+
+if [ ! -x "$standard_clj" ]; then
+  echo "standard-clj is not installed. Run \`npm install\` in $root first." >&2
+  exit 1
+fi
+
+cmd=fix
+if [ "$1" = "--check" ]; then
+  cmd=check
+  shift
+fi
+
+if [ $# -eq 0 ]; then
+  cd "$root" || exit 1
+  set -- src test dev
+fi
+
+exec "$standard_clj" "$cmd" "$@"
