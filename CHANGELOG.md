@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- `defhook` whose body only contains a map now returns a map
+- local values appearing within JS literals, e.g. `#js [foo]`, now are resolved
+  by `:auto-deps`
+- `use-memo`, `use-imperative` allow passing a single symbol as its body,
+  e.g. `(use-memo :once x)`
+- `use-effect` allows passing a single symbol as its body, e.g. `(use-effect
+  :once cleanup)`. This will still emit a warning- to silence, you can wrap it
+  in an anonymous function, e.g. `(use-effect :once #(cleanup))`.
+- Helix analyzer warnings now show up figwheel and cljsbuild projects
+
 ## 0.2.2
 
 ### Fixed
