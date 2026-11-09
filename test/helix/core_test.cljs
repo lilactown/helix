@@ -2,7 +2,33 @@
   (:require
     [cljs.test :as t :include-macros true]
     [goog.object :as gobj]
-    [helix.core :as helix :refer (defnc defnc- $)]))
+    [helix.core :as helix :refer (defhook defnc defnc- $)]))
+
+
+(defhook use-returns-map [] {:a 1})
+
+(defhook use-returns-map-with-docstring
+  "Has a docstring"
+  [x]
+  {:a x})
+
+(defhook use-with-options
+  []
+  {:helix/features {:check-invalid-hooks-usage false}}
+  :body)
+
+(defhook use-returns-map-with-options
+  []
+  {:helix/features {:check-invalid-hooks-usage false}}
+  {:a 1})
+
+(t/deftest defhook-body
+  (t/testing "a map literal as the only body form is the return value"
+    (t/is (= {:a 1} (use-returns-map)))
+    (t/is (= {:a 2} (use-returns-map-with-docstring 2))))
+  (t/testing "a map followed by more body forms is the options map"
+    (t/is (= :body (use-with-options)))
+    (t/is (= {:a 1} (use-returns-map-with-options)))))
 
 
 (t/deftest metadata-optimization-expansion

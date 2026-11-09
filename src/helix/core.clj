@@ -322,7 +322,7 @@
   (let [[docstring params body] (if (string? (first body))
                                   [(first body) (second body) (drop 2 body)]
                                   [nil (first body) (rest body)])
-        [opts body] (if (map? (first body))
+        [opts body] (if (and (map? (first body)) (next body))
                       [(first body) (rest body)]
                       [nil body])
         feature-flags (:helix/features opts)
