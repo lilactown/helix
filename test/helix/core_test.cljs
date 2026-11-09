@@ -1,9 +1,23 @@
 (ns helix.core-test
   (:require
+   ["react-dom/server" :as rds]
    [cljs.test :as t :include-macros true]
    [goog.object :as gobj]
    [helix.core :as helix :refer [$ defhook defnc defnc-]]
-   [helix.dom :as d]))
+   [helix.dom :as d]
+   [helix.hooks]))
+
+(defnc metadata-optimization-in-props
+  [{:keys [label]}]
+  {:helix/features {:metadata-optimizations true}}
+  ($ "button" {:title ^:memo (str label "!")
+               :on-click ^:callback (fn [] label)}))
+
+(t/deftest metadata-optimization-render
+  (t/testing "metadata on values in a props map"
+    (t/is (= "<button title=\"a!\"></button>"
+             (rds/renderToString
+               ($ metadata-optimization-in-props {:label "a"}))))))
 
 (defnc key-component [] "hi")
 
