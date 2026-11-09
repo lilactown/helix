@@ -2,7 +2,27 @@
   (:require
    [cljs.test :as t :include-macros true]
    [goog.object :as gobj]
-   [helix.core :as helix :refer [$ defhook defnc defnc-]]))
+   [helix.core :as helix :refer [$ defhook defnc defnc-]]
+   [helix.dom :as d]))
+
+(defnc key-component [] "hi")
+
+(t/deftest dynamic-key
+  (t/testing "an expression that evaluates to nil sets no key"
+    (let [k nil]
+      (t/is (nil? (.-key ($ "div" {:key k}))))
+      (t/is (nil? (.-key ($ key-component {:key k}))))
+      (t/is (nil? (.-key (d/div {:key k}))))))
+  (t/testing "an expression that evaluates to a value sets the key"
+    (let [k "a"]
+      (t/is (= "a" (.-key ($ "div" {:key k}))))
+      (t/is (= "a" (.-key ($ key-component {:key k}))))
+      (t/is (= "a" (.-key (d/div {:key k}))))))
+  (t/testing "falsey and empty values that aren't nil are still keys"
+    (let [zero 0
+          empty-str ""]
+      (t/is (= "0" (.-key ($ "div" {:key zero}))))
+      (t/is (= "" (.-key ($ "div" {:key empty-str})))))))
 
 (defhook use-returns-map [] {:a 1})
 

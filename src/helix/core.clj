@@ -72,7 +72,7 @@
                   `jsxs
                   `jsx)]
     (if has-key?
-      `^js/React.Element (~emit-fn ~type ~props ~the-key)
+      `^js/React.Element (~emit-fn ~type ~props ~(impl.props/key-form the-key))
       `^js/React.Element (~emit-fn ~type ~props))))
 
 (defmacro <>

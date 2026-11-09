@@ -125,6 +125,14 @@
        js/undefined
        v)))
 
+(defn key-form
+  "Returns the form to pass `k` as the key argument of jsx. React stringifies
+  any key that isn't undefined, so nil has to be converted at runtime."
+  [k]
+  (if (or (string? k) (number? k) (keyword? k))
+    k
+    `(or-undefined ~k)))
+
 (defn dom-style
   [style]
   (cond

@@ -14,6 +14,14 @@
   in an anonymous function, e.g. `(use-effect :once #(cleanup))`.
 - Helix analyzer warnings now show up figwheel and cljsbuild projects
 
+### Breaking
+
+- A nil `:key` prop is now passed as `undefined` to React. Previously, nil
+  would be passed directly to React and, if two elements had a nil key, would
+  produce a confusing duplice key warning. This change is meant to make it
+  easier to identify when code meant to generate the `:key` prop is not working,
+  as `:key` is meant to be a string-y value.
+
 ## 0.2.2
 
 ### Fixed

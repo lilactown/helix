@@ -178,7 +178,7 @@
                   `hx/jsxs
                   `hx/jsx)]
     (if (some? key)
-      `^js/React.Element (~emit-fn ~type (impl.props/dom-props ~props* ~children) ~key)
+      `^js/React.Element (~emit-fn ~type (impl.props/dom-props ~props* ~children) ~(impl.props/key-form key))
       `^js/React.Element (~emit-fn ~type (impl.props/dom-props ~props* ~children)))))
 
 #?(:clj (defn gen-tag
