@@ -17,6 +17,16 @@
     (t/is (= "Generated identifier: :R0:"
              (rds/renderToString ($ use-id-example))))))
 
+;;; use-memo
+
+(defnc use-memo-symbol-example [{:keys [value]}]
+  (let [captured (hooks/use-memo :once value)]
+    ($ "div" captured)))
+
+(t/deftest use-memo-symbol-body
+  (t/is (= "<div>hello</div>"
+           (rds/renderToString ($ use-memo-symbol-example {:value "hello"})))))
+
 ;;; use-imperative-handle
 
 (t/deftest use-imperative-handle-test

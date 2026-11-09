@@ -216,7 +216,7 @@
   [deps & body]
   #?(:clj
      (deps-macro-body
-       &env deps body false
+       &env deps body true
        (fn
          ([fn-body]
           (vary-meta
