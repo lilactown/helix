@@ -127,7 +127,7 @@
        ;; a single symbol
        (and (= (count body) 1) (symbol? (first body)) (not simple-body-ok?))
        (do (hana/warn hana/warning-simple-body env {:form body})
-           nil)
+           (first body))
 
        ;;
        ;; Different variations of deps
