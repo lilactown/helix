@@ -16,8 +16,7 @@
       [helix.hooks]))
   (:require
    #?@(:clj
-       [[helix.impl.analyzer :as hana]
-        [helix.impl.hooks :as-alias impl.hooks]]
+       [[helix.impl.analyzer :as hana]]
 
        :cljs
        [["react" :as react]
@@ -170,9 +169,9 @@
      (deps-macro-body
        &env deps body false
        (fn
-         ([fn-body] `^clj-nil (raw-use-effect (impl.hooks/wrap-fx (fn [] ~@fn-body))))
+         ([fn-body] `^clj-nil (raw-use-effect (helix.impl.hooks/wrap-fx (fn [] ~@fn-body))))
          ([deps fn-body]
-          `^clj-nil (raw-use-effect (impl.hooks/wrap-fx (fn [] ~@fn-body)) ~deps))))))
+          `^clj-nil (raw-use-effect (helix.impl.hooks/wrap-fx (fn [] ~@fn-body)) ~deps))))))
 
 #?(:cljs
    ;; we provide a CLJS defn in the case when we need to pass around the hook
@@ -195,9 +194,9 @@
      (deps-macro-body
        &env deps body false
        (fn
-         ([fn-body] `^clj-nil (raw-use-layout-effect (impl.hooks/wrap-fx (fn [] ~@fn-body))))
+         ([fn-body] `^clj-nil (raw-use-layout-effect (helix.impl.hooks/wrap-fx (fn [] ~@fn-body))))
          ([deps fn-body]
-          `^clj-nil (raw-use-layout-effect (impl.hooks/wrap-fx (fn [] ~@fn-body)) ~deps))))))
+          `^clj-nil (raw-use-layout-effect (helix.impl.hooks/wrap-fx (fn [] ~@fn-body)) ~deps))))))
 
 #?(:cljs
    (defn use-layout-effect*
