@@ -273,7 +273,7 @@
   [ref deps & body]
   #?(:clj
      (deps-macro-body
-       &env deps body false
+       &env deps body true
        (fn
          ([fn-body] `(raw-use-imperative-handle ~ref (fn [] ~@fn-body)))
          ([deps fn-body] `(raw-use-imperative-handle
