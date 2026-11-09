@@ -7,20 +7,22 @@
 - `defhook` whose body only contains a map now returns a map
 - local values appearing within JS literals, e.g. `#js [foo]`, now are resolved
   by `:auto-deps`
-- `use-memo`, `use-imperative` allow passing a single symbol as its body,
+- `use-memo`, `use-imperative-handle` allow passing a single symbol as its body,
   e.g. `(use-memo :once x)`
 - `use-effect` allows passing a single symbol as its body, e.g. `(use-effect
   :once cleanup)`. This will still emit a warning- to silence, you can wrap it
   in an anonymous function, e.g. `(use-effect :once #(cleanup))`.
-- Helix analyzer warnings now show up figwheel and cljsbuild projects
+- Helix analyzer warnings now show up in figwheel and cljsbuild projects
 - Runtime variants of hooks (`use-effect*`, `use-memo*`, etc.) now accept
-  `:once`, `:always` and will thrown an error if passed `:auto-deps`.
+  `:once`, `:always` and will throw an error if passed `:auto-deps`.
+- Fix metadata optimizations resulting in broken forms being emitted in many
+  cases
 
 ### Breaking
 
 - A nil `:key` prop is now passed as `undefined` to React. Previously, nil
   would be passed directly to React and, if two elements had a nil key, would
-  produce a confusing duplice key warning. This change is meant to make it
+  produce a confusing duplicate key warning. This change is meant to make it
   easier to identify when code meant to generate the `:key` prop is not working,
   as `:key` is meant to be a string-y value.
 
