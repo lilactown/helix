@@ -264,6 +264,27 @@
       'foo/use
       'foo/user)))
 
+(t/deftest hook-expr-on-non-list-seqs
+  (t/testing "hook-expr? recognizes syntax-quoted / generated seqs"
+    (t/is (hana/hook-expr? `(helix.hooks/use-memo [] 1)))
+    (t/is (hana/hook-expr? (lazy-seq (list 'use-foo))))
+    (t/is (hana/hook-expr? (cons 'use-foo ()))))
+  (t/testing "vectors and maps aren't hook expressions"
+    (t/is (not (hana/hook-expr? '[use-foo])))
+    (t/is (not (hana/hook-expr? '{use-foo 1}))))
+  (t/testing "invalid-hooks-usage reports generated hooks in a conditional"
+    (t/is (seq (hana/invalid-hooks-usage
+                 (list 'when 'x (lazy-seq (list 'use-foo)))))))
+  (t/testing "^:memo inside a conditional is reported after metadata expansion"
+    (t/is (seq (->> (map-meta '[(when x ^:memo (foo))])
+                    (map hana/invalid-hooks-usage)
+                    (flatten)
+                    (remove nil?)))))
+  (t/testing "find-hooks includes generated hooks"
+    (t/is (= 1 (count (hana/find-hooks [`(helix.hooks/use-memo [] 1)])))))
+  (t/testing "find-hooks ignores generated quote forms"
+    (t/is (= [] (hana/find-hooks [(cons 'quote (list '(use-foo)))])))))
+
 (t/deftest resolve-local-vars
   (let [env {:locals {'a {:name 'a} 'b {:name 'b}}}
         resolved #(set (hana/resolve-local-vars env %))]

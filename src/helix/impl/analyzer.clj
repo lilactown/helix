@@ -112,7 +112,7 @@ Example: ($ %s %s ...)"
 
 (defn hook-expr?
   [x]
-  (when (list? x)
+  (when (seq? x)
     (hook? (first x))))
 
 (defn find-hooks
@@ -123,7 +123,7 @@ Example: ($ %s %s ...)"
                        (not
                          ;; Ignore quoted forms, e.g. '(use-foo)
                          (and
-                           (list? form)
+                           (seq? form)
                            (= 'quote (first form)))))
                 (cond-> (reduce
                           (fn [acc x]
