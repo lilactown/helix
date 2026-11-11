@@ -89,7 +89,7 @@ that the component is wrapped in them.
   "I am memoized!")
 ```
 
-The `Memoized` component will be passed to `(helix.core/memo)` (and any other HOCs
+The `memoized` component will be passed to `(helix.core/memo)` (and any other HOCs
 given to the vector) using the [thread-first](https://clojuredocs.org/clojure.core/-%3E)
 macro.
 
